@@ -11,7 +11,7 @@ import { informe } from "../../functions/informe.js";
 /// Checkeo si el envío ya fue colectado cancelado o entregado
 /// Actualizo el estado del envío y lo envío al microservicio de estados
 /// Asigno el envío al usuario si es necesario
-export async function handleInternalFlex(dbConnection, companyId, userId,  dataQr, account) {
+export async function handleInternalFlex(dbConnection, companyId, userId, dataQr, account) {
     const senderId = dataQr.sender_id;
     const mlShipmentId = dataQr.id;
 
@@ -51,11 +51,11 @@ export async function handleInternalFlex(dbConnection, companyId, userId,  dataQ
 
     /// Actualizo el estado del envío y lo envío al microservicio de estados
     await updateLastShipmentState(dbConnection, shipmentId);
-    await sendToShipmentStateMicroService(companyId,userId, shipmentId);
+    await sendToShipmentStateMicroService(companyId, userId, shipmentId);
 
 
 
-    const body = await informe(dbConnection, userId);
+    const body = await informe(dbConnection, companyId, account.didCuenta, userId, shipmentId);
     return { estadoRespuesta: true, mensaje: "Paquete insertado y puesto a planta  - FLEX", body: body };
 
 }
