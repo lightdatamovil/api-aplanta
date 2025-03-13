@@ -1,5 +1,6 @@
 
 import { executeQuery } from "../../../db.js";
+import { logRed, logYellow } from "../../../src/funciones/logsCustom.js";
 
 export async function checkIfExistLogisticAsDriverInExternalCompany(dbConnection, syncCode) {
     try {
@@ -12,7 +13,7 @@ export async function checkIfExistLogisticAsDriverInExternalCompany(dbConnection
 
         return chofer[0].usuario;
     } catch (error) {
-        console.error("Error en checkIfExistLogisticAsDriverInExternalShipments:", error);
+        logRed(`Error en checkIfExistLogisticAsDriverInExternalShipments: ${error.message}`)
         throw error;
     }
 }

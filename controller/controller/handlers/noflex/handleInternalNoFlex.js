@@ -1,3 +1,4 @@
+import { logBlue, logRed } from "../../../../src/funciones/logsCustom.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
 import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
@@ -12,6 +13,8 @@ export async function handleInternalNoFlex(dbConnection, dataQr, companyId, user
     try {
         const shipmentId = dataQr.did;
 
+        const clientId = dataQr.cliente;
+
         /// Chequeo si el envio ya fue colectado, entregado o cancelado
         await checkearEstadoEnvio(dbConnection, shipmentId);
 
@@ -25,7 +28,7 @@ export async function handleInternalNoFlex(dbConnection, dataQr, companyId, user
 
         return { estadoRespuesta: true, mensaje: "Paquete puesto a planta  correctamente", body: body };
     } catch (error) {
-        console.error("Error en handleInternoNoFlex:", error);
+        logRed(`Error en handleInternoNoFlex: ${error.message}`);
         throw error;
     }
 }

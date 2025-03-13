@@ -44,8 +44,6 @@ export async function handleExternalFlex(dbConnection, companyId, dataQr, userId
         const externalDbConnection = mysql.createConnection(dbConfigExt);
         externalDbConnection.connect();
 
-
-
         /// Busco el envío
         const sqlEnvios = `
                         SELECT did
@@ -86,10 +84,9 @@ export async function handleExternalFlex(dbConnection, companyId, dataQr, userId
 
             externalShipmentId = rowsEnvios[0].did;
         }
+
         /// Busco si el chofer está asignado
-
         const check = await checkearEstadoEnvio(externalDbConnection, externalShipmentId);
-
 
         if (check) {
             externalDbConnection.end();

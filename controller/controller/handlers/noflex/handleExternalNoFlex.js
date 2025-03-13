@@ -7,6 +7,7 @@ import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.j
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
+import { logRed, logYellow } from "../../../../src/funciones/logsCustom.js";
 
 /// Esta funcion se conecta a la base de datos de la empresa externa
 /// Checkea si el envio ya fue colectado, entregado o cancelado
@@ -18,6 +19,7 @@ import { informe } from "../../functions/informe.js";
 export async function handleExternalNoFlex(dbConnection, dataQr, companyId, userId) {
     try {
         const shipmentIdFromDataQr = dataQr.did;
+        const clientIdFromDataQr = dataQr.cliente;
 
         /// Busco la empresa externa
         const externalCompany = await getCompanyById(dataQr.empresa);
@@ -35,27 +37,24 @@ export async function handleExternalNoFlex(dbConnection, dataQr, companyId, user
             return check;
         }
 
-        const companyClientList = await getClientsByCompany(externalDbConnection, externalCompany);
-        const client = companyClientList[dataQr.cliente];
+        const companyClientList = await getClientsByCompany(externalDbConnection, externalCompany.did);
+        const client = companyClientList[clientIdFromDataQr];
 
         const internalCompany = await getCompanyById(companyId);
 
-
         /// Busco el chofer que se crea en la vinculacion de logisticas
         const driver = await checkIfExistLogisticAsDriverInExternalCompany(externalDbConnection, internalCompany.codigo);
-        const consulta = 'SELECT didLocal FROM envios_exteriores WHERE didExterno = ?';
-        let didinterno = await executeQuery(dbConnection, consulta, [dataQr.did]);
 
-        // Verificamos si hay resultados y si la propiedad 'didLocal' existe
-        if (didinterno.length > 0 && didinterno[0]?.didLocal) {
-            didinterno = didinterno[0].didLocal;
-            console.log(didinterno, "didinterno");
+        let internalShipmentId;
+
+        const consulta = 'SELECT didLocal FROM envios_exteriores WHERE didExterno = ?';
+
+        internalShipmentId = await executeQuery(dbConnection, consulta, [shipmentIdFromDataQr]);
+
+        if (internalShipmentId.length > 0 && internalShipmentId[0]?.didLocal) {
+            internalShipmentId = internalShipmentId[0].didLocal;
         } else {
-            didinterno = null
-        }
-        if (didinterno == null) {
-            /// Inserto en envios en la empresa interna
-            didinterno = await insertEnvios(
+            internalShipmentId = await insertEnvios(
                 dbConnection,
                 companyId,
                 client.did,
@@ -66,32 +65,37 @@ export async function handleExternalNoFlex(dbConnection, dataQr, companyId, user
                 driver
             );
         }
+
         /// Inserto en envios exteriores en la empresa interna
         await insertEnviosExteriores(
             dbConnection,
-            didinterno,
+            internalShipmentId,
             shipmentIdFromDataQr,
             0,
             client.nombre || "",
             externalCompany.did,
         );
 
-        // Asigno a la empresa externa
-
-
-        await updateLastShipmentState(dbConnection, didinterno);
-        await sendToShipmentStateMicroService(companyId, userId, didinterno);
+        await updateLastShipmentState(dbConnection, internalShipmentId);
+        await sendToShipmentStateMicroService(companyId, userId, internalShipmentId);
 
         await updateLastShipmentState(externalDbConnection, shipmentIdFromDataQr);
         await sendToShipmentStateMicroService(dataQr.empresa, driver, shipmentIdFromDataQr);
 
-        const body = await informe(externalDbConnection, companyId, clientIdFromDataQr, userId, didinterno);
+        const queryClient = `
+            SELECT did 
+            FROM clientes WHERE codigoVinculacionLogE = ?
+        `;
+
+        const externalClient = await executeQuery(dbConnection, queryClient, [externalCompany.codigo]);
+
+        const body = await informe(dbConnection, companyId, externalClient[0].did, userId, internalShipmentId);
 
         externalDbConnection.end();
 
         return { estadoRespuesta: true, mensaje: "Paquete puesto a planta  con exito", body: body };
     } catch (error) {
-        console.error("Error en handleExternalNoFlex:", error);
+        logRed(`Error en handleExternalNoFlex: ${error.message}`);
         throw error;
     }
 }

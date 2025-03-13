@@ -1,4 +1,5 @@
 import { executeQuery } from "../../../db.js";
+import { logRed } from "../../../src/funciones/logsCustom.js";
 import { checkearEstadoEnvio } from "./checkarEstadoEnvio.js";
 
 export async function updateLastShipmentState(dbConnection, did) {
@@ -16,15 +17,14 @@ export async function updateLastShipmentState(dbConnection, did) {
         `;
 
         await executeQuery(dbConnection, sqlSuperado, [did]);
-        console.log(did,"deberia ser 578 mepa");
-        
+
         const sqlActualizarEnvios = `
             UPDATE envios 
             SET estado_envio = 1
             WHERE superado = 0 AND did = ?
         `;
 
-        await executeQuery(dbConnection, sqlActualizarEnvios, [ did]);
+        await executeQuery(dbConnection, sqlActualizarEnvios, [did]);
 
         const sqlDidCadete = `
             SELECT operador 
@@ -45,9 +45,9 @@ export async function updateLastShipmentState(dbConnection, did) {
 
         await executeQuery(dbConnection, sqlInsertHistorial, [did, estado, quien, fechaT, didCadete]);
 
-        
+
     } catch (error) {
-        console.error("Error en updateLastShipmentState:", error);
+        logRed(`Error en updateLastShipmentState:${error.message}`);
         throw error;
     }
 }

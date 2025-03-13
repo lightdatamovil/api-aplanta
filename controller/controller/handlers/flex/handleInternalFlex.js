@@ -53,9 +53,7 @@ export async function handleInternalFlex(dbConnection, companyId, userId, dataQr
     await updateLastShipmentState(dbConnection, shipmentId);
     await sendToShipmentStateMicroService(companyId, userId, shipmentId);
 
-
-
-    const body = await informe(dbConnection, companyId, account.didCuenta, userId, shipmentId);
+    const body = await informe(dbConnection, companyId, account.didCliente, userId, shipmentId);
     return { estadoRespuesta: true, mensaje: "Paquete insertado y puesto a planta  - FLEX", body: body };
 
 }

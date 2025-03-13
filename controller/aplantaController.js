@@ -4,8 +4,9 @@ import { handleExternalFlex } from "./controller/handlers/flex/handleExternalFle
 import { handleExternalNoFlex } from "./controller/handlers/noflex/handleExternalNoFlex.js";
 import { handleInternalNoFlex } from "./controller/handlers/noflex/handleInternalNoFlex.js";
 import mysql from "mysql";
+import { logRed } from "../src/funciones/logsCustom.js";
 
-export async function aplanta(company, dataQr,userId) {
+export async function aplanta(company, dataQr, userId) {
     const dbConfig = getProdDbConfig(company);
     const dbConnection = mysql.createConnection(dbConfig);
     dbConnection.connect();
@@ -19,10 +20,10 @@ export async function aplanta(company, dataQr,userId) {
             const account = await getAccountBySenderId(dbConnection, company.did, dataQr.sender_id);
 
             if (account) {
-                response = await handleInternalFlex(dbConnection, company.did,userId,   dataQr, account);
+                response = await handleInternalFlex(dbConnection, company.did, userId, dataQr, account);
             } else {
 
-                response = await handleExternalFlex(dbConnection, company.did,  dataQr,userId);
+                response = await handleExternalFlex(dbConnection, company.did, dataQr, userId);
             }
         } else {
             if (company.did == dataQr.empresa) {
@@ -34,7 +35,7 @@ export async function aplanta(company, dataQr,userId) {
 
         return response;
     } catch (error) {
-        console.error("Error en poner a planta :", error);
+        logRed(`Error en poner a planta: ${error.message}`)
         throw error;
     }
 }
