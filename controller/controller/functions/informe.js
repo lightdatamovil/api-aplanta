@@ -63,19 +63,29 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
         }
         const companyClients = await getClientsByCompany(dbConnection, companyId);
 
-        const companyDrivers = await getDriversByCompany(dbConnection, companyId);
-        logYellow(`companyClients: ${JSON.stringify(companyClients)}`);
-        logYellow(`Cliente: ${clientId}`);
         if (companyClients[clientId] === undefined) {
             throw new Error("Cliente no encontrado");
         }
+        logCyan("El cliente fue encontrado");
+
+        let chofer;
+
+        if (companyDrivers[choferasignado] === undefined) {
+            chofer = "Sin informacion";
+            logCyan("El chofer no fue encontrado");
+        } else {
+            chofer = companyDrivers[choferasignado].nombre;
+            logCyan("El chofer fue encontrado");
+        }
+
+        logCyan("Se generó el informe");
 
         return {
             cliente: `Cliente ${companyClients[clientId]?.nombre || 'Sin informacion'}`,
             aingresarhoy,
             ingresadoshot,
             ingresadosahora: 0,
-            chofer: companyDrivers[choferasignado]?.nombre || 'Sin informacion',
+            chofer: chofer,
             zonaentrega,
             sucursal
         };
