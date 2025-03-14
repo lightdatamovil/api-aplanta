@@ -20,6 +20,7 @@ a_planta.post('/aplanta', async (req, res) => {
 
         const result = await aplanta(company, JSON.parse(dataQr), userId, profile, autoAssign);
 
+        const endTime = performance.now();
         logPurple(`Tiempo de ejecución: ${endTime - startTime} ms`);
         res.status(200).json(result);
     } catch (error) {
