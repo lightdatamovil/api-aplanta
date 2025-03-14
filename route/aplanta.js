@@ -1,12 +1,12 @@
 import { Router } from 'express';
-
+import { verifyParameters } from '../src/funciones/verifyParameters.js';
 import { getCompanyById } from '../db.js';
 import { aplanta } from '../controller/aplantaController.js';
 
 const a_planta = Router();
 
 a_planta.post('/aplanta', async (req, res) => {
-    const errorMessage = verifyParamaters(req.body, ['dataQr', 'deviceFrom']);
+    const errorMessage = verifyParameters(req.body, ['dataQr', 'deviceFrom']);
 
     if (errorMessage) {
         return res.status(400).json({ message: errorMessage });

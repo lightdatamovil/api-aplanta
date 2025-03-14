@@ -1,6 +1,7 @@
 import redis from 'redis';
 import dotenv from 'dotenv';
-import { logPurple, logRed, logYellow } from './src/funciones/logsCustom.js';
+import mysql from 'mysql';
+import { logRed } from './src/funciones/logsCustom.js';
 
 dotenv.config({ path: process.env.ENV_FILE || ".env" });
 
@@ -16,29 +17,9 @@ export const redisClient = redis.createClient({
     password: redisPassword,
 });
 
-redisClient.on('error', (error) => {
+redisClient.on('error', (err) => {
     logRed(`Error al conectar con Redis: ${error.message}`);
 });
-
-export async function updateRedis(empresaId, envioId, choferId) {
-    const DWRTE = await redisClient.get('DWRTE',);
-    const empresaKey = `e.${empresaId}`;
-    const envioKey = `en.${envioId}`;
-
-    // Si la empresa no existe, la creamos
-    if (!DWRTE[empresaKey]) {
-        DWRTE[empresaKey] = {};
-    }
-
-    // Solo agrega si el envío no existe
-    if (!DWRTE[empresaKey][envioKey]) {
-        DWRTE[empresaKey][envioKey] = {
-            choferId: choferId
-        };
-    }
-
-    await redisClient.set('DWRTE', JSON.stringify(DWRTE));
-}
 
 let companiesList = {};
 let clientList = {};
@@ -168,8 +149,6 @@ export async function getAccountBySenderId(dbConnection, companyId, senderId) {
 }
 
 async function loadClients(dbConnection, companyId) {
-
-    // Verifica si la compañía especificada existe en la lista de compañías
     if (!clientList[companyId]) {
         clientList[companyId] = {}
     }
@@ -193,7 +172,7 @@ async function loadClients(dbConnection, companyId) {
             };
         });
     } catch (error) {
-        logRed(`Error en loadClients para la compañía ${companyId}: ${error}`);
+        logRed(`Error en loadClients para la compañía ${companyId}: ${error.message}`);
         throw error;
     }
 }
@@ -227,7 +206,7 @@ async function loadDrivers(dbConnection, companyId) {
 
     try {
         const queryUsers = `
-            SELECT sistema_usuarios.did, sistema_usuarios.nombre 
+            SELECT sistema_usuarios.did, sistema_usuarios.usuario 
             FROM sistema_usuarios_accesos
             INNER JOIN sistema_usuarios ON sistema_usuarios_accesos.did = sistema_usuarios.did
             WHERE sistema_usuarios_accesos.perfil IN (3, 6)
@@ -252,7 +231,7 @@ async function loadDrivers(dbConnection, companyId) {
                 fecha_sincronizacion: row.fecha_sincronizacion,
                 did: row.did,
                 codigo: row.codigo_empleado,
-                nombre: row.nombre,
+                nombre: row.usuario,
             };
         }
     } catch (error) {
@@ -282,7 +261,6 @@ export async function getDriversByCompany(dbConnection, companyId) {
         throw error;
     }
 }
-
 export async function executeQuery(connection, query, values) {
     try {
         return new Promise((resolve, reject) => {
@@ -295,7 +273,7 @@ export async function executeQuery(connection, query, values) {
             });
         });
     } catch (error) {
-        logRed(`Error al ejecutar la query: ${error.message}`);
+        logRed(`Error en executeQuery: ${error.message}`);
         throw error;
     }
 }

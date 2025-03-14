@@ -1,11 +1,10 @@
-import { logBlue, logRed } from "../../../../src/funciones/logsCustom.js";
+import { logBlue, logCyan, logRed } from "../../../../src/funciones/logsCustom.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
 import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
 import { updateLastShipmentState } from "../../functions/updateLastShipmentState.js";
 
 /// Esta funcion checkea si el envio ya fue colectado, entregado o cancelado
-/// Busca el chofer asignado al envio
 /// Si el envio no esta asignado y se quiere autoasignar, lo asigna
 /// Actualiza el estado del envio en el micro servicio
 /// Actualiza el estado del envio en la base de datos

@@ -2,7 +2,6 @@ import express, { json, urlencoded } from 'express';
 import a_planta from './route/aplanta.js';
 import { redisClient } from './db.js';
 
-
 const app = express();
 
 app.use(json({ limit: '50mb' }));
