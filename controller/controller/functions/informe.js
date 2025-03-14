@@ -37,16 +37,9 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
             and autofecha < ?)
             AND estado = 1;
         `;
-        // "SELECT count(id) as total
-        // FROM `envios_historial`
-        // where  elim=0
-        // and quien in ($quien)
-        // and ( autofecha > '$hoy 00:00:00'
-        // and autofecha < '$hoy 23:59:59' )
-        // and estado = 1"
-        logYellow(`userId: ${userId}`);
+
         const resultIngresadosHoyChofer = await executeQuery(dbConnection, queryIngresadosHoyChofer, [userId, `${hoy} 00:00:00`, `${hoy} 23:59:59`]);
-        logYellow(`resultIngresadosHoyChofer: ${JSON.stringify(resultIngresadosHoyChofer)}`);
+
         const ingresadosHoyChofer = resultIngresadosHoyChofer[0]?.total || 0;
 
         let choferasignado;
@@ -75,8 +68,7 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
         const companyClients = await getClientsByCompany(dbConnection, companyId);
 
         const companyDrivers = await getDriversByCompany(dbConnection, companyId);
-        logYellow(`companyDrivers: ${JSON.stringify(companyDrivers)}`);
-        logYellow(`choferasignado: ${choferasignado}`);
+
         if (companyClients[clientId] === undefined) {
             throw new Error("Cliente no encontrado");
         }

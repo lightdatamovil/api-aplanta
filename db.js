@@ -261,6 +261,7 @@ export async function getDriversByCompany(dbConnection, companyId) {
         throw error;
     }
 }
+
 export async function executeQuery(connection, query, values) {
     try {
         return new Promise((resolve, reject) => {

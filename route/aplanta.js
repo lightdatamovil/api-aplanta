@@ -6,6 +6,7 @@ import { aplanta } from '../controller/aplantaController.js';
 const a_planta = Router();
 
 a_planta.post('/aplanta', async (req, res) => {
+    const startTime = performance.now();
     const errorMessage = verifyParameters(req.body, ['dataQr', 'deviceFrom']);
 
     if (errorMessage) {
@@ -19,8 +20,11 @@ a_planta.post('/aplanta', async (req, res) => {
 
         const result = await aplanta(company, JSON.parse(dataQr), userId, profile, autoAssign);
 
+        logPurple(`Tiempo de ejecución: ${endTime - startTime} ms`);
         res.status(200).json(result);
     } catch (error) {
+        const endTime = performance.now();
+        logPurple(`Tiempo de ejecución: ${endTime - startTime} ms`);
         res.status(500).json({ message: error.message });
     }
 });
