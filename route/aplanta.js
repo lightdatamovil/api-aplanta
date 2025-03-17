@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { verifyParameters } from '../src/funciones/verifyParameters.js';
 import { getCompanyById } from '../db.js';
 import { aplanta } from '../controller/aplantaController.js';
+import { logPurple } from '../src/funciones/logsCustom.js';
 
 const a_planta = Router();
 
