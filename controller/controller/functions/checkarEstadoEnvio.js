@@ -11,11 +11,11 @@ export async function checkearEstadoEnvio(dbConnection, shipmentId) {
     if (estado.length > 0) {
         if (estado[0].estado_envio == 5 || estado[0].estado_envio == 9 || estado[0].estado_envio == 8) {
          //   dbConnection.end();
-            return { estadoRespuesta: false, mensaje: "El paquete ya fue entregado o cancelado" };
+            return { success: false, message: "El paquete ya fue entregado o cancelado" };
         }
         if (estado[0].estado_envio == 1) {
          //   dbConnection.end();
-            return { estadoRespuesta: false, mensaje: "El paquete ya se encuentra puesto a planta" };
+            return { success: false, message: "El paquete ya se encuentra puesto a planta" };
         }
     }
 }

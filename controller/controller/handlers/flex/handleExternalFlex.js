@@ -76,7 +76,7 @@ export async function handleExternalFlex(dbConnection, companyId, dataQr, userId
             if (rowsCuentas.length == 0) {
                 externalDbConnection.end();
 
-                return { estadoRespuesta: false, mensaje: "No se encontró cuenta asociada" };
+                return { success: false, message: "No se encontró cuenta asociada" };
             }
 
             const didcliente_ext = rowsCuentas[0].didCliente;
@@ -128,7 +128,7 @@ export async function handleExternalFlex(dbConnection, companyId, dataQr, userId
         externalDbConnection.end();
 
         const body = await informe(dbConnection, companyId, userId, userId, internalShipmentId);
-        return { estadoRespuesta: true, mensaje: "Paquete puesto a planta  correctamente - FLEX", body: body };
+        return { success: true, message: "Paquete puesto a planta  correctamente - FLEX", body: body };
 
     }
 }

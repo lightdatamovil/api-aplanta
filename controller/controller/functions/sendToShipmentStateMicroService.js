@@ -26,7 +26,7 @@ export async function sendToShipmentStateMicroService(companyId, userId, shipmen
 
         channel.sendToQueue(QUEUE_ESTADOS, Buffer.from(JSON.stringify(message)), { persistent: true }, (err, ok) => {
             if (err) {
-                logRed('❌ Error al enviar el mensaje:', err);
+                logRed(` Error al enviar el mensaje ${err.message}`, );
             } else {
                 logGreen('✅ Mensaje enviado correctamente al microservicio de estados');
             }
