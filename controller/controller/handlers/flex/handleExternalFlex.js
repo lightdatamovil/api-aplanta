@@ -8,6 +8,7 @@ import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentS
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
+import { logCyan } from "../../../../src/funciones/logsCustom.js";
 
 /// Esta funcion busca las logisticas vinculadas
 /// Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
@@ -117,12 +118,12 @@ export async function handleExternalFlex(dbConnection, companyId, dataQr, userId
 
         /// Actualizo el estado del envío y lo envío al microservicio de estados en la logística interna
         await updateLastShipmentState(dbConnection, internalShipmentId);
-        // await sendToShipmentStateMicroService(dbConnection, internalShipmentId);
+        await sendToShipmentStateMicroService(dbConnection, internalShipmentId);
         logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica interna");
 
         /// Actualizo el estado del envío y lo envío al microservicio de estados en la logística externa
         await updateLastShipmentState(externalDbConnection, externalShipmentId);
-        // await sendToShipmentStateMicroService(externalDbConnection, externalShipmentId);
+        await sendToShipmentStateMicroService(externalDbConnection, externalShipmentId);
         logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica externa");
         externalDbConnection.end();
 

@@ -1,17 +1,11 @@
 import { executeQuery, getClientsByCompany, getDriversByCompany } from "../../../db.js";
-import { logRed, logYellow } from "../../../src/funciones/logsCustom.js";
+import { logCyan, logRed, logYellow } from "../../../src/funciones/logsCustom.js";
 
 export async function informe(dbConnection, companyId, clientId, userId, shipmentId) {
     const hoy = new Date().toISOString().split('T')[0];
-    let aingresarhoy = 0;
-    let ingresadoshot = 0;
-    let choferasignado = "Sin asignar";
-    let zonaentrega = "";
-    let sucursal = "";
-    let chofer = 0;
 
     try {
-        const sql1 = `
+        const queryIngresadosHoy = `
             SELECT eh.estado 
             FROM envios_historial AS eh
             JOIN envios AS e 
@@ -21,29 +15,39 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
             AND eh.estado IN (7, 0, 1);
         `;
 
-        const rows1 = await executeQuery(dbConnection, sql1, [clientId, `${hoy} 00:00:00`, `${hoy} 23:59:59`]);
+        const resultIngresadosHoy = await executeQuery(dbConnection, queryIngresadosHoy, [clientId, `${hoy} 00:00:00`, `${hoy} 23:59:59`]);
 
-        rows1.forEach(row => {
+        let amountOfAPlanta = 0;
+        let amountOfARetirarAndRetirados = 0;
+
+        resultIngresadosHoy.forEach(row => {
             if (row.estado === 1) {
-                ingresadoshot++;
+                amountOfARetirarAndRetirados++;
             } else {
-                aingresarhoy++;
+                amountOfAPlanta++;
             }
         });
 
-        const sql2 = `
+        const queryIngresadosHoyChofer = `
             SELECT COUNT(id) AS total 
             FROM envios_historial 
-            WHERE elim=0 AND quien IN (${userId}) 
-            AND (autofecha BETWEEN ? AND ?) 
+            WHERE elim=0
+            AND quien = ?
+            and ( autofecha > ?
+            and autofecha < ?)
             AND estado = 1;
         `;
 
-        const rows2 = await executeQuery(dbConnection, sql2, [`${hoy} 00:00:00`, `${hoy} 23:59:59`]);
-        chofer = rows2[0]?.total || 0;
+        const resultIngresadosHoyChofer = await executeQuery(dbConnection, queryIngresadosHoyChofer, [userId, `${hoy} 00:00:00`, `${hoy} 23:59:59`]);
+
+        const ingresadosHoyChofer = resultIngresadosHoyChofer[0]?.total || 0;
+
+        let choferasignado;
+        let zonaentrega;
+        let sucursal;
 
         if (shipmentId > 0) {
-            const sql3 = `
+            const queryEnvios = `
                 SELECT ez.nombre AS zona, e.choferAsignado, sd.nombre AS sucursal
                 FROM envios AS e 
                 LEFT JOIN envios_zonas AS ez 
@@ -52,16 +56,18 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
                     ON sd.elim=0 AND sd.superado=0 AND sd.did = e.didSucursalDistribucion
                 WHERE e.superado=0 AND e.elim=0 AND e.did = ?;
             `;
+            const resultEnvios = await executeQuery(dbConnection, queryEnvios, [shipmentId]);
 
-            const rows3 = await executeQuery(dbConnection, sql3, [shipmentId]);
-
-            if (rows3.length > 0) {
-                choferasignado = rows3[0].choferAsignado || 'Sin asignar';
-                zonaentrega = rows3[0].zona || "";
-                sucursal = rows3[0].sucursal || "";
+            if (resultEnvios.length > 0) {
+                choferasignado = resultEnvios[0].choferAsignado || 'Sin asignar';
+                zonaentrega = resultEnvios[0].zona || "Sin informacion";
+                sucursal = resultEnvios[0].sucursal || "Sin informacion";
             }
         }
+
         const companyClients = await getClientsByCompany(dbConnection, companyId);
+
+        const companyDrivers = await getDriversByCompany(dbConnection, companyId);
 
         if (companyClients[clientId] === undefined) {
             throw new Error("Cliente no encontrado");
@@ -81,13 +87,13 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
         logCyan("Se generó el informe");
 
         return {
-            cliente: `Cliente ${companyClients[clientId]?.nombre || 'Sin informacion'}`,
-            aingresarhoy,
-            ingresadoshot,
-            ingresadosahora: 0,
+            cliente: `${companyClients[clientId]?.nombre || 'Sin informacion'}`,
+            aingresarhoy: amountOfAPlanta,
+            ingresadoshot: amountOfARetirarAndRetirados,
+            ingresadosahora: ingresadosHoyChofer,
             chofer: chofer,
-            zonaentrega,
-            sucursal
+            zonaentrega: zonaentrega,
+            sucursal: sucursal
         };
 
     } catch (error) {
