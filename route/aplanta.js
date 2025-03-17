@@ -19,7 +19,7 @@ a_planta.post('/aplanta', async (req, res) => {
     try {
         const company = await getCompanyById(companyId);
 
-        const result = await aplanta(company, JSON.parse(dataQr), userId, profile, autoAssign);
+        const result = await aplanta(company, dataQr, userId, profile, autoAssign);
 
         const endTime = performance.now();
         logPurple(`Tiempo de ejecución: ${endTime - startTime} ms`);
