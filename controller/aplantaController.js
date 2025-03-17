@@ -30,10 +30,10 @@ export async function aplanta(company, dataQr, userId) {
         } else {
             logCyan("No es flex");
             if (company.did == dataQr.empresa) {
-                logCyan("Es externo");
+                logCyan("Es interno");
                 response = await handleInternalNoFlex(dbConnection, dataQr, company.did, userId);
             } else {
-                logCyan("Es interno");
+                logCyan("Es externo");
                 response = await handleExternalNoFlex(dbConnection, dataQr, company.did, userId);
             }
         }
