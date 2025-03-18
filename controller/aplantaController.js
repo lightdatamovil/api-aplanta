@@ -43,4 +43,7 @@ export async function aplanta(company, dataQr, userId) {
         logRed(`Error en poner a planta: ${error.message}`)
         throw error;
     }
+    finally{
+        dbConnection.end();
+    }
 }
