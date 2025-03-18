@@ -18,10 +18,10 @@ import { logCyan } from "../../../../src/funciones/logsCustom.js";
 /// Inserto el envio en la tabla envios y envios exteriores de la logística interna
 /// Actualizo el estado del envío y lo envío al microservicio de estados en la logística interna
 /// Actualizo el estado del envío y lo envío al microservicio de estados en la logística externa
-export async function handleExternalFlex(dbConnection, companyId, dataQr, userId) {
+export async function handleExternalFlex(dbConnection, company, dataQr, userId) {
     const senderid = dataQr.sender_id;
     const shipmentId = dataQr.id;
-
+const codLocal= company.codigo;
     // Se llama logisticas y se toman de la tabla de clientes porque al vincularlas se crea un
     // cliente con el código de vinculación
     const queryLogisticasExternas = `
@@ -82,7 +82,7 @@ export async function handleExternalFlex(dbConnection, companyId, dataQr, userId
             const didcliente_ext = rowsCuentas[0].didCliente;
             const didcuenta_ext = rowsCuentas[0].did;
 
-            const result = await insertEnvios(externalDbConnection, externalCompanyId, didcliente_ext, didcuenta_ext, dataQr, 1, 0);
+            const result = await insertEnvios(externalDbConnection, externalCompanyId, didcliente_ext, didcuenta_ext, dataQr, 1, driver);
 
             rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [result, senderid]);
             logCyan("Inserte el envio en la logistica externa");
@@ -90,6 +90,7 @@ export async function handleExternalFlex(dbConnection, companyId, dataQr, userId
             externalShipmentId = rowsEnvios[0].did;
         }
 
+        const driver = await checkIfExistLogisticAsDriverInExternalCompany(externalDbConnection, codLocal);
         /// Busco si el chofer está asignado
         const check = await checkearEstadoEnvio(externalDbConnection, externalShipmentId);
 
@@ -109,7 +110,7 @@ export async function handleExternalFlex(dbConnection, companyId, dataQr, userId
             internalShipmentId = internalShipmentId[0].didLocal;
             logCyan("Encontre el envio en envios exteriores");
         } else {
-            internalShipmentId = await insertEnvios(dbConnection, companyId, externalLogisticId, 0, dataQr, 1, 1,);
+            internalShipmentId = await insertEnvios(dbConnection, company.did, externalLogisticId, 0, dataQr, 1, 1,userId);
             logCyan("Inserte el envio en envios");
         }
 
@@ -127,7 +128,7 @@ export async function handleExternalFlex(dbConnection, companyId, dataQr, userId
         logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica externa");
         externalDbConnection.end();
 
-        const body = await informe(dbConnection, companyId, userId, userId, internalShipmentId);
+        const body = await informe(dbConnection, company.did, userId, userId, internalShipmentId);
         return { success: true, message: "Paquete puesto a planta  correctamente - FLEX", body: body };
 
     }
