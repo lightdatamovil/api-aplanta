@@ -119,12 +119,12 @@ const codLocal= company.codigo;
 
         /// Actualizo el estado del envío y lo envío al microservicio de estados en la logística interna
 
-        await sendToShipmentStateMicroService(dbConnection, internalShipmentId);
+        await sendToShipmentStateMicroService(dbConnection,userId ,internalShipmentId);
         logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica interna");
 
         /// Actualizo el estado del envío y lo envío al microservicio de estados en la logística externa
     
-        await sendToShipmentStateMicroService(externalDbConnection, externalShipmentId);
+        await sendToShipmentStateMicroService(externalDbConnection,driver ,externalShipmentId);
         logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica externa");
         externalDbConnection.end();
 
