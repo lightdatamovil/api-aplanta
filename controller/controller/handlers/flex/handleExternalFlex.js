@@ -19,6 +19,7 @@ import { logCyan, logYellow } from "../../../../src/funciones/logsCustom.js";
 /// Actualizo el estado del envío y lo envío al microservicio de estados en la logística externa
 export async function handleExternalFlex(dbConnection, company, dataQr, userId) {
     const senderid = dataQr.sender_id;
+    logYellow(`El sender_id es: ${senderid}`);
     const shipmentId = dataQr.id;
     const codLocal = company.codigo;
     // Se llama logisticas y se toman de la tabla de clientes porque al vincularlas se crea un
