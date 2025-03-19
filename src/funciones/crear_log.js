@@ -9,7 +9,7 @@ export async function crearLog(idEmpresa, operador, endpoint, result, quien, idD
 
         await conInterno.execute(sqlLog, values);
     } catch (error) {
-        logRed(`Error al crear log: ${error.message}`);
+        logRed(`Error al crear log: ${error.stack}`);
         throw error;
     }
 }

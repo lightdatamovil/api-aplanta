@@ -1,6 +1,5 @@
 import { executeQuery, getClientsByCompany, getCompanyById, getProdDbConfig } from "../../../../db.js";
 import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
-import { updateLastShipmentState } from "../../functions/updateLastShipmentState.js";
 import mysql from "mysql";
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
@@ -87,11 +86,9 @@ export async function handleExternalNoFlex(dbConnection, dataQr, companyId, user
         );
         logCyan("Inserté en envios exteriores");
 
-        await updateLastShipmentState(dbConnection, internalShipmentId);
         await sendToShipmentStateMicroService(companyId, userId, internalShipmentId);
         logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios internos");
 
-        await updateLastShipmentState(externalDbConnection, shipmentIdFromDataQr);
         await sendToShipmentStateMicroService(dataQr.empresa, driver, shipmentIdFromDataQr);
         logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios externos");
 
@@ -108,7 +105,7 @@ export async function handleExternalNoFlex(dbConnection, dataQr, companyId, user
 
         return { success: true, message: "Paquete puesto a planta  con exito", body: body };
     } catch (error) {
-        logRed(`Error en handleExternalNoFlex: ${error.message}`);
+        logRed(`Error en handleExternalNoFlex: ${error.stack}`);
         throw error;
     }
 }

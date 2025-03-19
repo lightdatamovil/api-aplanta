@@ -27,7 +27,7 @@ a_planta.post('/aplanta', async (req, res) => {
     } catch (error) {
         const endTime = performance.now();
         logPurple(`Tiempo de ejecución: ${endTime - startTime} ms`);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.stack });
     }
 });
 

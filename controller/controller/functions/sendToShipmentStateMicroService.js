@@ -26,14 +26,14 @@ export async function sendToShipmentStateMicroService(companyId, userId, shipmen
 
         channel.sendToQueue(QUEUE_ESTADOS, Buffer.from(JSON.stringify(message)), { persistent: true }, (err, ok) => {
             if (err) {
-                logRed(` Error al enviar el mensaje ${err.message}`, );
+                logRed(` Error al enviar el mensaje ${err.message}`,);
             } else {
                 logGreen('✅ Mensaje enviado correctamente al microservicio de estados');
             }
             connection.close();
         });
     } catch (error) {
-        logRed(`Error en sendToShipmentStateMicroService: ${error.message}`);
+        logRed(`Error en sendToShipmentStateMicroService: ${error.stack}`);
         throw error;
     }
 };

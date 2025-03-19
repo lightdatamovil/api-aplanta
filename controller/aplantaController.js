@@ -25,7 +25,7 @@ export async function aplanta(company, dataQr, userId) {
                 response = await handleInternalFlex(dbConnection, company.did, userId, dataQr, account);
             } else {
                 logCyan("Es externo");
-                response = await handleExternalFlex(dbConnection, company.did, dataQr, userId);
+                response = await handleExternalFlex(dbConnection, company, dataQr, userId);
             }
         } else {
             logCyan("No es flex");
@@ -40,7 +40,7 @@ export async function aplanta(company, dataQr, userId) {
 
         return response;
     } catch (error) {
-        logRed(`Error en poner a planta: ${error.message}`)
+        logRed(`Error en poner a planta: ${error.stack}`)
         throw error;
     }
 }

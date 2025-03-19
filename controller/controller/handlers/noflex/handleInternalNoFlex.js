@@ -2,8 +2,6 @@ import { logBlue, logCyan, logRed } from "../../../../src/funciones/logsCustom.j
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
 import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
-import { updateLastShipmentState } from "../../functions/updateLastShipmentState.js";
-
 /// Esta funcion checkea si el envio ya fue colectado, entregado o cancelado
 /// Si el envio no esta asignado y se quiere autoasignar, lo asigna
 /// Actualiza el estado del envio en el micro servicio
@@ -25,14 +23,13 @@ export async function handleInternalNoFlex(dbConnection, dataQr, companyId, user
 
 
         /// Actualizamos el estado del envio en la base de datos
-        await updateLastShipmentState(dbConnection, shipmentId);
         logCyan("Se actualizo el estado del envio en la base de datos");
 
         const body = await informe(dbConnection, companyId, clientId, userId, shipmentId);
 
         return { success: true, message: "Paquete puesto a planta  correctamente", body: body };
     } catch (error) {
-        logRed(`Error en handleInternoNoFlex: ${error.message}`);
+        logRed(`Error en handleInternoNoFlex: ${error.stack}`);
         throw error;
     }
 }
