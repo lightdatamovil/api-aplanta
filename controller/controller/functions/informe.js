@@ -70,8 +70,8 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
 
             if (resultEnvios.length > 0) {
                 choferasignado = resultEnvios[0].choferAsignado || 'Sin asignar';
-                zonaentrega = resultEnvios[0].zona || "Sin informacion";
-                sucursal = resultEnvios[0].sucursal || "Sin informacion";
+                zonaentrega = resultEnvios[0].zona || "Sin información";
+                sucursal = resultEnvios[0].sucursal || "Sin información";
             }
         }
 
@@ -90,26 +90,23 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
         }
         logCyan("El cliente fue encontrado");
 
-        let chofer;
-
-        if (companyDrivers[choferasignado] === undefined) {
-            chofer = "Sin informacion";
+        const chofer = companyDrivers[choferasignado]?.nombre || "Sin información";
+        if (!companyDrivers[choferasignado]) {
             logCyan("El chofer no fue encontrado");
         } else {
-            chofer = companyDrivers[choferasignado].nombre;
             logCyan("El chofer fue encontrado");
         }
 
         logCyan("Se generó el informe");
 
         return {
-            cliente: `${companyClients[clientId]?.nombre || 'Sin informacion'}`,
+            cliente: `${companyClients[clientId]?.nombre || 'Sin información'}`,
             aingresarhoy: amountOfAPlanta,
             ingresadoshot: amountOfARetirarAndRetirados,
             ingresadosahora: ingresadosHoyChofer,
-            chofer: chofer,
-            zonaentrega: zonaentrega,
-            sucursal: sucursal
+            chofer,
+            zonaentrega,
+            sucursal
         };
 
     } catch (error) {
