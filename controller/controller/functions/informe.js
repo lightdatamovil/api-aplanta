@@ -1,5 +1,5 @@
 import { executeQuery, getClientsByCompany, getDriversByCompany } from "../../../db.js";
-import { logCyan, logRed, logYellow } from "../../../src/funciones/logsCustom.js";
+import { logCyan, logPurple, logRed, logYellow } from "../../../src/funciones/logsCustom.js";
 
 export async function informe(dbConnection, companyId, clientId, userId, shipmentId) {
     const hoy = new Date().toISOString().split('T')[0];
@@ -15,8 +15,11 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
             AND eh.estado IN (7, 0, 1);
         `;
 
+        const startTime1 = performance.now();
         const resultIngresadosHoy = await executeQuery(dbConnection, queryIngresadosHoy, [clientId, `${hoy} 00:00:00`, `${hoy} 23:59:59`]);
+        let endTime1 = performance.now();
 
+        logPurple(`Tiempo de ejecución1: ${endTime1 - startTime1} ms`);
         let amountOfAPlanta = 0;
         let amountOfARetirarAndRetirados = 0;
 
@@ -29,16 +32,19 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
         });
 
         const queryIngresadosHoyChofer = `
-            SELECT COUNT(id) AS total 
-            FROM envios_historial 
-            WHERE elim=0
-            AND quien = ?
-            and ( autofecha > ?
-            and autofecha < ?)
-            AND estado = 1;
+                SELECT COUNT(*) AS total 
+                FROM envios_historial 
+                WHERE elim = 0
+                AND superado = 0
+                AND quien = ? 
+                AND estado = 1
+                AND autofecha BETWEEN ? AND ?;
         `;
 
-        const resultIngresadosHoyChofer = await executeQuery(dbConnection, queryIngresadosHoyChofer, [userId, `${hoy} 00:00:00`, `${hoy} 23:59:59`]);
+        const startTime2 = performance.now();
+        const resultIngresadosHoyChofer = await executeQuery(dbConnection, queryIngresadosHoyChofer, [userId, `${hoy} 00:00:00`, `${hoy} 23:59:59`], true);
+        let endTime2 = performance.now();
+        logPurple(`Tiempo de ejecución2: ${endTime2 - startTime2} ms`);
 
         const ingresadosHoyChofer = resultIngresadosHoyChofer[0]?.total || 0;
 
@@ -56,7 +62,11 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
                     ON sd.elim=0 AND sd.superado=0 AND sd.did = e.didSucursalDistribucion
                 WHERE e.superado=0 AND e.elim=0 AND e.did = ?;
             `;
+
+            const startTime3 = performance.now();
             const resultEnvios = await executeQuery(dbConnection, queryEnvios, [shipmentId]);
+            let endTime3 = performance.now();
+            logPurple(`Tiempo de ejecución3: ${endTime3 - startTime3} ms`);
 
             if (resultEnvios.length > 0) {
                 choferasignado = resultEnvios[0].choferAsignado || 'Sin asignar';
@@ -65,9 +75,15 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
             }
         }
 
+        const startTime4 = performance.now();
         const companyClients = await getClientsByCompany(dbConnection, companyId);
+        let endTime4 = performance.now();
+        logPurple(`Tiempo de ejecución4: ${endTime4 - startTime4} ms`);
 
+        const startTime5 = performance.now();
         const companyDrivers = await getDriversByCompany(dbConnection, companyId);
+        let endTime5 = performance.now();
+        logPurple(`Tiempo de ejecución5: ${endTime5 - startTime5} ms`);
 
         if (companyClients[clientId] === undefined) {
             throw new Error("Cliente no encontrado");
