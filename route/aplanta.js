@@ -26,7 +26,7 @@ a_planta.post('/aplanta', async (req, res) => {
         const company = await getCompanyById(companyId);
 
         const result = await aplanta(company, dataQr, userId, profile, autoAssign);
-        crearLog(companyId,userId,qr.did || 0, "1", req.body,userId,dbConnectionLocal,JSON.stringify(result));
+        crearLog(companyId,userId,dataQr.did || 0, "1", req.body,userId,dbConnectionLocal,JSON.stringify(result));
         const endTime = performance.now();
         logPurple(`Tiempo de ejecución: ${endTime - startTime} ms`);
         res.status(200).json(result);
