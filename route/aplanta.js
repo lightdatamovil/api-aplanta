@@ -4,6 +4,7 @@ import { getCompanyById, getLocalDbConfig } from '../db.js';
 import { aplanta } from '../controller/aplantaController.js';
 import { logPurple } from '../src/funciones/logsCustom.js';
 import mysql2 from 'mysql2';
+import { crearLog } from '../src/funciones/crear_log.js';
 
 
 const a_planta = Router();
