@@ -41,7 +41,7 @@ export function getLocalDbConfig() {
         user:"ulogs" ,
         password: "aplanta2025*",
         database: "data",
-       port: 44343
+       port: 44345
     };
 }
 
