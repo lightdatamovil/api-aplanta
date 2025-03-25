@@ -3,11 +3,12 @@ import { verifyParameters } from '../src/funciones/verifyParameters.js';
 import { getCompanyById, getLocalDbConfig } from '../db.js';
 import { aplanta } from '../controller/aplantaController.js';
 import { logPurple } from '../src/funciones/logsCustom.js';
+import mysql2 from 'mysql2';
 
 
 const a_planta = Router();
 const dbConfigLocal = getLocalDbConfig();
-const dbConnectionLocal = mysql.createConnection(dbConfigLocal);
+const dbConnectionLocal = mysql2.createConnection(dbConfigLocal);
 dbConnectionLocal.connect();
 
 a_planta.post('/aplanta', async (req, res) => {
