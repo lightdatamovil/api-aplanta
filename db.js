@@ -39,7 +39,7 @@ export function getLocalDbConfig() {
       //  host: "localhost",
         host: "149.56.182.49",
         user:"ulogs" ,
-        password: "logs123456*",
+        password: "aplanta2025*",
         database: "data",
        port: 44343
     };
