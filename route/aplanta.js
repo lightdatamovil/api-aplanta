@@ -19,21 +19,26 @@ a_planta.post('/aplanta', async (req, res) => {
     if (errorMessage) {
         return res.status(400).json({ message: errorMessage });
     }
+    const body= req.body;
 
     const { companyId, userId, profile, dataQr, autoAssign } = req.body;
 
+    const company = await getCompanyById(companyId);
     try {
-        const company = await getCompanyById(companyId);
 
         const result = await aplanta(company, dataQr, userId, profile, autoAssign);
-        crearLog(companyId,userId,dataQr.did || 0, "1", req.body,userId,dbConnectionLocal,JSON.stringify(result));
         const endTime = performance.now();
+        const tiempo = endTime - startTime;
+        crearLog(dbConnectionLocal, company.did, userId, body.profile, body, tiempo, result, "api", true);
         logPurple(`Tiempo de ejecución: ${endTime - startTime} ms`);
         res.status(200).json(result);
     } catch (error) {
 
-        crearLog(companyId,userId,dataQr.did || 0, "-1", req.body,userId,dbConnectionLocal,error.message);
         const endTime = performance.now();
+        const tiempo = endTime - startTime;
+        console.log(company);
+        
+        crearLog(dbConnectionLocal, company.did, userId, body.profile, body, tiempo, error.stack, "api", true);
         logPurple(`Tiempo de ejecución: ${endTime - startTime} ms`);
         res.status(500).json({ message: error.stack });
     }
