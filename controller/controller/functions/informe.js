@@ -1,6 +1,6 @@
 import { executeQuery, getClientsByCompany, getDriversByCompany } from "../../../db.js";
 import { logCyan, logPurple, logRed, logYellow } from "../../../src/funciones/logsCustom.js";
-const contadoresIngresados = {}; 
+const contadoresIngresados = {};
 
 export async function informe(dbConnection, companyId, clientId, userId, shipmentId) {
     const hoy = new Date().toISOString().split('T')[0];
@@ -33,16 +33,16 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
         });
 
 
-// Función para incrementar el contador
+        // Función para incrementar el contador
 
-// En algún lugar donde se registre un nuevo ingreso:
-incrementarIngresados(hoy, companyId, userId);
+        // En algún lugar donde se registre un nuevo ingreso:
+        incrementarIngresados(hoy, companyId, userId);
 
-// Reemplazo de la consulta SQL con la variable local
-const ingresadosHoyChofer = obtenerIngresados(hoy, companyId, userId);
-logPurple(`Ingresados hoy por chofer: ${ingresadosHoyChofer}`);
+        // Reemplazo de la consulta SQL con la variable local
+        const ingresadosHoyChofer = obtenerIngresados(hoy, companyId, userId);
+        logPurple(`Ingresados hoy por chofer: ${ingresadosHoyChofer}`);
 
-    
+
         let choferasignado;
         let zonaentrega;
         let sucursal;
@@ -70,15 +70,9 @@ logPurple(`Ingresados hoy por chofer: ${ingresadosHoyChofer}`);
             }
         }
 
-        const startTime4 = performance.now();
         const companyClients = await getClientsByCompany(dbConnection, companyId);
-        let endTime4 = performance.now();
-        logPurple(`Tiempo de ejecución4: ${endTime4 - startTime4} ms`);
 
-        const startTime5 = performance.now();
         const companyDrivers = await getDriversByCompany(dbConnection, companyId);
-        let endTime5 = performance.now();
-        logPurple(`Tiempo de ejecución5: ${endTime5 - startTime5} ms`);
 
         if (companyClients[clientId] === undefined) {
             throw new Error("Cliente no encontrado");
