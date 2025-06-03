@@ -26,7 +26,7 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
             VALUES (?, ?, ?, ?, ?)
         `;
 
-        const ver = await executeQuery(dbConnection, sqlInsertHistorial, [result.insertId, 1, 1, fechaunix, driverId]);
+        const ver = await executeQuery(dbConnection, sqlInsertHistorial, [result.insertId, 1, 1, fecha_inicio, driverId]);
 
         if (result.insertId) {
             await axios.post(
