@@ -4,7 +4,9 @@ import { logRed } from '../../../src/funciones/logsCustom.js';
 
 export async function insertEnvios(dbConnection, companyId, clientId, accountId, dataQr, flex, externo, driverId) {
     const lote = Math.random().toString(36).substring(2, 15);
-    const fecha_inicio = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const fecha_actual = new Date();
+    fecha_actual.setHours(fecha_actual.getHours() - 3);
+    const fecha_inicio = fecha_actual.toISOString().slice(0, 19).replace('T', ' ');
     const idshipment = dataQr.id;
     const senderid = dataQr.sender_id;
     const fechaunix = Math.floor(Date.now() / 1000);
