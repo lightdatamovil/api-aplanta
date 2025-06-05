@@ -148,6 +148,10 @@ async function loadAccountList(dbConnection, companyId, senderId) {
 
 export async function getAccountBySenderId(dbConnection, companyId, senderId) {
   try {
+    console.log(
+      `Obteniendo cuenta para el senderId: ${senderId} y companyId: ${companyId}`
+    );
+
     if (
       accountList === undefined ||
       accountList === null ||
