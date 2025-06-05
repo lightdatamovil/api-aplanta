@@ -2,6 +2,7 @@ import redis from "redis";
 import dotenv from "dotenv";
 import mysql from "mysql";
 import { logRed, logYellow } from "./src/funciones/logsCustom.js";
+import { json } from "body-parser";
 
 dotenv.config({ path: process.env.ENV_FILE || ".env" });
 
@@ -90,10 +91,6 @@ export async function getCompanyByCode(companyCode) {
         throw error;
       }
     }
-    console.log(`Buscando compañía con código: ${companyCode}`);
-    console.log(
-      `Lista de compañías cargadas: ${JSON.stringify(companiesList)}`
-    );
 
     for (const key in companiesList) {
       if (companiesList.hasOwnProperty(key)) {
@@ -158,6 +155,15 @@ export async function getAccountBySenderId(dbConnection, companyId, senderId) {
     }
 
     const account = accountList[companyId][senderId];
+
+    console.log(json.stringify(accountList, null, 2));
+    console.log(
+      `Cuenta obtenida para el senderId ${senderId}: ${json.stringify(
+        account,
+        null,
+        2
+      )}`
+    );
 
     return account;
   } catch (error) {
