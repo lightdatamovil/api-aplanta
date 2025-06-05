@@ -51,6 +51,7 @@ export async function handleExternalFlex(
     const externalLogisticId = logistica.did;
     const nombreFantasia = logistica.nombre_fantasia;
     const syncCode = logistica.codigoVinculacionLogE;
+    console.log(syncCode, "syncCode");
 
     const externalCompany = await getCompanyByCode(syncCode);
     console.log(externalCompany, "llegammos");
