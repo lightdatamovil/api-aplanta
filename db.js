@@ -159,6 +159,15 @@ export async function getAccountBySenderId(dbConnection, companyId, senderId) {
 
     const account = accountList[companyId][senderId];
 
+    console.log(
+      `Cuenta obtenida para el senderId ${senderId}: ${JSON.stringify(account)}`
+    );
+    console.log(
+      `Cuenta obtenida para el senderId ${senderId}: ${JSON.stringify(
+        accountList
+      )}`
+    );
+
     return account;
   } catch (error) {
     logRed(`Error en getAccountBySenderId: ${error.stack}`);
