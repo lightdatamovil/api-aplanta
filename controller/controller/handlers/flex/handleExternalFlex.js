@@ -53,6 +53,7 @@ export async function handleExternalFlex(
     const syncCode = logistica.codigoVinculacionLogE;
 
     const externalCompany = await getCompanyByCode(syncCode);
+    console.log(externalCompanyId, "llegammos");
     const externalCompanyId = externalCompany.did;
 
     /// Me conecto a la base de datos de la logística externa
