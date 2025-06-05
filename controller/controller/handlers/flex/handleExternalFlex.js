@@ -200,7 +200,7 @@ export async function handleExternalFlex(
     };
 
     logCyan("Voy a asignar el envio en la logistica interna");
-    await assign(externalCompanyId, userId, profile, dqrext, userId);
+    await assign(externalCompanyId, userId, 0, dqrext, userId);
     const body = await informe(
       dbConnection,
       company.did,
