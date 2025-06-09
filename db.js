@@ -148,9 +148,6 @@ async function loadAccountList(dbConnection, companyId, senderId) {
 
 export async function getAccountBySenderId(dbConnection, companyId, senderId) {
   try {
-    console.log(
-      `Obteniendo cuenta para el senderId: ${senderId} y companyId: ${companyId}`
-    );
 
     if (
       accountList === undefined ||
@@ -163,14 +160,8 @@ export async function getAccountBySenderId(dbConnection, companyId, senderId) {
 
     const account = accountList[companyId][senderId];
 
-    console.log(
-      `Cuenta obtenida para el senderId ${senderId}: ${JSON.stringify(account)}`
-    );
-    console.log(
-      `Cuenta obtenida para el senderId ${senderId}: ${JSON.stringify(
-        accountList
-      )}`
-    );
+
+
 
     return account;
   } catch (error) {
