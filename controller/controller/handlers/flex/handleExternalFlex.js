@@ -99,7 +99,7 @@ export async function handleExternalFlex(
         senderid,
       ]);
 
-      if (rowsCuentas.length == 0) {
+      if (rowsCuentas[0].length == 0) {
         externalDbConnection.end();
 
         return { success: false, message: "No se encontró cuenta asociada" };
