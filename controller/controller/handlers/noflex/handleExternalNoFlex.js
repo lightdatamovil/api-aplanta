@@ -7,6 +7,7 @@ import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
 import { logCyan, logRed, logYellow } from "../../../../src/funciones/logsCustom.js";
+import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 
 /// Esta funcion se conecta a la base de datos de la empresa externa
 /// Checkea si el envio ya fue colectado, entregado o cancelado

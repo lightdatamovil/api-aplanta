@@ -13,6 +13,7 @@ import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/c
 import { informe } from "../../functions/informe.js";
 import { logCyan, logYellow } from "../../../../src/funciones/logsCustom.js";
 import { assign } from "../../functions/assing.js";
+import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 
 /// Esta funcion busca las logisticas vinculadas
 /// Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
