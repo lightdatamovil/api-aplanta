@@ -164,6 +164,24 @@ export async function handleExternalFlex(
       logCyan("Inserte el envio en envios");
     }
 
+    const checkLI = "SELECT valor FROM envios_logisticainversa WHERE didEnvio = ?";
+
+    const rows = await executeQuery(
+      externalDbConnection,
+      checkLI,
+      [externalShipmentId],
+      true
+    );
+    if (rows.length > 0) {
+      await insertEnviosLogisticaInversa(
+        dbConnection,
+        internalShipmentId,
+        rows[0].valor,
+        userId,
+      );
+    }
+
+
     await insertEnviosExteriores(
       dbConnection,
       externalShipmentId,

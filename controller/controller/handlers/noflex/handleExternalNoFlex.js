@@ -86,6 +86,24 @@ export async function handleExternalNoFlex(dbConnection, dataQr, companyId, user
         );
         logCyan("Inserté en envios exteriores");
 
+
+        const check2 = "SELECT valor FROM envios_logisticainversa WHERE didEnvio = ?";
+
+        const rows = await executeQuery(
+            externalDbConnection,
+            check2,
+            [shipmentIdFromDataQr],
+            true
+        );
+        if (rows.length > 0) {
+            await insertEnviosLogisticaInversa(
+                dbConnection,
+                internalShipmentId,
+                rows[0].valor,
+                userId,
+            );
+        }
+
         await sendToShipmentStateMicroService(companyId, userId, internalShipmentId);
         logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios internos");
 
