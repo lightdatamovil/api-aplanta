@@ -185,8 +185,8 @@ export async function handleExternalFlex(
 
     await insertEnviosExteriores(
       dbConnection,
-      externalShipmentId,
       internalShipmentId,
+      externalShipmentId,
       1,
       nombreFantasia,
       externalCompanyId
