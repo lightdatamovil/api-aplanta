@@ -3,6 +3,7 @@ import a_planta from './route/aplanta.js';
 import { redisClient } from './db.js';
 import { logBlue } from './src/funciones/logsCustom.js';
 import cors from 'cors';
+import clear from './route/clearClient.js';
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(cors());
 const PORT = process.env.PORT || 13000;
 
 app.use("/api", a_planta)
+app.use("/client", clear)
 app.get('/ping', (req, res) => {
   const currentDate = new Date();
   currentDate.setHours(currentDate.getHours()); // Resta 3 horas
