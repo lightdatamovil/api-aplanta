@@ -42,10 +42,12 @@ export async function handleExternalFlex(
         `;
   const logisticasExternas = await executeQuery(
     dbConnection,
-    queryLogisticasExternas
+    queryLogisticasExternas, [], true
   );
   logCyan("Me traigo las logisticas externas");
-
+  if (logisticasExternas.length == 0) {
+    throw new Error("No se encontraron logísticas externas");
+  }
   /// Por cada logística externa
   for (const logistica of logisticasExternas) {
     logCyan(`logistica externa actual: ${logistica.nombre_fantasia}`);
