@@ -22,14 +22,14 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
             queryInsertEnvios,
             [0, idshipment, senderid, clientId, 1, lote, accountId, JSON.stringify(dataQr), fecha_inicio, flex, externo, fechaunix, driverId],
         );
-
-        const sqlInsertHistorial = `
-            INSERT INTO envios_historial (didEnvio, estado, quien, fecha, didCadete) 
-            VALUES (?, ?, ?, ?, ?)
-        `;
-
-        const ver = await executeQuery(dbConnection, sqlInsertHistorial, [result.insertId, 1, 1, fecha_inicio, driverId]);
-
+        /*
+                const sqlInsertHistorial = `
+                    INSERT INTO envios_historial (didEnvio, estado, quien, fecha, didCadete) 
+                    VALUES (?, ?, ?, ?, ?)
+                `;
+        
+                const ver = await executeQuery(dbConnection, sqlInsertHistorial, [result.insertId, 1, 1, fecha_inicio, driverId]);
+        */
         if (result.insertId) {
             await axios.post(
                 'https://altaenvios.lightdata.com.ar/api/enviosMLredis',
