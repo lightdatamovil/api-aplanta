@@ -5,6 +5,35 @@ import { handleExternalNoFlex } from "./controller/handlers/noflex/handleExterna
 import { handleInternalNoFlex } from "./controller/handlers/noflex/handleInternalNoFlex.js";
 import mysql from "mysql";
 import { logCyan, logRed } from "../src/funciones/logsCustom.js";
+import axios from "axios";
+async function getShipmentIdFromQr(companyId, dataQr) {
+
+    try {
+        const payload = {
+            companyId: Number(companyId),
+            userId: 0,
+            profile: 0,
+            deviceId: "null",
+            brand: "null",
+            model: "null",
+            androidVersion: "null",
+            deviceFrom: "Autoasignado de colecta",
+            appVersion: "null",
+            dataQr: dataQr
+        };
+
+        const result = await axios.post('https://apimovil2test.lightdata.app/api/qr/get-shipment-id', payload);
+        if (result.status == 200) {
+            return result.body;
+        } else {
+            logRed("Error al obtener el shipmentId");
+            throw new Error("Error al obtener el shipmentId");
+        }
+    } catch (error) {
+        logRed(`Error al obtener el shipmentId: ${error.stack}`);
+        throw error;
+    }
+}
 
 export async function aplanta(company, dataQr, userId) {
     const dbConfig = getProdDbConfig(company);
@@ -14,6 +43,15 @@ export async function aplanta(company, dataQr, userId) {
     try {
         let response;
 
+        if (company.did == 211 && !dataQr.hasOwnProperty("local") && !dataQr.hasOwnProperty("sender_id")) {
+            const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
+            dataQr = {
+                local: "1",
+                empresa: company.did,
+                did: shipmentId,
+                cliente: 301
+            }
+        }
         const isFlex = dataQr.hasOwnProperty("sender_id");
 
         if (isFlex) {
