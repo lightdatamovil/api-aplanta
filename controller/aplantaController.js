@@ -22,9 +22,9 @@ async function getShipmentIdFromQr(companyId, dataQr) {
             dataQr: dataQr
         };
 
-        const result = await axios.post('https://apimovil2test.lightdata.app/api/qr/get-shipment-id', payload);
+        const result = await axios.post('https://apimovil2.lightdata.app/api/qr/get-shipment-id', payload);
         if (result.status == 200) {
-            return result.body;
+            return result.data.body;
         } else {
             logRed("Error al obtener el shipmentId");
             throw new Error("Error al obtener el shipmentId");

@@ -49,12 +49,12 @@ export async function sendToShipmentStateMicroService(
         const message = {
             didempresa: companyId,
             didenvio: shipmentId,
-            estado: 0,
+            estado: 1,
             subestado: null,
             estadoML: null,
             fecha: formatFechaUTC3(),
             quien: userId,
-            operacion: 'colecta',
+            operacion: 'aplanta',
             latitud,
             longitud
         };
