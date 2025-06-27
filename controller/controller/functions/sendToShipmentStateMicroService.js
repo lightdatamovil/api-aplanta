@@ -2,11 +2,13 @@ import { connect } from 'amqplib';
 import dotenv from 'dotenv';
 import { logGreen, logRed } from '../../../src/funciones/logsCustom.js';
 import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
+import axios from 'axios';
 
 dotenv.config({ path: process.env.ENV_FILE || '.env' });
 
 const RABBITMQ_URL = process.env.RABBITMQ_URL;
 const QUEUE_ESTADOS = process.env.QUEUE_ESTADOS;
+const BACKUP_ENDPOINT = "https://serverestado.lightdata.app/estados"
 
 let connection = null;
 let channel = null;
@@ -43,21 +45,21 @@ export async function sendToShipmentStateMicroService(
     latitud,
     longitud
 ) {
+    const message = {
+        didempresa: companyId,
+        didenvio: shipmentId,
+        estado: 1,
+        subestado: null,
+        estadoML: null,
+        fecha: formatFechaUTC3(),
+        quien: userId,
+        operacion: 'aplanta',
+        latitud,
+        longitud
+    };
+
     try {
         const ch = await getChannel();
-
-        const message = {
-            didempresa: companyId,
-            didenvio: shipmentId,
-            estado: 0,
-            subestado: null,
-            estadoML: null,
-            fecha: formatFechaUTC3(),
-            quien: userId,
-            operacion: 'colecta',
-            latitud,
-            longitud
-        };
 
         const sent = ch.sendToQueue(
             QUEUE_ESTADOS,
@@ -69,9 +71,19 @@ export async function sendToShipmentStateMicroService(
             logGreen('✅ Mensaje enviado correctamente al microservicio de estados');
         } else {
             logYellow('⚠️ Mensaje no pudo encolarse (buffer lleno)');
+            // Si querés forzar el fallback HTTP en este caso:
+            throw new Error('Buffer lleno en RabbitMQ');
         }
     } catch (error) {
-        logRed(`Error en sendToShipmentStateMicroService: ${error.stack}`);
-        throw error;
+        logRed(`❌ Falló RabbitMQ, intentando enviar por HTTP: ${error.message}`);
+
+        try {
+            const response = await axios.post(BACKUP_ENDPOINT, message);
+            logGreen(`✅ Enviado por HTTP con status ${response.status}`);
+        } catch (httpError) {
+            logRed(`❌ Falló el envío por HTTP también: ${httpError.message}`);
+            throw httpError;
+        }
     }
 }
+
