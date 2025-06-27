@@ -4,7 +4,7 @@ export function verifyParameters(body, requiredParams, userData = false) {
         params.push('companyId', 'userId', 'profile');
     }
 
-    const missingParams = params.filter(p => !body.hasOwnProperty(p));
+    const missingParams = params.filter(p => !Object.prototype.hasOwnProperty.call(body, p));
 
     if (missingParams.length > 0) {
         return `Faltan los siguientes parámetros: ${missingParams.join(', ')}`;

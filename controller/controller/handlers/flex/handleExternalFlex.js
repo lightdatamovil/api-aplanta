@@ -4,7 +4,7 @@ import {
   getCompanyByCode,
 } from "../../../../db.js";
 
-import mysql from "mysql";
+import mysql2 from "mysql2";
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
 import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
@@ -14,6 +14,7 @@ import { informe } from "../../functions/informe.js";
 import { logCyan, logYellow } from "../../../../src/funciones/logsCustom.js";
 import { assign } from "../../functions/assing.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
+import CustomException from "../../../../classes/custom_exception.js";
 
 /// Esta funcion busca las logisticas vinculadas
 /// Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
@@ -46,7 +47,11 @@ export async function handleExternalFlex(
   );
   logCyan("Me traigo las logisticas externas");
   if (logisticasExternas.length == 0) {
-    throw new Error("No se encontraron logísticas externas");
+    throw new CustomException({
+      title: "No se encontraron logísticas externas",
+      message: "No se encontraron logísticas externas",
+      stack: ''
+    });
   }
   /// Por cada logística externa
   for (const logistica of logisticasExternas) {
@@ -54,15 +59,13 @@ export async function handleExternalFlex(
     const externalLogisticId = logistica.did;
     const nombreFantasia = logistica.nombre_fantasia;
     const syncCode = logistica.codigoVinculacionLogE;
-    console.log(syncCode, "syncCode");
 
     const externalCompany = await getCompanyByCode(syncCode);
-    console.log(externalCompany, "llegammos");
     const externalCompanyId = externalCompany.did;
 
     /// Me conecto a la base de datos de la logística externa
     const dbConfigExt = getProdDbConfig(externalCompany);
-    const externalDbConnection = mysql.createConnection(dbConfigExt);
+    const externalDbConnection = mysql2.createConnection(dbConfigExt);
     externalDbConnection.connect();
 
     /// Busco el envío

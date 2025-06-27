@@ -1,6 +1,6 @@
 
 import { executeQuery } from "../../../db.js";
-import { logRed, logYellow } from "../../../src/funciones/logsCustom.js";
+import { logRed } from "../../../src/funciones/logsCustom.js";
 
 export async function checkIfExistLogisticAsDriverInExternalCompany(dbConnection, syncCode) {
     try {

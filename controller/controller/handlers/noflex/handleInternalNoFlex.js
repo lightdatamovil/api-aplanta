@@ -1,4 +1,4 @@
-import { logBlue, logCyan, logRed } from "../../../../src/funciones/logsCustom.js";
+import { logCyan, logRed } from "../../../../src/funciones/logsCustom.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
 import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";

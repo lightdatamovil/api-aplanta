@@ -1,6 +1,5 @@
 import redis from "redis";
 import dotenv from "dotenv";
-import mysql from "mysql";
 import { logRed, logYellow } from "./src/funciones/logsCustom.js";
 
 dotenv.config({ path: process.env.ENV_FILE || ".env" });
@@ -17,7 +16,7 @@ export const redisClient = redis.createClient({
   password: redisPassword,
 });
 
-redisClient.on("error", (err) => {
+redisClient.on("error", (error) => {
   logRed(`Error al conectar con Redis: ${error.stack}`);
 });
 
@@ -90,13 +89,9 @@ export async function getCompanyByCode(companyCode) {
         throw error;
       }
     }
-    console.log(`Buscando compañía con código: ${companyCode}`);
-    console.log(
-      `Lista de compañías cargadas: ${JSON.stringify(companiesList)}`
-    );
 
     for (const key in companiesList) {
-      if (companiesList.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(companiesList, key)) {
         const currentCompany = companiesList[key];
         if (String(currentCompany.codigo) === String(companyCode)) {
           company = currentCompany;

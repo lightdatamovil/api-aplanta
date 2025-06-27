@@ -1,5 +1,6 @@
+import CustomException from "../../../classes/custom_exception.js";
 import { executeQuery, getClientsByCompany, getDriversByCompany } from "../../../db.js";
-import { logCyan, logPurple, logRed, logYellow } from "../../../src/funciones/logsCustom.js";
+import { logCyan, logPurple, logRed } from "../../../src/funciones/logsCustom.js";
 const contadoresIngresados = {};
 
 export async function informe(dbConnection, companyId, clientId, userId, shipmentId) {
@@ -75,7 +76,11 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
         const companyDrivers = await getDriversByCompany(dbConnection, companyId);
 
         if (companyClients[clientId] === undefined) {
-            throw new Error("Cliente no encontrado");
+            throw new CustomException({
+                title: "Cliente no encontrado",
+                message: `No se encontró el cliente con ID: ${clientId}`,
+                stack: ''
+            });
         }
         logCyan("El cliente fue encontrado");
 
@@ -120,7 +125,6 @@ function obtenerIngresados(fecha, empresa, chofer) {
 }
 
 function limpiarContadores() {
-    console.log("🔄 Reiniciando contadores de envíos ingresados...");
     Object.keys(contadoresIngresados).forEach(clave => delete contadoresIngresados[clave]);
 }
 setInterval(limpiarContadores, 14 * 24 * 60 * 60 * 1000);
