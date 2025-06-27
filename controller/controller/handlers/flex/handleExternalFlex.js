@@ -11,7 +11,7 @@ import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentS
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
-import { logCyan, logYellow } from "../../../../src/funciones/logsCustom.js";
+import { logCyan } from "../../../../src/funciones/logsCustom.js";
 import { assign } from "../../functions/assing.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 import CustomException from "../../../../classes/custom_exception.js";
@@ -31,7 +31,6 @@ export async function handleExternalFlex(
   userId
 ) {
   const senderid = dataQr.sender_id;
-  logYellow(`El sender_id es: ${senderid}`);
   const shipmentId = dataQr.id;
   const codLocal = company.codigo;
   // Se llama logisticas y se toman de la tabla de clientes porque al vincularlas se crea un
@@ -43,7 +42,7 @@ export async function handleExternalFlex(
         `;
   const logisticasExternas = await executeQuery(
     dbConnection,
-    queryLogisticasExternas, [], true
+    queryLogisticasExternas, []
   );
   logCyan("Me traigo las logisticas externas");
   if (logisticasExternas.length == 0) {

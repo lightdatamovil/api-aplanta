@@ -1,6 +1,6 @@
 import { connect } from 'amqplib';
 import dotenv from 'dotenv';
-import { logGreen, logRed, logYellow } from '../../../src/funciones/logsCustom.js';
+import { logGreen, logRed } from '../../../src/funciones/logsCustom.js';
 import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
 import axios from 'axios';
 import CustomException from '../../../classes/custom_exception.js';
@@ -71,7 +71,6 @@ export async function sendToShipmentStateMicroService(
         if (sent) {
             logGreen('✅ Mensaje enviado correctamente al microservicio de estados');
         } else {
-            logYellow('⚠️ Mensaje no pudo encolarse (buffer lleno)');
             // Si querés forzar el fallback HTTP en este caso:
             throw new CustomException({
                 title: "Buffer lleno en RabbitMQ",
