@@ -1,7 +1,6 @@
-import os from "os";
 
 //const isLocal = os.hostname() != "asignaciones";
-const isLocal= true;
+const isLocal = true;
 export function logGreen(message) {
     if (isLocal) {
         console.log(`\x1b[32m%s\x1b[0m`, `✅ ${message}

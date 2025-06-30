@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { logGreen, logRed } from '../../../src/funciones/logsCustom.js';
 import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
 import axios from 'axios';
+import CustomException from '../../../classes/custom_exception.js';
 
 dotenv.config({ path: process.env.ENV_FILE || '.env' });
 
@@ -45,21 +46,21 @@ export async function sendToShipmentStateMicroService(
     latitud,
     longitud
 ) {
-    const message = {
-        didempresa: companyId,
-        didenvio: shipmentId,
-        estado: 1,
-        subestado: null,
-        estadoML: null,
-        fecha: formatFechaUTC3(),
-        quien: userId,
-        operacion: 'aplamta',
-        latitud,
-        longitud
-    };
     try {
         const ch = await getChannel();
 
+        const message = {
+            didempresa: companyId,
+            didenvio: shipmentId,
+            estado: 1,
+            subestado: null,
+            estadoML: null,
+            fecha: formatFechaUTC3(),
+            quien: userId,
+            operacion: 'colecta',
+            latitud,
+            longitud
+        };
 
         const sent = ch.sendToQueue(
             QUEUE_ESTADOS,
@@ -70,9 +71,12 @@ export async function sendToShipmentStateMicroService(
         if (sent) {
             logGreen('✅ Mensaje enviado correctamente al microservicio de estados');
         } else {
-            logYellow('⚠️ Mensaje no pudo encolarse (buffer lleno)');
             // Si querés forzar el fallback HTTP en este caso:
-            throw new Error('Buffer lleno en RabbitMQ');
+            throw new CustomException({
+                title: "Buffer lleno en RabbitMQ",
+                message: "No se pudo encolar el mensaje",
+                stack: ''
+            });
         }
     } catch (error) {
         logRed(`❌ Falló RabbitMQ, intentando enviar por HTTP: ${error.message}`);

@@ -3,47 +3,19 @@ import { handleInternalFlex } from "./controller/handlers/flex/handleInternalFle
 import { handleExternalFlex } from "./controller/handlers/flex/handleExternalFlex.js";
 import { handleExternalNoFlex } from "./controller/handlers/noflex/handleExternalNoFlex.js";
 import { handleInternalNoFlex } from "./controller/handlers/noflex/handleInternalNoFlex.js";
-import mysql from "mysql";
+import mysql2 from "mysql2";
 import { logCyan, logRed } from "../src/funciones/logsCustom.js";
-import axios from "axios";
-async function getShipmentIdFromQr(companyId, dataQr) {
-
-    try {
-        const payload = {
-            companyId: Number(companyId),
-            userId: 0,
-            profile: 0,
-            deviceId: "null",
-            brand: "null",
-            model: "null",
-            androidVersion: "null",
-            deviceFrom: "Autoasignado de colecta",
-            appVersion: "null",
-            dataQr: dataQr
-        };
-
-        const result = await axios.post('https://apimovil2.lightdata.app/api/qr/get-shipment-id', payload);
-        if (result.status == 200) {
-            return result.data.body;
-        } else {
-            logRed("Error al obtener el shipmentId");
-            throw new Error("Error al obtener el shipmentId");
-        }
-    } catch (error) {
-        logRed(`Error al obtener el shipmentId: ${error.stack}`);
-        throw error;
-    }
-}
+import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
 
 export async function aplanta(company, dataQr, userId) {
     const dbConfig = getProdDbConfig(company);
-    const dbConnection = mysql.createConnection(dbConfig);
+    const dbConnection = mysql2.createConnection(dbConfig);
     dbConnection.connect();
 
     try {
         let response;
 
-        if (company.did == 211 && !dataQr.hasOwnProperty("local") && !dataQr.hasOwnProperty("sender_id")) {
+        if (company.did == 211 && !Object.prototype.hasOwnProperty.call(dataQr, "local") && !Object.prototype.hasOwnProperty.call(dataQr, "sender_id")) {
             const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
             dataQr = {
                 local: "1",
@@ -52,7 +24,7 @@ export async function aplanta(company, dataQr, userId) {
                 cliente: 301
             }
         }
-        const isFlex = dataQr.hasOwnProperty("sender_id");
+        const isFlex = Object.prototype.hasOwnProperty.call(dataQr, "sender_id");
 
         if (isFlex) {
             logCyan("Es flex");

@@ -43,7 +43,6 @@ a_planta.post("/aplanta", async (req, res) => {
   } catch (error) {
     const endTime = performance.now();
     const tiempo = endTime - startTime;
-    console.log(company);
 
     crearLog(
       dbConnectionLocal,

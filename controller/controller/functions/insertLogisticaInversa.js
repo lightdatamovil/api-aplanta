@@ -3,10 +3,6 @@ import { executeQuery } from "../../../db.js";
 
 
 export async function insertEnviosLogisticaInversa(dbConnection, shipmentId, valor, userId) {
-
-
-
-
     const sqlInsertEnviosLogisticaInversa = `
         INSERT INTO envios_logisticainversa (didEnvio,didCampoLogistica,valor,quien) VALUES (?,?,?,?)
     `

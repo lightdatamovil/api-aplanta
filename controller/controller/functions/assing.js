@@ -1,5 +1,6 @@
 import axios from "axios";
 import { logGreen, logRed } from "../../../src/funciones/logsCustom.js";
+import CustomException from "../../../classes/custom_exception.js";
 
 export async function assign(companyId, userId, profile, dataQr, driverId) {
   const payload = {
@@ -25,10 +26,18 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
       logGreen("Asignado correctamente");
     } else {
       logRed("Error al asignar");
-      throw new Error("Error al asignar");
+      throw new CustomException({
+        title: "Error al asignar",
+        message: `Código de estado: ${result.status}`,
+        stack: result.data.stack || '',
+      });
     }
   } catch (error) {
     logRed(`Error al asignar: ${error.stack}`);
-    throw error;
+    throw new CustomException({
+      title: "Error al asignar",
+      message: `Código de estado: ${error.status}`,
+      stack: error.stack || '',
+    });
   }
 }
