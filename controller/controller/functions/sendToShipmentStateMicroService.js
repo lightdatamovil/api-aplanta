@@ -46,21 +46,21 @@ export async function sendToShipmentStateMicroService(
     latitud,
     longitud
 ) {
+    const message = {
+        didempresa: companyId,
+        didenvio: shipmentId,
+        estado: 1,
+        subestado: null,
+        estadoML: null,
+        fecha: formatFechaUTC3(),
+        quien: userId,
+        operacion: 'colecta',
+        latitud,
+        longitud
+    };
     try {
         const ch = await getChannel();
 
-        const message = {
-            didempresa: companyId,
-            didenvio: shipmentId,
-            estado: 1,
-            subestado: null,
-            estadoML: null,
-            fecha: formatFechaUTC3(),
-            quien: userId,
-            operacion: 'colecta',
-            latitud,
-            longitud
-        };
 
         const sent = ch.sendToQueue(
             QUEUE_ESTADOS,
