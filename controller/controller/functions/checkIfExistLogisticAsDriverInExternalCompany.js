@@ -4,8 +4,10 @@ import { logRed, logYellow } from "../../../src/funciones/logsCustom.js";
 
 export async function checkIfExistLogisticAsDriverInExternalCompany(dbConnection, syncCode) {
     try {
+        console.log(`checkIfExistLogisticAsDriverInExternalCompany: ${syncCode}`);
+
         const querySelectSistemUsuariosAccesos = 'SELECT usuario FROM sistema_usuarios_accesos WHERE codvinculacion = ?';
-        const chofer = await executeQuery(dbConnection, querySelectSistemUsuariosAccesos, [syncCode]);
+        const chofer = await executeQuery(dbConnection, querySelectSistemUsuariosAccesos, [syncCode], true);
 
         if (chofer.length == 0) {
             return;
