@@ -12,41 +12,52 @@ export async function aplanta(company, dataQr, userId) {
     const dbConnection = mysql2.createConnection(dbConfig);
     dbConnection.connect();
 
-    let response;
+    try {
 
-    if (company.did == 211 && !Object.prototype.hasOwnProperty.call(dataQr, "local") && !Object.prototype.hasOwnProperty.call(dataQr, "sender_id")) {
-        const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
-        dataQr = {
-            local: "1",
-            empresa: company.did,
-            did: shipmentId,
-            cliente: 301
+        let response;
+
+        if (company.did == 211 && !Object.prototype.hasOwnProperty.call(dataQr, "local") && !Object.prototype.hasOwnProperty.call(dataQr, "sender_id")) {
+            const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
+            dataQr = {
+                local: "1",
+                empresa: company.did,
+                did: shipmentId,
+                cliente: 301
+            }
         }
-    }
-    const isFlex = Object.prototype.hasOwnProperty.call(dataQr, "sender_id");
+        const isFlex = Object.prototype.hasOwnProperty.call(dataQr, "sender_id");
 
-    if (isFlex) {
-        logCyan("Es flex");
-        const account = await getAccountBySenderId(dbConnection, company.did, dataQr.sender_id);
+        if (isFlex) {
+            logCyan("Es flex");
+            const account = await getAccountBySenderId(dbConnection, company.did, dataQr.sender_id);
 
-        if (account) {
-            logCyan("Es interno");
-            response = await handleInternalFlex(dbConnection, company.did, userId, dataQr, account);
+            if (account) {
+                logCyan("Es interno");
+                response = await handleInternalFlex(dbConnection, company.did, userId, dataQr, account);
+            } else {
+                logCyan("Es externo");
+                response = await handleExternalFlex(dbConnection, company, dataQr, userId);
+            }
         } else {
-            logCyan("Es externo");
-            response = await handleExternalFlex(dbConnection, company, dataQr, userId);
+            logCyan("No es flex");
+            if (company.did == dataQr.empresa) {
+                logCyan("Es interno");
+                response = await handleInternalNoFlex(dbConnection, dataQr, company.did, userId);
+            } else {
+                logCyan("Es externo");
+                response = await handleExternalNoFlex(dbConnection, dataQr, company.did, userId);
+            }
         }
-    } else {
-        logCyan("No es flex");
-        if (company.did == dataQr.empresa) {
-            logCyan("Es interno");
-            response = await handleInternalNoFlex(dbConnection, dataQr, company.did, userId);
-        } else {
-            logCyan("Es externo");
-            response = await handleExternalNoFlex(dbConnection, dataQr, company.did, userId);
-        }
-    }
 
-    dbConnection.end();
-    return response;
+
+        return response;
+    }
+    catch (error) {
+        logRed("Error en colectar: ", error.message);
+        throw error;
+
+
+    } finally {
+        dbConnection.end();
+    };
 }
