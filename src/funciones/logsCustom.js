@@ -42,3 +42,10 @@ export function logCyan(message) {
 --------------------------------------------------`);
     }
 }
+export function logOrange(message) {
+    if (isLocal) {
+        // ANSI code 38;5;208 es un tono naranja
+        console.log(`\x1b[38;5;208m%s\x1b[0m`, `🟧 ${message}
+--------------------------------------------------`);
+    }
+}

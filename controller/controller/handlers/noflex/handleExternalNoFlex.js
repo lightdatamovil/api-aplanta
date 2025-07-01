@@ -6,7 +6,7 @@ import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.j
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
-import { logCyan, logRed } from "../../../../src/funciones/logsCustom.js";
+import { logCyan } from "../../../../src/funciones/logsCustom.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 
 /// Esta funcion se conecta a la base de datos de la empresa externa
@@ -17,114 +17,111 @@ import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInv
 /// Si es autoasignacion, asigno a la empresa interna
 /// Actualizo el estado del envio a colectado y envio el estado del envio en los microservicios
 export async function handleExternalNoFlex(dbConnection, dataQr, companyId, userId) {
-    try {
-        const shipmentIdFromDataQr = dataQr.did;
-        const clientIdFromDataQr = dataQr.cliente;
+    const shipmentIdFromDataQr = dataQr.did;
 
-        /// Busco la empresa externa
-        const externalCompany = await getCompanyById(dataQr.empresa);
+    const clientIdFromDataQr = dataQr.cliente;
 
-        /// Conecto a la base de datos de la empresa externa
-        const dbConfigExt = getProdDbConfig(externalCompany);
-        const externalDbConnection = mysql2.createConnection(dbConfigExt);
-        externalDbConnection.connect();
+    /// Busco la empresa externa
+    const externalCompany = await getCompanyById(dataQr.empresa);
 
-        /// Chequeo si el envio ya fue colectado, entregado o cancelado
-        const check = await checkearEstadoEnvio(externalDbConnection, shipmentIdFromDataQr);
-        if (check) {
-            externalDbConnection.end();
+    /// Conecto a la base de datos de la empresa externa
+    const dbConfigExt = getProdDbConfig(externalCompany);
+    const externalDbConnection = mysql2.createConnection(dbConfigExt);
+    externalDbConnection.connect();
 
-            return check;
-        }
-        logCyan("El envio no es colectado, entregado o cancelado");
+    /// Chequeo si el envio ya fue colectado, entregado o cancelado
+    const check = await checkearEstadoEnvio(externalDbConnection, shipmentIdFromDataQr);
+    if (check) {
+        externalDbConnection.end();
 
-        const companyClientList = await getClientsByCompany(externalDbConnection, externalCompany.did);
-        const client = companyClientList[clientIdFromDataQr];
+        return check;
+    }
+    logCyan("El envio no es colectado, entregado o cancelado");
 
-        const internalCompany = await getCompanyById(companyId);
+    const companyClientList = await getClientsByCompany(externalDbConnection, externalCompany.did);
+    const client = companyClientList[clientIdFromDataQr];
 
-        /// Busco el chofer que se crea en la vinculacion de logisticas
-        const driver = await checkIfExistLogisticAsDriverInExternalCompany(externalDbConnection, internalCompany.codigo);
+    const internalCompany = await getCompanyById(companyId);
 
-        if (!driver) {
-            externalDbConnection.end();
+    /// Busco el chofer que se crea en la vinculacion de logisticas
+    const driver = await checkIfExistLogisticAsDriverInExternalCompany(externalDbConnection, internalCompany.codigo);
 
-            return { success: false, message: "No se encontró chofer asignado" };
-        }
-        logCyan("Se encontró la logistica como chofer en la logistica externa");
+    if (!driver) {
+        externalDbConnection.end();
 
-        let internalShipmentId;
+        return { success: false, message: "No se encontró chofer asignado" };
+    }
+    logCyan("Se encontró la logistica como chofer en la logistica externa");
 
-        const consulta = 'SELECT didLocal FROM envios_exteriores WHERE didExterno = ?';
+    let internalShipmentId;
 
-        internalShipmentId = await executeQuery(dbConnection, consulta, [shipmentIdFromDataQr]);
+    const consulta = 'SELECT didLocal FROM envios_exteriores WHERE didExterno = ?';
 
-        if (internalShipmentId.length > 0 && internalShipmentId[0]?.didLocal) {
-            internalShipmentId = internalShipmentId[0].didLocal;
-            logCyan("Se encontró el didLocal en envios_exteriores");
-        } else {
-            internalShipmentId = await insertEnvios(
-                dbConnection,
-                companyId,
-                client.did,
-                0,
-                { id: "", sender_id: "" },
-                0,
-                1,
-                driver
-            );
-            logCyan("Inserté en envios");
-        }
+    internalShipmentId = await executeQuery(dbConnection, consulta, [shipmentIdFromDataQr]);
 
-        /// Inserto en envios exteriores en la empresa interna
-        await insertEnviosExteriores(
+    if (internalShipmentId.length > 0 && internalShipmentId[0]?.didLocal) {
+        internalShipmentId = internalShipmentId[0].didLocal;
+        logCyan("Se encontró el didLocal en envios_exteriores");
+    } else {
+        internalShipmentId = await insertEnvios(
+            dbConnection,
+            companyId,
+            client.did,
+            0,
+            { id: "", sender_id: "" },
+            0,
+            1,
+            driver
+        );
+        logCyan("Inserté en envios");
+    }
+
+    /// Inserto en envios exteriores en la empresa interna
+    await insertEnviosExteriores(
+        dbConnection,
+        internalShipmentId,
+        shipmentIdFromDataQr,
+        0,
+        client.nombre || "",
+        externalCompany.did,
+    );
+    logCyan("Inserté en envios exteriores");
+
+
+    const check2 = "SELECT valor FROM envios_logisticainversa WHERE didEnvio = ?";
+
+    const rows = await executeQuery(
+        externalDbConnection,
+        check2,
+        [shipmentIdFromDataQr],
+        true
+    );
+    if (rows.length > 0) {
+        await insertEnviosLogisticaInversa(
             dbConnection,
             internalShipmentId,
-            shipmentIdFromDataQr,
-            0,
-            client.nombre || "",
-            externalCompany.did,
+            rows[0].valor,
+            userId,
         );
-        logCyan("Inserté en envios exteriores");
+    }
 
+    await sendToShipmentStateMicroService(companyId, userId, internalShipmentId);
+    logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios internos");
 
-        const check2 = "SELECT valor FROM envios_logisticainversa WHERE didEnvio = ?";
+    await sendToShipmentStateMicroService(dataQr.empresa, driver, shipmentIdFromDataQr);
+    logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios externos");
 
-        const rows = await executeQuery(
-            externalDbConnection,
-            check2,
-            [shipmentIdFromDataQr],
-            true
-        );
-        if (rows.length > 0) {
-            await insertEnviosLogisticaInversa(
-                dbConnection,
-                internalShipmentId,
-                rows[0].valor,
-                userId,
-            );
-        }
-
-        await sendToShipmentStateMicroService(companyId, userId, internalShipmentId);
-        logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios internos");
-
-        await sendToShipmentStateMicroService(dataQr.empresa, driver, shipmentIdFromDataQr);
-        logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios externos");
-
-        const queryClient = `
+    const queryClient = `
             SELECT did 
             FROM clientes WHERE codigoVinculacionLogE = ?
         `;
 
-        const externalClient = await executeQuery(dbConnection, queryClient, [externalCompany.codigo]);
+    const externalClient = await executeQuery(dbConnection, queryClient, [externalCompany.codigo]);
 
-        const body = await informe(dbConnection, companyId, externalClient[0].did, userId, internalShipmentId);
+    const body = await informe(dbConnection, companyId, externalClient[0].did, userId, internalShipmentId);
 
-        externalDbConnection.end();
+    externalDbConnection.end();
 
-        return { success: true, message: "Paquete puesto a planta  con exito", body: body };
-    } catch (error) {
-        logRed(`Error en handleExternalNoFlex: ${error.stack}`);
-        throw error;
-    }
+    return { success: true, message: "Paquete puesto a planta  con exito", body: body };
+
 }

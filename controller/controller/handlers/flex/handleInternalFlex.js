@@ -5,6 +5,7 @@ import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentS
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
 import { logCyan } from "../../../../src/funciones/logsCustom.js";
+import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
 
 /// Busco el envio
 /// Si no existe, lo inserto y tomo el did
@@ -20,6 +21,7 @@ export async function handleInternalFlex(
 ) {
   const senderId = dataQr.sender_id;
   const mlShipmentId = dataQr.id;
+  await checkIfFulfillment(dbConnection, mlShipmentId);
 
   let shipmentId;
 
@@ -60,6 +62,7 @@ export async function handleInternalFlex(
   const row = resultBuscarEnvio[0];
 
   shipmentId = row.did;
+
 
   /// Checkeo si el envío ya fue colectado cancelado o entregado
   const check = await checkearEstadoEnvio(dbConnection, shipmentId);

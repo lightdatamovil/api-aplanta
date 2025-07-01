@@ -15,6 +15,7 @@ import { logCyan } from "../../../../src/funciones/logsCustom.js";
 import { assign } from "../../functions/assing.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 import CustomException from "../../../../classes/custom_exception.js";
+import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
 
 /// Esta funcion busca las logisticas vinculadas
 /// Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
@@ -31,7 +32,8 @@ export async function handleExternalFlex(
   userId
 ) {
   const senderid = dataQr.sender_id;
-  const shipmentId = dataQr.id;
+  const mlShipmentId = dataQr.id;
+  await checkIfFulfillment(dbConnection, mlShipmentId);
   const codLocal = company.codigo;
   // Se llama logisticas y se toman de la tabla de clientes porque al vincularlas se crea un
   // cliente con el código de vinculación
@@ -77,7 +79,7 @@ export async function handleExternalFlex(
     let rowsEnvios = await executeQuery(
       externalDbConnection,
       sqlEnvios,
-      [shipmentId, senderid],
+      [mlShipmentId, senderid],
       true
     );
 
@@ -228,7 +230,7 @@ export async function handleExternalFlex(
 
     logCyan("Voy a asignar el envio en la logistica interna");
     await assign(externalCompanyId, userId, 0, dqrext, userId);
-    const body = await informe(
+    const resultInforme = await informe(
       dbConnection,
       company.did,
       userId,
@@ -238,7 +240,7 @@ export async function handleExternalFlex(
     return {
       success: true,
       message: "Paquete puesto a planta  correctamente - FLEX",
-      body: body,
+      body: resultInforme,
     };
   }
 }

@@ -1,13 +1,13 @@
 import CustomException from "../../../classes/custom_exception.js";
 import { executeQuery, getClientsByCompany, getDriversByCompany } from "../../../db.js";
-import { logCyan, logPurple, logRed } from "../../../src/funciones/logsCustom.js";
+import { logCyan, logPurple } from "../../../src/funciones/logsCustom.js";
 const contadoresIngresados = {};
 
 export async function informe(dbConnection, companyId, clientId, userId, shipmentId) {
     const hoy = new Date().toISOString().split('T')[0];
 
-    try {
-        const queryIngresadosHoy = `
+
+    const queryIngresadosHoy = `
             SELECT eh.estado 
             FROM envios_historial AS eh
             JOIN envios AS e 
@@ -17,39 +17,39 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
             AND eh.estado IN (7, 0, 1);
         `;
 
-        const startTime1 = performance.now();
-        const resultIngresadosHoy = await executeQuery(dbConnection, queryIngresadosHoy, [clientId, `${hoy} 00:00:00`, `${hoy} 23:59:59`]);
-        let endTime1 = performance.now();
+    const startTime1 = performance.now();
+    const resultIngresadosHoy = await executeQuery(dbConnection, queryIngresadosHoy, [clientId, `${hoy} 00:00:00`, `${hoy} 23:59:59`]);
+    let endTime1 = performance.now();
 
-        logPurple(`Tiempo de ejecución1: ${endTime1 - startTime1} ms`);
-        let amountOfAPlanta = 0;
-        let amountOfARetirarAndRetirados = 0;
+    logPurple(`Tiempo de ejecución1: ${endTime1 - startTime1} ms`);
+    let amountOfAPlanta = 0;
+    let amountOfARetirarAndRetirados = 0;
 
-        resultIngresadosHoy.forEach(row => {
-            if (row.estado === 1) {
-                amountOfARetirarAndRetirados++;
-            } else {
-                amountOfAPlanta++;
-            }
-        });
-
-
-        // Función para incrementar el contador
-
-        // En algún lugar donde se registre un nuevo ingreso:
-        incrementarIngresados(hoy, companyId, userId);
-
-        // Reemplazo de la consulta SQL con la variable local
-        const ingresadosHoyChofer = obtenerIngresados(hoy, companyId, userId);
-        logPurple(`Ingresados hoy por chofer: ${ingresadosHoyChofer}`);
+    resultIngresadosHoy.forEach(row => {
+        if (row.estado === 1) {
+            amountOfARetirarAndRetirados++;
+        } else {
+            amountOfAPlanta++;
+        }
+    });
 
 
-        let choferasignado;
-        let zonaentrega;
-        let sucursal;
+    // Función para incrementar el contador
 
-        if (shipmentId > 0) {
-            const queryEnvios = `
+    // En algún lugar donde se registre un nuevo ingreso:
+    incrementarIngresados(hoy, companyId, userId);
+
+    // Reemplazo de la consulta SQL con la variable local
+    const ingresadosHoyChofer = obtenerIngresados(hoy, companyId, userId);
+    logPurple(`Ingresados hoy por chofer: ${ingresadosHoyChofer}`);
+
+
+    let choferasignado;
+    let zonaentrega;
+    let sucursal;
+
+    if (shipmentId > 0) {
+        const queryEnvios = `
                 SELECT ez.nombre AS zona, e.choferAsignado, sd.nombre AS sucursal
                 FROM envios AS e 
                 LEFT JOIN envios_zonas AS ez 
@@ -59,54 +59,49 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
                 WHERE e.superado=0 AND e.elim=0 AND e.did = ?;
             `;
 
-            const startTime3 = performance.now();
-            const resultEnvios = await executeQuery(dbConnection, queryEnvios, [shipmentId]);
-            let endTime3 = performance.now();
-            logPurple(`Tiempo de ejecución3: ${endTime3 - startTime3} ms`);
+        const startTime3 = performance.now();
+        const resultEnvios = await executeQuery(dbConnection, queryEnvios, [shipmentId]);
+        let endTime3 = performance.now();
+        logPurple(`Tiempo de ejecución3: ${endTime3 - startTime3} ms`);
 
-            if (resultEnvios.length > 0) {
-                choferasignado = resultEnvios[0].choferAsignado || 'Sin asignar';
-                zonaentrega = resultEnvios[0].zona || "Sin información";
-                sucursal = resultEnvios[0].sucursal || "Sin información";
-            }
+        if (resultEnvios.length > 0) {
+            choferasignado = resultEnvios[0].choferAsignado || 'Sin asignar';
+            zonaentrega = resultEnvios[0].zona || "Sin información";
+            sucursal = resultEnvios[0].sucursal || "Sin información";
         }
-
-        const companyClients = await getClientsByCompany(dbConnection, companyId);
-
-        const companyDrivers = await getDriversByCompany(dbConnection, companyId);
-
-        if (companyClients[clientId] === undefined) {
-            throw new CustomException({
-                title: "Cliente no encontrado",
-                message: `No se encontró el cliente con ID: ${clientId}`,
-                stack: ''
-            });
-        }
-        logCyan("El cliente fue encontrado");
-
-        const chofer = companyDrivers[choferasignado]?.nombre || "Sin información";
-        if (!companyDrivers[choferasignado]) {
-            logCyan("El chofer no fue encontrado");
-        } else {
-            logCyan("El chofer fue encontrado");
-        }
-
-        logCyan("Se generó el informe");
-
-        return {
-            cliente: `${companyClients[clientId]?.nombre || 'Sin información'}`,
-            aingresarhoy: amountOfAPlanta,
-            ingresadoshot: amountOfARetirarAndRetirados,
-            ingresadosahora: ingresadosHoyChofer,
-            chofer,
-            zonaentrega,
-            sucursal
-        };
-
-    } catch (error) {
-        logRed(`Error en informe: ${error.stack}`);
-        throw error;
     }
+
+    const companyClients = await getClientsByCompany(dbConnection, companyId);
+
+    const companyDrivers = await getDriversByCompany(dbConnection, companyId);
+
+    if (companyClients[clientId] === undefined) {
+        throw new CustomException({
+            title: "Cliente no encontrado",
+            message: `No se encontró el cliente con ID: ${clientId}`,
+            stack: ''
+        });
+    }
+    logCyan("El cliente fue encontrado");
+
+    const chofer = companyDrivers[choferasignado]?.nombre || "Sin información";
+    if (!companyDrivers[choferasignado]) {
+        logCyan("El chofer no fue encontrado");
+    } else {
+        logCyan("El chofer fue encontrado");
+    }
+
+    logCyan("Se generó el informe");
+
+    return {
+        cliente: `${companyClients[clientId]?.nombre || 'Sin información'}`,
+        aingresarhoy: amountOfAPlanta,
+        ingresadoshot: amountOfARetirarAndRetirados,
+        ingresadosahora: ingresadosHoyChofer,
+        chofer,
+        zonaentrega,
+        sucursal
+    };
 }
 
 
