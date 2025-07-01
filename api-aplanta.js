@@ -12,7 +12,7 @@ app.use(urlencoded({ limit: '50mb', extended: true }));
 app.use(json());
 app.use(cors());
 
-const PORT = process.env.PORT || 13000;
+const PORT = process.env.PORT;
 
 app.use("/api", a_planta)
 app.use("/client", clear)

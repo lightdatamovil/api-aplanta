@@ -5,10 +5,22 @@ import mysql2 from "mysql2";
 
 dotenv.config({ path: process.env.ENV_FILE || ".env" });
 
+/// Redis para obtener las empresas
 const redisHost = process.env.REDIS_HOST;
 const redisPort = process.env.REDIS_PORT;
 const redisPassword = process.env.REDIS_PASSWORD;
 
+/// Base de datos de aplanta
+const aplantaDBHost = process.env.APLANTA_DB_HOST;
+const aplantaDBPort = process.env.APLANTA_DB_PORT;
+
+/// Usuario y contraseña para los logs de la base de datos de aplanta
+const aplantaDbUserForLogs = process.env.APLANTA_DB_USER_FOR_LOGS;
+const aplantaDbPasswordForLogs = process.env.APLANTA_DB_PASSWORD_FOR_LOGS;
+const aplantaDbNameForLogs = process.env.APLANTA_DB_NAME_FOR_LOGS;
+// Produccion
+const hostProductionDb = process.env.PRODUCTION_DB_HOST;
+const portProductionDb = process.env.PRODUCTION_DB_PORT;
 export const redisClient = redis.createClient({
   socket: {
     host: redisHost,
@@ -28,19 +40,20 @@ let driverList = {};
 
 export function getProdDbConfig(company) {
   return {
-    host: "bhsmysql1.lightdata.com.ar",
+    host: hostProductionDb,
     user: company.dbuser,
     password: company.dbpass,
     database: company.dbname,
+    port: portProductionDb,
   };
 }
 
 export const poolLocal = mysql2.createPool({
-  host: "149.56.182.49",
-  user: "ulogs",
-  password: "aplanta2025*",
-  database: "data",
-  port: 44345,
+  host: aplantaDBHost,
+  user: aplantaDbUserForLogs,
+  password: aplantaDbPasswordForLogs,
+  database: aplantaDbNameForLogs,
+  port: aplantaDBPort,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
