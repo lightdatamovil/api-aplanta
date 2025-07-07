@@ -53,7 +53,7 @@ export async function aplanta(company, dataQr, userId) {
         return response;
     }
     catch (error) {
-        logRed("Error en colectar: ", error.message);
+        logRed(`Error en colectar: ${error.message}`);
         throw error;
 
 
