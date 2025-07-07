@@ -4,7 +4,7 @@ import { handleExternalFlex } from "./controller/handlers/flex/handleExternalFle
 import { handleExternalNoFlex } from "./controller/handlers/noflex/handleExternalNoFlex.js";
 import { handleInternalNoFlex } from "./controller/handlers/noflex/handleInternalNoFlex.js";
 import mysql2 from "mysql2";
-import { logCyan } from "../src/funciones/logsCustom.js";
+import { logCyan, logRed } from "../src/funciones/logsCustom.js";
 import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
 
 export async function aplanta(company, dataQr, userId) {
