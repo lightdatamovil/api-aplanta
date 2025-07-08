@@ -17,9 +17,9 @@ export async function handleInternalFlex(
   companyId,
   userId,
   dataQr,
-  account
+  account,
+  senderId
 ) {
-  const senderId = dataQr.sender_id;
   const mlShipmentId = dataQr.id;
   await checkIfFulfillment(dbConnection, mlShipmentId);
 
