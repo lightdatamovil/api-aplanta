@@ -52,6 +52,25 @@ export async function aplanta(company, dataQr, userId) {
                 response = await handleInternalFlex(dbConnection, company.did, userId, dataQr, account, senderId);
             }
 
+            if (!account && company.did == 144) {
+                logCyan("Es interno (por verificación extra de empresa 144)");
+                const queryCheck = `
+                SELECT did
+                FROM envios
+                WHERE ml_vendedor_id = ?
+                AND superado = 0
+                AND elim = 0
+                LIMIT 1
+                `;
+                const resultCheck = await executeQuery(dbConnection, queryCheck, [dataQr.sender_id]);
+
+                if (resultCheck.length > 0) {
+                    senderId = dataQr.sender_id;
+                    logCyan("Es interno (por verificación extra de empresa 144)");
+                    response = await handleInternalFlex(dbConnection, company.did, userId, dataQr, account, dataQr.sender_id);
+                }
+            }
+
 
 
             else {
@@ -73,7 +92,7 @@ export async function aplanta(company, dataQr, userId) {
         return response;
     }
     catch (error) {
-        logRed(`Error en colectar: ${error.message}`);
+        logRed(`Error en aplanta: ${error.message}`);
         throw error;
 
 
