@@ -5,7 +5,9 @@ const contadoresIngresados = {};
 
 export async function informe(dbConnection, companyId, clientId, userId, shipmentId) {
     const hoy = new Date().toISOString().split('T')[0];
-
+    if (!clientId) {
+        clientId = 0;
+    }
 
     const queryIngresadosHoy = `
             SELECT eh.estado 
