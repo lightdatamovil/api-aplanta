@@ -91,6 +91,21 @@ export async function handleInternalFlex(
     "Actualice el estado del envio y lo envie al microservicio de estados"
   );
 
+  if (companyId == 144) {
+    const body = await informe(
+      dbConnection,
+      companyId,
+      didCLiente,
+      userId,
+      shipmentId
+    );
+    return {
+      success: true,
+      message: "Paquete insertado y puesto a planta  - FLEX",
+      body: body,
+    };
+
+  }
   const body = await informe(
     dbConnection,
     companyId,
