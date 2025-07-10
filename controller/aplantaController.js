@@ -1,4 +1,4 @@
-import { executeQuery, getAccountBySenderId, getProdDbConfig } from "../db.js";
+import { getAccountBySenderId, getProdDbConfig } from "../db.js";
 import { handleInternalFlex } from "./controller/handlers/flex/handleInternalFlex.js";
 import { handleExternalFlex } from "./controller/handlers/flex/handleExternalFlex.js";
 import { handleExternalNoFlex } from "./controller/handlers/noflex/handleExternalNoFlex.js";
@@ -25,68 +25,15 @@ export async function aplanta(company, dataQr, userId) {
                 cliente: 301
             }
         }
-        const isCollectShipmentML = Object.prototype.hasOwnProperty.call(dataQr, "t");
-        /// Me fijo si es flex o no
-        const isFlex = Object.prototype.hasOwnProperty.call(dataQr, "sender_id") || isCollectShipmentML;
+        const isFlex = Object.prototype.hasOwnProperty.call(dataQr, "sender_id");
 
         if (isFlex) {
             logCyan("Es flex");
-            /// Busco la cuenta del cliente
-            let account = null;
-            let senderId = null;
-            if (isCollectShipmentML) {
-                //! Esto quiere decir que es un envio de colecta de ML
-                const querySeller = `SELECT ml_vendedor_id FROM envios WHERE ml_shipment_id = ? AND flex = 1 AND superado=0 AND elim=0`;
-                const result = await executeQuery(dbConnection, querySeller, [dataQr.id]);
-
-                senderId = result[0].ml_vendedor_id;
-                account = await getAccountBySenderId(dbConnection, company.did, senderId);
-                logCyan(JSON.stringify(account));
-            } else {
-                account = await getAccountBySenderId(dbConnection, company.did, dataQr.sender_id);
-                senderId = dataQr.sender_id;
-            }
+            const account = await getAccountBySenderId(dbConnection, company.did, dataQr.sender_id);
 
             if (account) {
                 logCyan("Es interno");
-                response = await handleInternalFlex(dbConnection, company.did, userId, dataQr, account, senderId);
-            }
-            if (!account && company.did == 144) {
-                logCyan("Es interno (por verificación extra de empresa 144)");
-                const queryCheck = `
-                SELECT did
-                FROM envios
-                WHERE ml_vendedor_id = ?
-                AND superado = 0
-                AND elim = 0
-                LIMIT 1
-                `;
-                const resultCheck = await executeQuery(dbConnection, queryCheck, [dataQr.sender_id]);
-
-                if (resultCheck.length > 0) {
-                    senderId = dataQr.sender_id;
-                    logCyan("Es interno (por verificación extra de empresa 144)");
-                    response = await handleInternalFlex(dbConnection, company.did, userId, dataQr, account, senderId);
-                }
-            }
-
-            if (!account && company.did == 144) {
-                logCyan("Es interno (por verificación extra de empresa 144)");
-                const queryCheck = `
-                SELECT did
-                FROM envios
-                WHERE ml_vendedor_id = ?
-                AND superado = 0
-                AND elim = 0
-                LIMIT 1
-                `;
-                const resultCheck = await executeQuery(dbConnection, queryCheck, [dataQr.sender_id]);
-
-                if (resultCheck.length > 0) {
-                    senderId = dataQr.sender_id;
-                    logCyan("Es interno (por verificación extra de empresa 144)");
-                    response = await handleInternalFlex(dbConnection, company.did, userId, profile, dataQr, autoAssign, account, latitude, longitude, senderId);
-                }
+                response = await handleInternalFlex(dbConnection, company.did, userId, dataQr, account);
             } else {
                 logCyan("Es externo");
                 response = await handleExternalFlex(dbConnection, company, dataQr, userId);
