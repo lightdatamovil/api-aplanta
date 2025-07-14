@@ -6,6 +6,7 @@ import { handleInternalNoFlex } from "./controller/handlers/noflex/handleInterna
 import mysql2 from "mysql2";
 import { logCyan, logRed } from "../src/funciones/logsCustom.js";
 import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
+import { parseIfJson } from "../src/funciones/isValidJson.js";
 
 export async function aplanta(company, dataQr, userId) {
     const dbConfig = getProdDbConfig(company);
@@ -16,14 +17,15 @@ export async function aplanta(company, dataQr, userId) {
 
         let response;
 
-        if (company.did == 211 && !Object.prototype.hasOwnProperty.call(dataQr, "local") && !Object.prototype.hasOwnProperty.call(dataQr, "sender_id")) {
+        dataQr = parseIfJson(dataQr);
+        if ((company.did == 211 || company.did == 20) && !Object.prototype.hasOwnProperty.call(dataQr, "local") && !Object.prototype.hasOwnProperty.call(dataQr, "sender_id")) {
             const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
             dataQr = {
                 local: "1",
                 empresa: company.did,
                 did: shipmentId,
-                cliente: 301
-            }
+                cliente: company.did == 20 ? 215 : 301,
+            };
         }
         const isCollectShipmentML = Object.prototype.hasOwnProperty.call(dataQr, "t");
         /// Me fijo si es flex o no

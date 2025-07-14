@@ -4,6 +4,7 @@ import { logGreen, logRed } from '../../../src/funciones/logsCustom.js';
 import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
 import axios from 'axios';
 import CustomException from '../../../classes/custom_exception.js';
+import { generarTokenFechaHoy } from '../../../src/funciones/generarTokenFechaHoy.js';
 
 dotenv.config({ path: process.env.ENV_FILE || '.env' });
 
@@ -56,9 +57,13 @@ export async function sendToShipmentStateMicroService(
         quien: userId,
         operacion: 'colecta',
         latitud,
-        longitud
+        longitud,
+        tkn: generarTokenFechaHoy(),
     };
     try {
+        if (process.env.LOCAL == 'true') {
+            throw new Error();
+        }
         const ch = await getChannel();
 
 
@@ -90,4 +95,3 @@ export async function sendToShipmentStateMicroService(
         }
     }
 }
-

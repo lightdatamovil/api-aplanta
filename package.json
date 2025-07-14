@@ -3,6 +3,7 @@
     "amqplib": "^0.10.5",
     "axios": "^1.10.0",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "mysql2": "^3.12.0",
@@ -14,6 +15,9 @@
   "main": "db.js",
   "keywords": [],
   "author": "",
+  "scripts": {
+    "dev": "node --watch api-aplanta.js"
+  },
   "license": "ISC",
   "description": "",
   "devDependencies": {
