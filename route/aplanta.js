@@ -2,8 +2,9 @@ import { Router } from "express";
 import { verifyParameters } from "../src/funciones/verifyParameters.js";
 import { getCompanyById } from "../db.js";
 import { aplanta } from "../controller/aplantaController.js";
-import { logPurple } from "../src/funciones/logsCustom.js";
+import { logPurple, logRed } from "../src/funciones/logsCustom.js";
 import { crearLog } from "../src/funciones/crear_log.js";
+import CustomException from "../classes/custom_exception.js";
 
 const a_planta = Router();
 
@@ -24,15 +25,21 @@ a_planta.post("/aplanta", async (req, res) => {
     const endTime = performance.now();
     const tiempo = endTime - startTime;
     crearLog(company.did, userId, body.profile, body, tiempo, result, "api", true);
-    logPurple(`Tiempo de ejecución: ${endTime - startTime} ms`);
     res.status(200).json(result);
   } catch (error) {
-    const endTime = performance.now();
-    const tiempo = endTime - startTime;
+    if (error instanceof CustomException) {
+      logRed(`Error 400 en aplanta: ${JSON.stringify(error)} `);
+      crearLog(companyId, userId, profile, body, performance.now() - startTime, JSON.stringify(error), "api", false);
+      res.status(400).json(error);
+    } else {
+      logRed(`Error 500 en aplanta: ${JSON.stringify(error)} `);
+      crearLog(companyId, userId, profile, body, performance.now() - startTime, JSON.stringify(error.message), "api", false);
+      res.status(500).json({ title: 'Error interno del servidor', message: 'Unhandled Error', stack: error.stack });
+    }
 
-    crearLog(company.did, userId, body.profile, body, tiempo, error, "api", true);
-    logPurple(`Tiempo de ejecución: ${endTime - startTime} ms`);
-    res.status(500).json({ message: error.stack });
+  } finally {
+
+    logPurple(`Tiempo de ejecución: ${performance.now() - startTime} ms`);
   }
 });
 

@@ -6,6 +6,6 @@ export async function crearLog(empresa, usuario, perfil, body, tiempo, resultado
 
     const values = [empresa, usuario, perfil, JSON.stringify(body), tiempo, JSON.stringify(resultado), metodo, exito];
 
-    await executeQueryFromPool(sqlLog, values);
+    await executeQueryFromPool(sqlLog, values, true);
     logGreen(`Log creado: ${JSON.stringify(values)}`);
 }
