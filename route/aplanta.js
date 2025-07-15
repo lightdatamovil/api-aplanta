@@ -24,7 +24,7 @@ a_planta.post("/aplanta", async (req, res) => {
     const result = await aplanta(company, dataQr, userId, profile, autoAssign);
     const endTime = performance.now();
     const tiempo = endTime - startTime;
-    crearLog(company.did, userId, body.profile, body, tiempo, result, "api", true);
+    crearLog(companyId, userId, profile, body, tiempo, result, "api", true);
     res.status(200).json(result);
   } catch (error) {
     if (error instanceof CustomException) {
@@ -36,9 +36,7 @@ a_planta.post("/aplanta", async (req, res) => {
       crearLog(companyId, userId, profile, body, performance.now() - startTime, JSON.stringify(error.message), "api", false);
       res.status(500).json({ title: 'Error interno del servidor', message: 'Unhandled Error', stack: error.stack });
     }
-
   } finally {
-
     logPurple(`Tiempo de ejecución: ${performance.now() - startTime} ms`);
   }
 });
