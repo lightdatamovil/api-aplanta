@@ -8,6 +8,7 @@ import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/c
 import { informe } from "../../functions/informe.js";
 import { logCyan } from "../../../../src/funciones/logsCustom.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
+import { assign } from "../../functions/assing.js";
 
 /// Esta funcion se conecta a la base de datos de la empresa externa
 /// Checkea si el envio ya fue colectado, entregado o cancelado
@@ -59,6 +60,11 @@ export async function handleExternalNoFlex(dbConnection, dataQr, companyId, user
 
     internalShipmentId = await executeQuery(dbConnection, consulta, [shipmentIdFromDataQr]);
 
+    const queryClient = `
+            SELECT did 
+            FROM clientes WHERE codigoVinculacionLogE = ?
+        `;
+    const externalClient = await executeQuery(dbConnection, queryClient, [externalCompany.codigo]);
     if (internalShipmentId.length > 0 && internalShipmentId[0]?.didLocal) {
         internalShipmentId = internalShipmentId[0].didLocal;
         logCyan("Se encontró el didLocal en envios_exteriores");
@@ -66,7 +72,7 @@ export async function handleExternalNoFlex(dbConnection, dataQr, companyId, user
         internalShipmentId = await insertEnvios(
             dbConnection,
             companyId,
-            client.did,
+            externalClient[0].did,
             0,
             { id: "", sender_id: "" },
             0,
@@ -111,17 +117,11 @@ export async function handleExternalNoFlex(dbConnection, dataQr, companyId, user
     await sendToShipmentStateMicroService(dataQr.empresa, driver, shipmentIdFromDataQr);
     logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios externos");
 
-    const queryClient = `
-            SELECT did 
-            FROM clientes WHERE codigoVinculacionLogE = ?
-        `;
-
-    const externalClient = await executeQuery(dbConnection, queryClient, [externalCompany.codigo]);
-
+    logCyan("Voy a asignar el envio en la logistica interna");
+    await assign(externalCompany.did, userId, 3, dataQr, driver);
     const body = await informe(dbConnection, companyId, externalClient[0].did, userId, internalShipmentId);
 
     externalDbConnection.end();
 
     return { success: true, message: "Paquete puesto a planta  con exito", body: body };
-
 }

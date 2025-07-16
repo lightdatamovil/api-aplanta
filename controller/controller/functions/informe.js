@@ -19,11 +19,8 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
             AND eh.estado IN (7, 0, 1);
         `;
 
-    const startTime1 = performance.now();
     const resultIngresadosHoy = await executeQuery(dbConnection, queryIngresadosHoy, [clientId, `${hoy} 00:00:00`, `${hoy} 23:59:59`]);
-    let endTime1 = performance.now();
 
-    logPurple(`Tiempo de ejecución1: ${endTime1 - startTime1} ms`);
     let amountOfAPlanta = 0;
     let amountOfARetirarAndRetirados = 0;
 
@@ -61,10 +58,7 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
                 WHERE e.superado=0 AND e.elim=0 AND e.did = ?;
             `;
 
-        const startTime3 = performance.now();
         const resultEnvios = await executeQuery(dbConnection, queryEnvios, [shipmentId]);
-        let endTime3 = performance.now();
-        logPurple(`Tiempo de ejecución3: ${endTime3 - startTime3} ms`);
 
         if (resultEnvios.length > 0) {
             choferasignado = resultEnvios[0].choferAsignado || 'Sin asignar';
