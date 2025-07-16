@@ -2,6 +2,7 @@ import redis from "redis";
 import dotenv from "dotenv";
 import { logRed, logYellow } from "./src/funciones/logsCustom.js";
 import mysql2 from "mysql2";
+import CustomException from "./classes/custom_exception.js";
 
 dotenv.config({ path: process.env.ENV_FILE || ".env" });
 
@@ -96,7 +97,13 @@ export async function getCompanyByCode(companyCode) {
       }
     }
   }
-
+  if (company === undefined) {
+    throw new CustomException({
+      title: "Empresa no encontrada",
+      message: `No se encontró la empresa con el código: "${companyCode}"`,
+      stack: ''
+    });
+  }
   return company;
 }
 
