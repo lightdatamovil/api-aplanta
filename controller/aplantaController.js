@@ -83,9 +83,6 @@ export async function aplanta(req) {
                 }
             }
 
-
-
-
             else {
                 logCyan("Es externo");
                 response = await handleExternalFlex(dbConnection, company, dataQr, userId);
@@ -106,7 +103,6 @@ export async function aplanta(req) {
     }
     catch (error) {
         throw error;
-
     } finally {
         if (dbConnection) dbConnection.end();
     };

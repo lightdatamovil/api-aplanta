@@ -14,7 +14,7 @@ a_planta.post("/aplanta", async (req, res) => {
   if (!verificarTodo(req, res, [], requiredBodyFields)) return;
   try {
     const result = await aplanta(req);
-    res.status(Status.ok).json({ body: result, message: "paquete a planta correctamente" });
+    res.status(Status.ok).json(result);
   } catch (err) {
     return handleError(req, res, err);
   } finally {
