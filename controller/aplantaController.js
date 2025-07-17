@@ -1,4 +1,4 @@
-import { executeQuery, getAccountBySenderId, getProdDbConfig } from "../db.js";
+import { executeQuery, getAccountBySenderId, getCompanyById, getProdDbConfig } from "../db.js";
 import { handleInternalFlex } from "./controller/handlers/flex/handleInternalFlex.js";
 import { handleExternalFlex } from "./controller/handlers/flex/handleExternalFlex.js";
 import { handleExternalNoFlex } from "./controller/handlers/noflex/handleExternalNoFlex.js";
@@ -8,12 +8,21 @@ import { logCyan } from "../src/funciones/logsCustom.js";
 import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
 import { parseIfJson } from "../src/funciones/isValidJson.js";
 
-export async function aplanta(company, dataQr, userId) {
-    const dbConfig = getProdDbConfig(company);
-    const dbConnection = mysql2.createConnection(dbConfig);
-    dbConnection.connect();
 
+
+export async function aplanta(req) {
+    let { companyId, userId, dataQr } = req.body;
+
+    let dbConnection;
     try {
+
+        const company = await getCompanyById(companyId);
+
+        const dbConfig = getProdDbConfig(company);
+        const dbConnection = mysql2.createConnection(dbConfig);
+        dbConnection.connect();
+
+
 
         let response;
 
@@ -99,6 +108,6 @@ export async function aplanta(company, dataQr, userId) {
         throw error;
 
     } finally {
-        dbConnection.end();
+        if (dbConnection) dbConnection.end();
     };
 }
