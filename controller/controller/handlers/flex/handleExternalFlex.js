@@ -136,7 +136,7 @@ export async function handleExternalFlex(
       );
 
       if (check) {
-        return check; // ← igual se ejecutará finally
+        return check;
       }
 
       logCyan("El envio no fue colectado cancelado o entregado");
