@@ -18,15 +18,47 @@ export async function aplanta(company, dataQr, userId) {
         let response;
 
         dataQr = parseIfJson(dataQr);
-        if ((company.did == 211 || company.did == 20) && !Object.prototype.hasOwnProperty.call(dataQr, "local") && !Object.prototype.hasOwnProperty.call(dataQr, "sender_id")) {
+        // Primero definimos la lista de compañías elegibles
+        const eligibleCompanies = [20, 211, 55];
+
+        if (
+            eligibleCompanies.includes(company.did) &&
+            // mejor usar Object.hasOwn para chequear sólo properties propias
+            !Object.hasOwn(dataQr, 'local') &&
+            !Object.hasOwn(dataQr, 'sender_id')
+        ) {
+            // obtenemos el envío
             const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
+
+            // variables a asignar según el caso
+            let empresa;
+            let cliente;
+
+            switch (company.did) {
+                case 20:
+                    empresa = 211;
+                    cliente = 215;
+                    break;
+
+                case 211:
+                    empresa = 211;
+                    cliente = 301;
+                    break;
+
+                case 55:
+                    empresa = 55;
+                    cliente = 184;
+                    break;
+            }
+
             dataQr = {
-                local: "1",
-                empresa: company.did == 20 ? 211 : company.did,
+                local: '1',
+                empresa,
                 did: shipmentId,
-                cliente: company.did == 20 ? 215 : 301,
+                cliente,
             };
         }
+
         const isCollectShipmentML = Object.prototype.hasOwnProperty.call(dataQr, "t");
         /// Me fijo si es flex o no
         const isFlex = Object.prototype.hasOwnProperty.call(dataQr, "sender_id") || isCollectShipmentML;
