@@ -277,3 +277,13 @@ export function executeQueryFromPool(query, values = [], log = false) {
     });
   });
 }
+
+// funcion para crear conexon por did_empresa
+
+export async function conectionForCompany(companyId) {
+  const company = await getCompanyById(companyId);
+  const config = getProdDbConfig(company);
+  const conn = mysql2.createConnection(config);
+  conn.connect();
+  return conn;
+}
