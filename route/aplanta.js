@@ -6,19 +6,19 @@ import { handleError } from "../src/funciones/handle_error.js";
 import { verificarTodo } from "../src/funciones/verificar_all.js";
 
 const a_planta = Router();
-
-const requiredBodyFields = ["companyId", "userId", "profile", "deviceId", "appVersion", "brand", "model", "androidVersion", "autoAssign", "ilat", "ilong", "dataQr", "deviceFrom"];
+const requeridosSiempre = ["companyId", "userId", "profile", "deviceId", "appVersion", "brand", "model", "androidVersion", "deviceFrom"]
+const requiredBodyFields = ["autoAssign", "ilat", "ilong", "dataQr"];
 
 a_planta.post("/aplanta", async (req, res) => {
-  const start = performance.now();
-  if (!verificarTodo(req, res, [], requiredBodyFields)) return;
+  const startTime = performance.now();
+  if (!verificarTodo(req, res, [], [...requeridosSiempre, ...requiredBodyFields])) return;
   try {
     const result = await aplanta(req);
     res.status(Status.ok).json(result);
   } catch (err) {
-    return handleError(req, res, err);
+    return handleError(req, res, err, startTime);
   } finally {
-    logPurple(`POST /api/aplanta ejecutado en ${performance.now() - start} ms`);
+    logPurple(`${req.method} ${req.originalUrl} ejecutado en ${performance.now() - startTime} ms`);
   }
 });
 

@@ -1,14 +1,25 @@
 import { executeQuery, getAccountBySenderId, getCompanyById, getProdDbConfig } from "../db.js";
-import { handleInternalFlex } from "./controller/handlers/flex/handleInternalFlex.js";
-import { handleExternalFlex } from "./controller/handlers/flex/handleExternalFlex.js";
-import { handleExternalNoFlex } from "./controller/handlers/noflex/handleExternalNoFlex.js";
-import { handleInternalNoFlex } from "./controller/handlers/noflex/handleInternalNoFlex.js";
+import { handleInternalFlex } from "./handlers/flex/handleInternalFlex.js";
+import { handleExternalFlex } from "./handlers/flex/handleExternalFlex.js";
+import { handleExternalNoFlex } from "./handlers/noflex/handleExternalNoFlex.js";
+import { handleInternalNoFlex } from "./handlers/noflex/handleInternalNoFlex.js";
 import mysql2 from "mysql2";
 import { logCyan } from "../src/funciones/logsCustom.js";
 import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
 import { parseIfJson } from "../src/funciones/isValidJson.js";
 
+const empresasCOn = [211, 20]
 
+function getDidClienteByEmpresa(empresa) {
+    switch (empresa) {
+        case 20:
+            return 215;
+        case 144:
+            return 301;
+        default:
+            return null;
+    }
+}
 
 export async function aplanta(req) {
     let { companyId, userId, dataQr } = req.body;
@@ -22,18 +33,16 @@ export async function aplanta(req) {
         const dbConnection = mysql2.createConnection(dbConfig);
         dbConnection.connect();
 
-
-
         let response;
 
         dataQr = parseIfJson(dataQr);
-        if ((company.did == 211 || company.did == 20) && !Object.prototype.hasOwnProperty.call(dataQr, "local") && !Object.prototype.hasOwnProperty.call(dataQr, "sender_id")) {
+        if (empresasCOn.includes(company.did) && !Object.prototype.hasOwnProperty.call(dataQr, "local") && !Object.prototype.hasOwnProperty.call(dataQr, "sender_id")) {
             const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
             dataQr = {
                 local: "1",
                 empresa: company.did,
                 did: shipmentId,
-                cliente: company.did == 20 ? 215 : 301,
+                cliente: getDidClienteByEmpresa(company.did),
             };
         }
         const isCollectShipmentML = Object.prototype.hasOwnProperty.call(dataQr, "t");
@@ -100,8 +109,7 @@ export async function aplanta(req) {
 
 
         return response;
-    }
-    catch (error) {
+    } catch (error) {
         throw error;
     } finally {
         if (dbConnection) dbConnection.end();
