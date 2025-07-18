@@ -22,7 +22,7 @@ export async function aplanta(company, dataQr, userId) {
             const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
             dataQr = {
                 local: "1",
-                empresa: company.did,
+                empresa: company.did == 20 ? 211 : company.did,
                 did: shipmentId,
                 cliente: company.did == 20 ? 215 : 301,
             };
