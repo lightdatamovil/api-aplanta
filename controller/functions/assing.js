@@ -1,6 +1,6 @@
 import axios from "axios";
-import { logGreen, logRed } from "../../../src/funciones/logsCustom.js";
-import CustomException from "../../../classes/custom_exception.js";
+import { logGreen, logRed } from "../../src/funciones/logsCustom.js";
+import CustomException from "../../classes/custom_exception.js";
 
 export async function assign(companyId, userId, profile, dataQr, driverId) {
   const payload = {
