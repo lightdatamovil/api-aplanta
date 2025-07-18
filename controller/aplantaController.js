@@ -4,7 +4,7 @@ import { handleExternalFlex } from "./controller/handlers/flex/handleExternalFle
 import { handleExternalNoFlex } from "./controller/handlers/noflex/handleExternalNoFlex.js";
 import { handleInternalNoFlex } from "./controller/handlers/noflex/handleInternalNoFlex.js";
 import mysql2 from "mysql2";
-import { logCyan } from "../src/funciones/logsCustom.js";
+import { logCyan, logPurple } from "../src/funciones/logsCustom.js";
 import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
 import { parseIfJson } from "../src/funciones/isValidJson.js";
 
@@ -52,8 +52,7 @@ export async function aplanta(company, dataQr, userId) {
             if (account) {
                 logCyan("Es interno");
                 response = await handleInternalFlex(dbConnection, company.did, userId, dataQr, account, senderId);
-            }
-            else if (!account && company.did == 144) {
+            } else if (!account && company.did == 144) {
                 logCyan("Es interno (por verificación extra de empresa 144)");
                 const queryCheck = `
                   SELECT did
@@ -88,6 +87,7 @@ export async function aplanta(company, dataQr, userId) {
                 response = await handleInternalNoFlex(dbConnection, dataQr, company.did, userId);
             } else {
                 logCyan("Es externo");
+                logPurple(JSON.stringify(dataQr));
                 response = await handleExternalNoFlex(dbConnection, dataQr, company.did, userId);
             }
         }
