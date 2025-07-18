@@ -24,6 +24,7 @@ const aplantaDbNameForLogs = process.env.APLANTA_DB_NAME_FOR_LOGS;
 const hostProductionDb = process.env.PRODUCTION_DB_HOST;
 const portProductionDb = process.env.PRODUCTION_DB_PORT;
 
+//se usa en este archivo
 export const redisClient = redis.createClient({
   socket: {
     host: redisHost,
@@ -41,6 +42,7 @@ export let clientList = {};
 let accountList = {};
 let driverList = {};
 
+//si se usa
 export function getProdDbConfig(company) {
   return {
     host: hostProductionDb,
@@ -51,6 +53,7 @@ export function getProdDbConfig(company) {
   };
 }
 
+//SE USA EN ESTE ARCHIVO
 export const poolLocal = mysql2.createPool({
   host: aplantaDBHost,
   user: aplantaDbUserForLogs,
@@ -62,13 +65,14 @@ export const poolLocal = mysql2.createPool({
   queueLimit: 0
 });
 
-
+//SE USA EN ESTE ARCHIVO
 async function loadCompaniesFromRedis() {
   const companiesListString = await redisClient.get("empresasData");
 
   companiesList = JSON.parse(companiesListString);
 }
 
+//SE USA 
 export async function getCompanyById(companyId) {
   let company = companiesList[companyId];
 
@@ -81,6 +85,7 @@ export async function getCompanyById(companyId) {
   return company;
 }
 
+//SE USA 
 export async function getCompanyByCode(companyCode) {
   let company;
 
@@ -107,6 +112,7 @@ export async function getCompanyByCode(companyCode) {
   return company;
 }
 
+//SE USA EN ESTE ARCHIVO
 async function loadAccountList(dbConnection, companyId, senderId) {
   const querySelectClientesCuentas = `
             SELECT did, didCliente, ML_id_vendedor 
@@ -180,6 +186,7 @@ async function loadClients(dbConnection, companyId) {
   });
 }
 
+//SE USA
 export async function getClientsByCompany(dbConnection, companyId) {
   let companyClients = clientList[companyId];
 
@@ -192,6 +199,8 @@ export async function getClientsByCompany(dbConnection, companyId) {
   return companyClients;
 }
 
+
+// SE USA EN ESTE ARCHIVO
 async function loadDrivers(dbConnection, companyId) {
   if (!driverList[companyId]) {
     driverList[companyId] = {};
@@ -228,6 +237,7 @@ async function loadDrivers(dbConnection, companyId) {
   }
 }
 
+//si se usa
 export async function getDriversByCompany(dbConnection, companyId) {
   let companyDrivers = driverList[companyId];
 
@@ -261,6 +271,7 @@ export async function executeQuery(connection, query, values, log = false) {
 
 }
 
+//SE USA
 export function executeQueryFromPool(query, values = [], log = false) {
   const formattedQuery = mysql2.format(query, values);
 
@@ -278,8 +289,7 @@ export function executeQueryFromPool(query, values = [], log = false) {
   });
 }
 
-// funcion para crear conexon por did_empresa
-
+// funcion para crear conexon por did_empresa --SE USA
 export async function conectionForCompany(companyId) {
   const company = await getCompanyById(companyId);
   const config = getProdDbConfig(company);

@@ -14,9 +14,9 @@ export async function aplanta(req) {
         if (isFlex) {
             const { account, senderId } =
                 await fetchFlexAccount(conn, company.did, dataQr, isCollectShipmentML);
-            return processFlex(conn, company, userId, dataQr, account, senderId, isCollectShipmentML);
+            return await processFlex(conn, company, userId, dataQr, account, senderId, isCollectShipmentML);
         } else {
-            return processNoFlex(conn, company.did, userId, dataQr);
+            return await processNoFlex(conn, company.did, userId, dataQr);
         }
     } finally {
         conn.end();
