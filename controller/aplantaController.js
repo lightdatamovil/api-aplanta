@@ -15,14 +15,10 @@ export async function aplanta(req) {
 
     let dbConnection;
     try {
-
         const company = await getCompanyById(companyId);
-
         const dbConfig = getProdDbConfig(company);
         const dbConnection = mysql2.createConnection(dbConfig);
         dbConnection.connect();
-
-
 
         let response;
 
