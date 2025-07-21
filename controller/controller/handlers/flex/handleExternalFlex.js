@@ -240,4 +240,8 @@ export async function handleExternalFlex(
       externalDbConnection.end(); // Se ejecuta SIEMPRE
     }
   }
+  return {
+    success: false,
+    message: "No se encontró cuenta asociada",
+  };
 }
