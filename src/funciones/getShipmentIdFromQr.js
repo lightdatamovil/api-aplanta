@@ -15,16 +15,25 @@ export async function getShipmentIdFromQr(companyId, dataQr) {
         appVersion: "null",
         dataQr: dataQr
     };
-
-    const result = await axios.post('https://apimovil2.lightdata.app/api/qr/get-shipment-id', payload);
-    if (result.status == 200) {
-        return result.data.body;
-    } else {
-        logRed("Error al obtener el shipmentId");
+    try {
+        const result = await axios.post('https://apimovil2.lightdata.app/api/qr/get-shipment-id', payload);
+        if (result.status == 200) {
+            return result.data.body;
+        } else {
+            logRed("Error al obtener el shipmentId");
+            throw new CustomException({
+                title: "No se pudo obtener el envio",
+                message: `Error al obtener el envio: ${result.data.message}`,
+                stack: result.data.stack || ''
+            });
+        }
+    } catch (error) {
+        logRed(`Error al obtener el shipmentId: ${error.message}`);
         throw new CustomException({
-            title: "Error al obtener el shipmentId",
-            message: `Código de estado: ${result.status}`,
-            stack: result.data.stack || ''
+            title: "No se pudo obtener el envio",
+            message: `Error al obtener el envio: ${error.message}`,
+            stack: error.stack || ''
         });
     }
+
 }

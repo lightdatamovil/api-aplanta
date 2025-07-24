@@ -7,6 +7,7 @@ import mysql2 from "mysql2";
 import { logCyan, logPurple } from "../src/funciones/logsCustom.js";
 import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
 import { parseIfJson } from "../src/funciones/isValidJson.js";
+import LogisticaConf from "../classes/logisticas_conf.js";
 
 export async function aplanta(company, dataQr, userId) {
     const dbConfig = getProdDbConfig(company);
@@ -19,10 +20,9 @@ export async function aplanta(company, dataQr, userId) {
 
         dataQr = parseIfJson(dataQr);
         // Primero definimos la lista de compañías elegibles
-        const eligibleCompanies = [20, 211, 55];
 
         if (
-            eligibleCompanies.includes(company.did) &&
+            LogisticaConf.hasBarcodeEnabled(company.did) &&
             // mejor usar Object.hasOwn para chequear sólo properties propias
             !Object.hasOwn(dataQr, 'local') &&
             !Object.hasOwn(dataQr, 'sender_id')
@@ -30,26 +30,8 @@ export async function aplanta(company, dataQr, userId) {
             // obtenemos el envío
             const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
 
-            // variables a asignar según el caso
-            let empresa;
-            let cliente;
-
-            switch (company.did) {
-                case 20:
-                    empresa = 211;
-                    cliente = 215;
-                    break;
-
-                case 211:
-                    empresa = 211;
-                    cliente = 301;
-                    break;
-
-                case 55:
-                    empresa = 55;
-                    cliente = 184;
-                    break;
-            }
+            const cliente = LogisticaConf.getSenderId(company.did);
+            const empresa = LogisticaConf.getEmpresaId(company.did);
 
             dataQr = {
                 local: '1',
@@ -103,12 +85,7 @@ export async function aplanta(company, dataQr, userId) {
                     logCyan("Es externo (empresa 144 pero sin coincidencias)");
                     response = await handleExternalFlex(dbConnection, company, dataQr, userId);
                 }
-            }
-
-
-
-
-            else {
+            } else {
                 logCyan("Es externo");
                 response = await handleExternalFlex(dbConnection, company, dataQr, userId);
             }
