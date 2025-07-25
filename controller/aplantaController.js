@@ -31,11 +31,10 @@ export async function aplanta(company, dataQr, userId) {
             const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
 
             const cliente = LogisticaConf.getSenderId(company.did);
-            const empresa = LogisticaConf.getEmpresaId(company.did);
 
             dataQr = {
                 local: '1',
-                empresa,
+                empresa: company.did,
                 did: shipmentId,
                 cliente,
             };

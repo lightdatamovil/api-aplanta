@@ -1,11 +1,11 @@
 export default class LogisticaConf {
 
     static tieneBarcode = {
-        12: { cliente: 44, empresa: 55 },
-        55: { cliente: 184, empresa: 55 },
-        211: { cliente: 301, empresa: 211 },
-        20: { cliente: 215, empresa: 211 },
-        327: { cliente: 15, empresa: 55 },
+        12: { cliente: 44, empresaDB: 55 },
+        55: { cliente: 184, empresaDB: 55 },
+        211: { cliente: 301, empresaDB: 211 },
+        20: { cliente: 215, empresaDB: 211 },
+        327: { cliente: 15, empresaDB: 55 },
     };
 
     static hasBarcodeEnabled(did) {
@@ -16,7 +16,7 @@ export default class LogisticaConf {
         return this.tieneBarcode?.[String(did)]?.cliente ?? 0;
     }
 
-    static getEmpresaId(did) {
+    static getEmpresaDBdid(did) {
         return this.tieneBarcode?.[String(did)]?.empresa ?? 0;
     }
 }
