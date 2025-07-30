@@ -102,9 +102,7 @@ export async function aplanta(company, dataQr, userId) {
                     logCyan("Es externo (empresa 144 pero sin coincidencias)");
                     response = await handleExternalFlex(dbConnection, company, dataQr, userId);
                 }
-            }
-
-            else {
+            } else {
                 logCyan("Es externo");
                 response = await handleExternalFlex(dbConnection, company, dataQr, userId);
             }

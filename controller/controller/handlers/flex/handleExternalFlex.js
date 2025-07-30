@@ -50,9 +50,10 @@ export async function handleExternalFlex(
   if (logisticasExternas.length == 0) {
     throw new CustomException({
       title: "No se encontraron logísticas externas",
-      message: "No se encontraron logísticas externas",
+      message: "No se encontro cuenta asociada",
       stack: ''
     });
+
   }
   /// Por cada logística externa
   for (const logistica of logisticasExternas) {
