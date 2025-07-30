@@ -7,6 +7,7 @@ import mysql2 from "mysql2";
 import { logCyan, logPurple } from "../src/funciones/logsCustom.js";
 import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
 import { parseIfJson } from "../src/funciones/isValidJson.js";
+import LogisticaConf from "../classes/logistica_conf.js";
 
 
 export async function aplanta(company, dataQr, userId) {
