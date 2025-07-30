@@ -1,7 +1,5 @@
 export default class LogisticaConf {
 
-
-
     // el array debe tener la vnculacion entre logisticas ademas del did_vendedor asociado 
     static tieneBarcode = {
         12: 44,
