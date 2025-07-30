@@ -136,25 +136,26 @@ async function loadAccountList(dbConnection, companyId, senderId) {
   return accountList[companyId] ? accountList[companyId][senderId] : null;
 }
 
+
 export async function getAccountBySenderId(dbConnection, companyId, senderId) {
-  if (
-    accountList === undefined ||
-    accountList === null ||
-    Object.keys(accountList).length === 0 ||
-    !accountList[companyId]
-  ) {
-    await loadAccountList(dbConnection, companyId, senderId);
+  try {
+    if (accountList === undefined || accountList === null || Object.keys(accountList).length === 0 || !accountList[companyId]) {
+      await loadAccountList(dbConnection, companyId, senderId);
+    }
+
+    let account = accountList[companyId][senderId];
+    if (!account) {
+      await loadAccountList(dbConnection, companyId, senderId);
+      account = accountList[companyId][senderId];
+    }
+
+    return account;
+  } catch (error) {
+    logRed(`Error en getAccountBySenderId: ${error.stack}`);
+    throw error;
   }
-
-  let account = accountList[companyId][senderId];
-
-  if (account === undefined) {
-    await loadAccountList(dbConnection, companyId, senderId);
-    account = accountList[companyId][senderId];
-  }
-
-  return account;
 }
+
 
 async function loadClients(dbConnection, companyId) {
   if (!clientList[companyId]) {
