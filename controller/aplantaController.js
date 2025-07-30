@@ -7,7 +7,7 @@ import mysql2 from "mysql2";
 import { logCyan, logPurple } from "../src/funciones/logsCustom.js";
 import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
 import { parseIfJson } from "../src/funciones/isValidJson.js";
-import LogisticaConf from "../classes/logistica_conf.js";
+
 
 export async function aplanta(company, dataQr, userId) {
     const dbConfig = getProdDbConfig(company);
@@ -15,9 +15,7 @@ export async function aplanta(company, dataQr, userId) {
     dbConnection.connect();
 
     try {
-
         let response;
-
         dataQr = parseIfJson(dataQr);
 
         if (
@@ -40,8 +38,8 @@ export async function aplanta(company, dataQr, userId) {
 
             } catch (error) {
 
-                const empresaVinculada = LogisticaConf.getEmpresaVinculada(company.did);
                 const cliente = LogisticaConf.getSenderId(company.did);
+                const empresaVinculada = LogisticaConf.getEmpresaVinculada(company.did);
                 // que pasa si es 211 o  55 que no tienen empresa vinculada
                 if (empresaVinculada === null) {
                     // preguntar a cris 
@@ -59,7 +57,6 @@ export async function aplanta(company, dataQr, userId) {
                 };
             }
         }
-
         const isCollectShipmentML = Object.prototype.hasOwnProperty.call(dataQr, "t");
         /// Me fijo si es flex o no
         const isFlex = Object.prototype.hasOwnProperty.call(dataQr, "sender_id") || isCollectShipmentML;
