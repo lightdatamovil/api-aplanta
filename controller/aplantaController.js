@@ -7,6 +7,7 @@ import mysql2 from "mysql2";
 import { logCyan, logPurple } from "../src/funciones/logsCustom.js";
 import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
 import { parseIfJson } from "../src/funciones/isValidJson.js";
+import LogisticaConf from "../classes/logistica_conf.js";
 
 export async function aplanta(company, dataQr, userId) {
     const dbConfig = getProdDbConfig(company);
@@ -18,45 +19,45 @@ export async function aplanta(company, dataQr, userId) {
         let response;
 
         dataQr = parseIfJson(dataQr);
-        // Primero definimos la lista de compañías elegibles
-        const eligibleCompanies = [20, 211, 55];
 
         if (
-            eligibleCompanies.includes(company.did) &&
+            LogisticaConf.hasBarcodeEnabled(company.did) &&
             // mejor usar Object.hasOwn para chequear sólo properties propias
             !Object.hasOwn(dataQr, 'local') &&
             !Object.hasOwn(dataQr, 'sender_id')
         ) {
-            // obtenemos el envío
-            const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
+            try {
+                // obtenemos el envío
+                const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
+                const cliente = LogisticaConf.getSenderId(company.did);
 
-            // variables a asignar según el caso
-            let empresa;
-            let cliente;
+                dataQr = {
+                    local: '1',
+                    did: shipmentId,
+                    cliente,
+                    empresa: company.did
+                };
 
-            switch (company.did) {
-                case 20:
-                    empresa = 211;
-                    cliente = 215;
-                    break;
+            } catch (error) {
 
-                case 211:
-                    empresa = 211;
-                    cliente = 301;
-                    break;
+                const empresaVinculada = LogisticaConf.getEmpresaVinculada(company.did);
+                const cliente = LogisticaConf.getSenderId(company.did);
+                // que pasa si es 211 o  55 que no tienen empresa vinculada
+                if (empresaVinculada === null) {
+                    // preguntar a cris 
+                    throw new Error("El envio no esta igresado en su sistema");
+                };
 
-                case 55:
-                    empresa = 55;
-                    cliente = 184;
-                    break;
+                const shipmentIdExterno = await getShipmentIdFromQr(empresaVinculada, dataQr);
+
+                //no encontre shipmentiD : cambiar en el qr la empresa x la externa --- si no esta lo inserta 
+                dataQr = {
+                    local: '1',
+                    did: shipmentIdExterno,
+                    cliente,
+                    empresa: empresaVinculada
+                };
             }
-
-            dataQr = {
-                local: '1',
-                empresa,
-                did: shipmentId,
-                cliente,
-            };
         }
 
         const isCollectShipmentML = Object.prototype.hasOwnProperty.call(dataQr, "t");
@@ -104,9 +105,6 @@ export async function aplanta(company, dataQr, userId) {
                     response = await handleExternalFlex(dbConnection, company, dataQr, userId);
                 }
             }
-
-
-
 
             else {
                 logCyan("Es externo");
