@@ -19,12 +19,7 @@ export async function aplanta(company, dataQr, userId) {
         let response;
         dataQr = parseIfJson(dataQr);
 
-        if (
-            LogisticaConf.hasBarcodeEnabled(company.did) &&
-            // mejor usar Object.hasOwn para chequear sólo properties propias
-            !Object.hasOwn(dataQr, 'local') &&
-            !Object.hasOwn(dataQr, 'sender_id')
-        ) {
+        if (LogisticaConf.hasBarcodeEnabled(company.did) && dataQr.includes("MLAR")) {
             try {
                 // obtenemos el envío
                 const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
@@ -74,10 +69,9 @@ export async function aplanta(company, dataQr, userId) {
 
                 senderId = result[0].ml_vendedor_id;
                 account = await getAccountBySenderId(dbConnection, company.did, senderId);
-                logCyan(JSON.stringify(account));
             } else {
-                account = await getAccountBySenderId(dbConnection, company.did, dataQr.sender_id);
                 senderId = dataQr.sender_id;
+                account = await getAccountBySenderId(dbConnection, company.did, dataQr.sender_id);
             }
 
             if (account) {

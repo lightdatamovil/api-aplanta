@@ -17,11 +17,11 @@ a_planta.post("/aplanta", async (req, res) => {
   }
   const body = req.body;
 
-  const { companyId, userId, profile, dataQr, autoAssign } = req.body;
+  const { companyId, userId, profile, dataQr } = req.body;
 
   const company = await getCompanyById(companyId);
   try {
-    const result = await aplanta(company, dataQr, userId, profile, autoAssign);
+    const result = await aplanta(company, dataQr, userId);
     const endTime = performance.now();
     const tiempo = endTime - startTime;
     crearLog(companyId, userId, profile, body, tiempo, result, "api", true);

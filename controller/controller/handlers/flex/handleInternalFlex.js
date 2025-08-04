@@ -27,7 +27,7 @@ export async function handleInternalFlex(
 
   /// Busco el envio
   const sql = `
-        SELECT did,didCLiente
+        SELECT did,didCliente
         FROM envios 
         WHERE ml_shipment_id = ? AND ml_vendedor_id = ? and superado = 0 and elim = 0
         LIMIT 1
@@ -38,10 +38,26 @@ export async function handleInternalFlex(
     senderId,
   ]);
 
-  let didCLiente = resultBuscarEnvio[0]?.didCLiente || 0;
+  const row = resultBuscarEnvio[0];
 
   /// Si no existe, lo inserto y tomo el did
-  if (resultBuscarEnvio.length === 0) {
+  if (resultBuscarEnvio.length > 0) {
+    logCyan("Encontre el envio");
+    shipmentId = row.did;
+    /// Checkea si el envio ya fue puesto a planta, entregado, entregado 2da o cancelado
+    const check = await checkearEstadoEnvio(dbConnection, shipmentId);
+    if (check) return check;
+    logCyan("El envio no fue puesto a planta, entregado, entregado 2da o cancelado");
+    const queryUpdateEnvios = `
+                UPDATE envios 
+                SET ml_qr_seguridad = ?
+                WHERE superado = 0 AND elim = 0 AND did = ?
+                LIMIT 1
+            `;
+
+    await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,]);
+    logCyan("Actualice el ml_qr_seguridad del envio");
+  } else {
     shipmentId = await insertEnvios(
       dbConnection,
       companyId,
@@ -57,35 +73,9 @@ export async function handleInternalFlex(
       senderId,
     ]);
     logCyan("Inserte el envio");
-  } else {
-    logCyan("Encontre el envio");
   }
 
-  const row = resultBuscarEnvio[0];
-
-  shipmentId = row.did;
-
-
-  /// Checkeo si el envío ya fue colectado cancelado o entregado
-  const check = await checkearEstadoEnvio(dbConnection, shipmentId);
-  if (check) return check;
-  logCyan("El envio no fue colectado cancelado o entregado");
-
-  const queryUpdateEnvios = `
-                UPDATE envios 
-                SET ml_qr_seguridad = ?
-                WHERE superado = 0 AND elim = 0 AND did = ?
-                LIMIT 1
-            `;
-
-  await executeQuery(dbConnection, queryUpdateEnvios, [
-    JSON.stringify(dataQr),
-    shipmentId,
-  ]);
-  logCyan("Actualice el ml_qr_seguridad del envio");
-
   /// Actualizo el estado del envío y lo envío al microservicio de estados
-
   await sendToShipmentStateMicroService(companyId, userId, shipmentId);
   logCyan(
     "Actualice el estado del envio y lo envie al microservicio de estados"
@@ -95,7 +85,7 @@ export async function handleInternalFlex(
     const body = await informe(
       dbConnection,
       companyId,
-      didCLiente,
+      row.didCliente,
       userId,
       shipmentId
     );
@@ -109,7 +99,7 @@ export async function handleInternalFlex(
   const body = await informe(
     dbConnection,
     companyId,
-    account.didCliente || didCLiente,
+    account.didCliente || row.didCliente,
     userId,
     shipmentId
   );
