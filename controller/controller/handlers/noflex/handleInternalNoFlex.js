@@ -7,7 +7,8 @@ import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentS
 /// Si el envio no esta asignado y se quiere autoasignar, lo asigna
 /// Actualiza el estado del envio en el micro servicio
 /// Actualiza el estado del envio en la base de datos
-export async function handleInternalNoFlex(dbConnection, dataQr, companyId, userId) {
+export async function handleInternalNoFlex(dbConnection, dataQr, company, userId) {
+    const companyId = company.did;
     const shipmentId = dataQr.did;
 
     const clientId = dataQr.cliente;

@@ -14,12 +14,13 @@ import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment
 /// Asigno el envío al usuario si es necesario
 export async function handleInternalFlex(
   dbConnection,
-  companyId,
+  company,
   userId,
   dataQr,
   account,
   senderId
 ) {
+  const companyId = company.did;
   const mlShipmentId = dataQr.id;
   await checkIfFulfillment(dbConnection, mlShipmentId);
 

@@ -16,7 +16,8 @@ import { assign } from "../../functions/assing.js";
 /// Asigno a la empresa externa
 /// Si es autoasignacion, asigno a la empresa interna
 /// Actualizo el estado del envio a colectado y envio el estado del envio en los microservicios
-export async function handleExternalNoFlex(dbConnection, dataQr, companyId, userId) {
+export async function handleExternalNoFlex(dbConnection, dataQr, company, userId) {
+    const companyId = company.did;
     const shipmentIdFromDataQr = dataQr.did;
 
     const clientIdFromDataQr = dataQr.cliente;
