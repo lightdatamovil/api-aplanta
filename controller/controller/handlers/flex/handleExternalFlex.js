@@ -115,6 +115,8 @@ export async function handleExternalFlex(
           didcuenta_ext,
           dataQr,
           1,
+          0,
+          driver,
           driver
         );
 
@@ -144,6 +146,7 @@ export async function handleExternalFlex(
           dataQr,
           1,
           1,
+          userId,
           userId
         );
         logCyan("Inserte el envio en envios");

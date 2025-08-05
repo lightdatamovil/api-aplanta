@@ -68,6 +68,7 @@ export async function handleInternalFlex(
       1,
       0,
       userId,
+      userId
     );
     resultBuscarEnvio = await executeQuery(dbConnection, sql, [
       mlShipmentId,
