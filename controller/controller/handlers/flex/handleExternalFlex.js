@@ -69,10 +69,10 @@ export async function handleExternalFlex(
         codLocal
       );
 
-      if (driver) {
+      if (driver.length > 0) {
         logCyan("El driver existe en la logistica externa");
-        continue;
       }
+
 
       const sqlEnvios = `
         SELECT did
@@ -80,7 +80,7 @@ export async function handleExternalFlex(
         WHERE ml_shipment_id = ? AND ml_vendedor_id = ? 
         LIMIT 1
       `;
-      let rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [mlShipmentId, senderid]);
+      let rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [mlShipmentId, senderid], true);
 
       let externalShipmentId;
 
