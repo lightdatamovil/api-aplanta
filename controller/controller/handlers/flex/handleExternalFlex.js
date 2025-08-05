@@ -69,10 +69,12 @@ export async function handleExternalFlex(
         codLocal
       );
 
-      if (driver.length > 0) {
-        logCyan("El driver existe en la logistica externa");
-      }
 
+      if (!driver) {
+        externalDbConnection.end();
+
+        return { success: false, message: "No se encontró chofer asignado" };
+      }
 
       const sqlEnvios = `
         SELECT did
@@ -99,6 +101,7 @@ export async function handleExternalFlex(
 
         if (rowsCuentas.length == 0) {
           logCyan("No se encontró cuenta asociada, paso a la siguiente logística");
+          externalDbConnection.end();
           continue;
         }
 

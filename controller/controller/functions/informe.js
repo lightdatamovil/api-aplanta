@@ -4,9 +4,8 @@ import { logCyan, logPurple } from "../../../src/funciones/logsCustom.js";
 const contadoresIngresados = {};
 
 export async function informe(dbConnection, company, clientId, userId, shipmentId) {
-    const companyId = company?.did || company;
-    // cambio a la fecha de hoy 
-
+    const companyId = company.did;
+    // cambio a la fecha de hoy
     const hoy = new Date().toISOString().split('T')[0];
     if (!clientId) {
         clientId = 0;
