@@ -14,7 +14,7 @@ export async function informe(dbConnection, companyId, clientId, userId, shipmen
             FROM envios_historial AS eh
             JOIN envios AS e 
                 ON e.elim=0 AND e.superado=0 AND e.didCliente = ? AND e.did = eh.didEnvio
-            WHERE eh.elim=0 AND eh.superado=0 
+            WHERE eh.elim =0 AND eh.superado=0 
             AND (eh.autofecha BETWEEN ? AND ?) 
             AND eh.estado IN (7, 0, 1);
         `;
