@@ -196,7 +196,7 @@ export async function handleExternalFlex(
 
       const resultInforme = await informe(
         dbConnection,
-        company.did,
+        company,
         userId,
         userId,
         internalShipmentId

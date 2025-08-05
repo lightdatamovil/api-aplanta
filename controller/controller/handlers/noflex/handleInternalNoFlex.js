@@ -30,7 +30,7 @@ export async function handleInternalNoFlex(dbConnection, dataQr, company, userId
     await sendToShipmentStateMicroService(companyId, userId, shipmentId, 0, null, null);
     logCyan("Se actualizo el estado del envio en el micro servicio");
 
-    const body = await informe(dbConnection, companyId, clientId, userId, shipmentId);
+    const body = await informe(dbConnection, company, clientId, userId, shipmentId);
 
     return { success: true, message: "Paquete puesto a planta  correctamente", body: body };
 }

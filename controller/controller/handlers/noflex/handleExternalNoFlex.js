@@ -120,7 +120,7 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
 
     logCyan("Voy a asignar el envio en la logistica interna");
     await assign(externalCompany.did, userId, 3, dataQr, driver);
-    const body = await informe(dbConnection, companyId, externalClient[0].did, userId, internalShipmentId);
+    const body = await informe(dbConnection, company, externalClient[0].did, userId, internalShipmentId);
 
     externalDbConnection.end();
 
