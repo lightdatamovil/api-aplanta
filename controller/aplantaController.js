@@ -19,7 +19,13 @@ export async function aplanta(company, dataQr, userId) {
         let response;
         dataQr = parseIfJson(dataQr);
 
-        if (LogisticaConf.hasBarcodeEnabled(company.did) && dataQr.includes("MLAR")) {
+        if (
+            LogisticaConf.hasBarcodeEnabled(company.did) &&
+            (
+                (typeof dataQr === "string" && dataQr.includes("MLAR")) ||
+                (typeof dataQr === "object" && dataQr !== null && Object.values(dataQr).some(val => typeof val === "string" && val.includes("MLAR")))
+            )
+        ) {
             try {
                 // obtenemos el envío
                 const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
