@@ -1,14 +1,8 @@
-import {
-  executeQuery,
-  getProdDbConfig,
-  getCompanyByCode,
-} from "../../../../db.js";
-
+import { executeQuery, getProdDbConfig, getCompanyByCode } from "../../../../db.js";
 import mysql2 from "mysql2";
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
-import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
-import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
+import { sendToShipmentStateMicroService as sendShipmentStateToStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
 import { logCyan } from "../../../../src/funciones/logsCustom.js";
@@ -67,9 +61,18 @@ export async function handleExternalFlex(
 
     const dbConfigExt = getProdDbConfig(externalCompany);
     const externalDbConnection = mysql2.createConnection(dbConfigExt);
+    externalDbConnection.connect();
 
     try {
-      externalDbConnection.connect();
+      const driver = await checkIfExistLogisticAsDriverInExternalCompany(
+        externalDbConnection,
+        codLocal
+      );
+
+      if (driver) {
+        logCyan("El driver existe en la logistica externa");
+        continue;
+      }
 
       const sqlEnvios = `
         SELECT did
@@ -77,17 +80,7 @@ export async function handleExternalFlex(
         WHERE ml_shipment_id = ? AND ml_vendedor_id = ? 
         LIMIT 1
       `;
-      let rowsEnvios = await executeQuery(
-        externalDbConnection,
-        sqlEnvios,
-        [mlShipmentId, senderid],
-        true
-      );
-
-      const driver = await checkIfExistLogisticAsDriverInExternalCompany(
-        externalDbConnection,
-        codLocal
-      );
+      let rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [mlShipmentId, senderid]);
 
       let externalShipmentId;
 
@@ -96,18 +89,17 @@ export async function handleExternalFlex(
         logCyan("Encontre el envio en la logistica externa");
       } else {
         logCyan("No encontre el envio en la logistica externa");
+        //? Esto en algun momento puede llegar a funcionar mal si un seller trabaja con 2 logisticas
         const sqlCuentas = `
           SELECT did, didCliente 
           FROM clientes_cuentas 
           WHERE superado = 0 AND elim = 0 AND tipoCuenta = 1 AND ML_id_vendedor = ?
         `;
-        const rowsCuentas = await executeQuery(externalDbConnection, sqlCuentas, [
-          senderid,
-        ]);
+        const rowsCuentas = await executeQuery(externalDbConnection, sqlCuentas, [senderid]);
 
         if (rowsCuentas.length == 0) {
           logCyan("No se encontró cuenta asociada, paso a la siguiente logística");
-          continue; // <- se va al finally igual
+          continue;
         }
 
         const didcliente_ext = rowsCuentas[0].didCliente;
@@ -131,17 +123,6 @@ export async function handleExternalFlex(
         externalShipmentId = rowsEnvios[0].did;
       }
 
-      const check = await checkearEstadoEnvio(
-        externalDbConnection,
-        externalShipmentId
-      );
-
-      if (check) {
-        return check;
-      }
-
-      logCyan("El envio no fue colectado cancelado o entregado");
-
       const consulta =
         "SELECT didLocal FROM envios_exteriores WHERE didExterno = ?";
       let internalShipmentId = await executeQuery(dbConnection, consulta, [
@@ -163,15 +144,19 @@ export async function handleExternalFlex(
           userId
         );
         logCyan("Inserte el envio en envios");
+        await insertEnviosExteriores(
+          dbConnection,
+          internalShipmentId,
+          externalShipmentId,
+          1,
+          nombreFantasia,
+          externalCompanyId
+        );
+        logCyan("Inserte el envio en envios exteriores");
       }
 
       const checkLI = "SELECT valor FROM envios_logisticainversa WHERE didEnvio = ?";
-      const rows = await executeQuery(
-        externalDbConnection,
-        checkLI,
-        [externalShipmentId],
-        true
-      );
+      const rows = await executeQuery(externalDbConnection, checkLI, [externalShipmentId]);
 
       if (rows.length > 0) {
         await insertEnviosLogisticaInversa(
@@ -182,24 +167,14 @@ export async function handleExternalFlex(
         );
       }
 
-      await insertEnviosExteriores(
-        dbConnection,
-        internalShipmentId,
-        externalShipmentId,
-        1,
-        nombreFantasia,
-        externalCompanyId
-      );
-      logCyan("Inserte el envio en envios exteriores");
-
-      await sendToShipmentStateMicroService(
+      await sendShipmentStateToStateMicroService(
         company.did,
         userId,
         internalShipmentId
       );
       logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica interna");
 
-      await sendToShipmentStateMicroService(
+      await sendShipmentStateToStateMicroService(
         externalCompanyId,
         driver,
         externalShipmentId
@@ -238,7 +213,7 @@ export async function handleExternalFlex(
         stack: error.stack,
       });
     } finally {
-      externalDbConnection.end(); // Se ejecuta SIEMPRE
+      externalDbConnection.end();
     }
   }
   return {
