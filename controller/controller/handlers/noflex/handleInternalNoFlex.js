@@ -1,8 +1,7 @@
+import { logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
 import { executeQuery } from "../../../../db.js";
-import { logCyan } from "../../../../src/funciones/logsCustom.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
-import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
 /// Esta funcion checkea si el envio ya fue colectado, entregado o cancelado
 /// Si el envio no esta asignado y se quiere autoasignar, lo asigna
 /// Actualiza el estado del envio en el micro servicio
@@ -27,7 +26,7 @@ export async function handleInternalNoFlex(dbConnection, dataQr, company, userId
     logCyan("El envio no fue colectado, entregado o cancelado");
 
     /// Actualizamos el estado del envio en el micro servicio
-    await sendToShipmentStateMicroService(companyId, userId, shipmentId, 0, null, null);
+    await sendShipmentStateToStateMicroservice(companyId, userId, shipmentId, 0, null, null);
     logCyan("Se actualizo el estado del envio en el micro servicio");
 
     const body = await informe(dbConnection, company, clientId, userId, shipmentId);

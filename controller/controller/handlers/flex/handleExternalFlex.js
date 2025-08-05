@@ -2,14 +2,10 @@ import { executeQuery, getProdDbConfig, getCompanyByCode } from "../../../../db.
 import mysql2 from "mysql2";
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
-import { sendToShipmentStateMicroService as sendShipmentStateToStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
-import { logCyan } from "../../../../src/funciones/logsCustom.js";
-import { assign } from "../../functions/assing.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
-import CustomException from "../../../../classes/custom_exception.js";
-import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
+import { assign, checkIfFulfillment, CustomException, logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
 
 /// Esta funcion busca las logisticas vinculadas
 /// Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
@@ -170,14 +166,14 @@ export async function handleExternalFlex(
         );
       }
 
-      await sendShipmentStateToStateMicroService(
+      await sendShipmentStateToStateMicroservice(
         company.did,
         userId,
         internalShipmentId
       );
       logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica interna");
 
-      await sendShipmentStateToStateMicroService(
+      await sendShipmentStateToStateMicroservice(
         externalCompanyId,
         driver,
         externalShipmentId

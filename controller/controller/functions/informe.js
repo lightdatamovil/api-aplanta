@@ -1,6 +1,5 @@
-import CustomException from "../../../classes/custom_exception.js";
+import { CustomException, logCyan, logPurple } from "lightdata-tools";
 import { executeQuery, getClientsByCompany, getDriversByCompany } from "../../../db.js";
-import { logCyan, logPurple } from "../../../src/funciones/logsCustom.js";
 const contadoresIngresados = {};
 
 export async function informe(dbConnection, company, clientId, userId, shipmentId) {
