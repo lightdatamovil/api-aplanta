@@ -91,7 +91,7 @@ export async function aplanta(company, dataQr, userId) {
 
                 if (resultCheck.length > 0) {
                     senderId = dataQr.sender_id;
-                    response = await handleInternalFlex(dbConnection, company.did, userId, dataQr, account, senderId);
+                    response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
                 } else {
                     logCyan("Es externo (empresa 144 pero sin coincidencias)");
                     response = await handleExternalFlex(dbConnection, company, dataQr, userId);
@@ -104,11 +104,11 @@ export async function aplanta(company, dataQr, userId) {
             logCyan("No es flex");
             if (company.did == dataQr.empresa) {
                 logCyan("Es interno");
-                response = await handleInternalNoFlex(dbConnection, dataQr, company.did, userId);
+                response = await handleInternalNoFlex(dbConnection, dataQr, company, userId);
             } else {
                 logCyan("Es externo");
                 logPurple(JSON.stringify(dataQr));
-                response = await handleExternalNoFlex(dbConnection, dataQr, company.did, userId);
+                response = await handleExternalNoFlex(dbConnection, dataQr, company, userId);
             }
         }
 
