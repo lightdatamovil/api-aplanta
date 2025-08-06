@@ -14,11 +14,11 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
             INSERT INTO envios (did, ml_shipment_id, ml_vendedor_id, didCliente, quien, lote, didCuenta, ml_qr_seguridad, fecha_inicio, flex, exterior, fechaunix, choferAsignado)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
-
+    // !modificacion harcodeo chofer asignado en a planta
     const result = await executeQuery(
         dbConnection,
         queryInsertEnvios,
-        [0, idshipment, senderid, clientId, userId, lote, accountId, JSON.stringify(dataQr), fecha_inicio, flex, externo, fechaunix, driverId],
+        [0, idshipment, senderid, clientId, userId, lote, accountId, JSON.stringify(dataQr), fecha_inicio, flex, externo, fechaunix, 0],
     );
 
     if (result.insertId) {

@@ -4,7 +4,7 @@ import { insertEnvios } from "../../functions/insertEnvios.js";
 import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
-import { logCyan } from "../../../../src/funciones/logsCustom.js";
+import { logCyan, logPurple } from "../../../../src/funciones/logsCustom.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
 
 /// Busco el envio
@@ -37,9 +37,10 @@ export async function handleInternalFlex(
   let resultBuscarEnvio = await executeQuery(dbConnection, sql, [
     mlShipmentId,
     senderId,
-  ]);
+  ], true);
 
   const row = resultBuscarEnvio[0];
+
 
   /// Si no existe, lo inserto y tomo el did
   if (resultBuscarEnvio.length > 0) {
@@ -47,6 +48,7 @@ export async function handleInternalFlex(
     shipmentId = row.did;
     /// Checkea si el envio ya fue puesto a planta, entregado, entregado 2da o cancelado
     const check = await checkearEstadoEnvio(dbConnection, shipmentId);
+    console.log("llegue a Check estado envio:", check);
     if (check) return check;
     logCyan("El envio no fue puesto a planta, entregado, entregado 2da o cancelado");
     const queryUpdateEnvios = `
@@ -56,7 +58,7 @@ export async function handleInternalFlex(
                 LIMIT 1
             `;
 
-    await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,]);
+    await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,], true);
     logCyan("Actualice el ml_qr_seguridad del envio");
   } else {
     shipmentId = await insertEnvios(

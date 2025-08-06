@@ -2,8 +2,9 @@ import { executeQuery } from "../../../db.js";
 
 /// Checkea si el envio ya fue puesto a planta, entregado, entregado 2da o cancelado
 export async function checkearEstadoEnvio(dbConnection, shipmentId) {
-    const querySelectEstadoEnvio = 'SELECT estado_envio FROM envios WHERE did = ? LIMIT 1';
-    const estado = await executeQuery(dbConnection, querySelectEstadoEnvio, [shipmentId]);
+    const querySelectEstadoEnvio = 'SELECT estado_envio FROM envios WHERE did = ? and superado = 0 and elim = 0 LIMIT 1 ';
+    const estado = await executeQuery(dbConnection, querySelectEstadoEnvio, [shipmentId], true);
+
 
     if (estado.length > 0) {
         if (estado[0].estado_envio == 5 || estado[0].estado_envio == 9 || estado[0].estado_envio == 8) {
