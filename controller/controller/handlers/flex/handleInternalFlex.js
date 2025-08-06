@@ -4,7 +4,7 @@ import { insertEnvios } from "../../functions/insertEnvios.js";
 import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
-import { logCyan, logPurple } from "../../../../src/funciones/logsCustom.js";
+import { logCyan } from "../../../../src/funciones/logsCustom.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
 
 /// Busco el envio
