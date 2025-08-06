@@ -1,5 +1,4 @@
-import { logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
-import { executeQuery } from "../../../../db.js";
+import { executeQuery, logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
 /// Esta funcion checkea si el envio ya fue colectado, entregado o cancelado

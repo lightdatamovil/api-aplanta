@@ -1,9 +1,9 @@
 import express, { json, urlencoded } from 'express';
 import a_planta from './route/aplanta.js';
 import { redisClient } from './db.js';
-import { logBlue } from './src/funciones/logsCustom.js';
 import cors from 'cors';
 import clear from './route/clearClient.js';
+import { logBlue } from 'lightdata-tools';
 
 const app = express();
 

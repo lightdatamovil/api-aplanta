@@ -1,4 +1,4 @@
-import { executeQuery } from "../../../db.js";
+import { executeQuery } from "lightdata-tools";
 
 export async function insertEnviosLogisticaInversa(dbConnection, shipmentId, valor, userId) {
     const sqlInsertEnviosLogisticaInversa = `

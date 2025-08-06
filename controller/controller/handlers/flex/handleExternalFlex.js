@@ -1,11 +1,11 @@
-import { executeQuery, getProdDbConfig, getCompanyByCode } from "../../../../db.js";
 import mysql2 from "mysql2";
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
-import { assign, checkIfFulfillment, CustomException, logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
+import { assign, checkIfFulfillment, CustomException, executeQuery, getCompanyByCode, getProductionDbConfig, logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
+import { companiesList } from "../../../../db.js";
 
 /// Esta funcion busca las logisticas vinculadas
 /// Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
@@ -52,10 +52,10 @@ export async function handleExternalFlex(
     const nombreFantasia = logistica.nombre_fantasia;
     const syncCode = logistica.codigoVinculacionLogE;
 
-    const externalCompany = await getCompanyByCode(syncCode);
+    const externalCompany = await getCompanyByCode(companiesList, syncCode);
     const externalCompanyId = externalCompany.did;
 
-    const dbConfigExt = getProdDbConfig(externalCompany);
+    const dbConfigExt = getProductionDbConfig(externalCompany);
     const externalDbConnection = mysql2.createConnection(dbConfigExt);
     externalDbConnection.connect();
 
@@ -167,6 +167,7 @@ export async function handleExternalFlex(
       }
 
       await sendShipmentStateToStateMicroservice(
+        'aplanta',
         company.did,
         userId,
         internalShipmentId

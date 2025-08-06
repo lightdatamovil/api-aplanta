@@ -1,11 +1,11 @@
-import { executeQuery, getClientsByCompany, getCompanyById, getProdDbConfig } from "../../../../db.js";
 import mysql2 from "mysql2";
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
-import { assign, logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
+import { assign, executeQuery, getClientsByCompany, getCompanyById, getProductionDbConfig, logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
+import { clientList, companiesList } from "../../../../db.js";
 
 /// Esta funcion se conecta a la base de datos de la empresa externa
 /// Checkea si el envio ya fue colectado, entregado o cancelado
@@ -21,10 +21,10 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
     const clientIdFromDataQr = dataQr.cliente;
 
     /// Busco la empresa externa
-    const externalCompany = await getCompanyById(dataQr.empresa);
+    const externalCompany = await getCompanyById(companiesList, dataQr.empresa);
 
     /// Conecto a la base de datos de la empresa externa
-    const dbConfigExt = getProdDbConfig(externalCompany);
+    const dbConfigExt = getProductionDbConfig(externalCompany);
     const externalDbConnection = mysql2.createConnection(dbConfigExt);
     externalDbConnection.connect();
 
@@ -38,7 +38,7 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
     // }
     logCyan("El envio no es colectado, entregado o cancelado");
 
-    const companyClientList = await getClientsByCompany(externalDbConnection, externalCompany.did);
+    const companyClientList = await getClientsByCompany(externalDbConnection, clientList, externalCompany.did);
     const client = companyClientList[clientIdFromDataQr];
 
     const internalCompany = await getCompanyById(companyId);

@@ -1,4 +1,4 @@
-import { executeQuery } from "../../../db.js";
+import { executeQuery } from "lightdata-tools";
 
 /// Checkea si el envio ya fue puesto a planta, entregado, entregado 2da o cancelado
 export async function checkearEstadoEnvio(dbConnection, shipmentId) {

@@ -1,5 +1,5 @@
-import { executeQuery } from '../../../db.js';
 import axios from "axios";
+import { executeQuery } from "lightdata-tools";
 
 export async function insertEnvios(dbConnection, companyId, clientId, accountId, dataQr, flex, externo, driverId) {
     const lote = Math.random().toString(36).substring(2, 15);
