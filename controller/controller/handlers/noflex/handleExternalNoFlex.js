@@ -76,22 +76,21 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
             { id: "", sender_id: "" },
             0,
             1,
-            driver
+            0,
+            userId
         );
         logCyan("Inserté en envios");
+        /// Inserto en envios exteriores en la empresa interna
+        await insertEnviosExteriores(
+            dbConnection,
+            internalShipmentId,
+            shipmentIdFromDataQr,
+            0,
+            client.nombre || "",
+            externalCompany.did,
+        );
+        logCyan("Inserté en envios exteriores");
     }
-
-    /// Inserto en envios exteriores en la empresa interna
-    await insertEnviosExteriores(
-        dbConnection,
-        internalShipmentId,
-        shipmentIdFromDataQr,
-        0,
-        client.nombre || "",
-        externalCompany.did,
-    );
-    logCyan("Inserté en envios exteriores");
-
 
     const check2 = "SELECT valor FROM envios_logisticainversa WHERE didEnvio = ?";
 

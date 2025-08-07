@@ -37,17 +37,20 @@ export async function handleInternalFlex(
   let resultBuscarEnvio = await executeQuery(dbConnection, sql, [
     mlShipmentId,
     senderId,
-  ]);
+  ], true);
 
   const row = resultBuscarEnvio[0];
+
 
   /// Si no existe, lo inserto y tomo el did
   if (resultBuscarEnvio.length > 0) {
     logCyan("Encontre el envio");
     shipmentId = row.did;
+
     /// Checkea si el envio ya fue puesto a planta, entregado, entregado 2da o cancelado
     const check = await checkearEstadoEnvio(dbConnection, shipmentId);
     if (check) return check;
+
     logCyan("El envio no fue puesto a planta, entregado, entregado 2da o cancelado");
     const queryUpdateEnvios = `
                 UPDATE envios 
@@ -56,7 +59,7 @@ export async function handleInternalFlex(
                 LIMIT 1
             `;
 
-    await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,]);
+    await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,], true);
     logCyan("Actualice el ml_qr_seguridad del envio");
   } else {
     shipmentId = await insertEnvios(
@@ -66,6 +69,7 @@ export async function handleInternalFlex(
       account.didCuenta,
       dataQr,
       1,
+      0,
       0,
       userId,
     );

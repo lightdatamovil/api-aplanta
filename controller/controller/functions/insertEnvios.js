@@ -1,7 +1,7 @@
 import axios from "axios";
 import { executeQuery } from "lightdata-tools";
 
-export async function insertEnvios(dbConnection, companyId, clientId, accountId, dataQr, flex, externo, driverId) {
+export async function insertEnvios(dbConnection, companyId, clientId, accountId, dataQr, flex, externo, driverId, userId) {
     const lote = Math.random().toString(36).substring(2, 15);
     const fecha_actual = new Date();
     fecha_actual.setHours(fecha_actual.getHours() - 3);
@@ -14,11 +14,11 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
             INSERT INTO envios (did, ml_shipment_id, ml_vendedor_id, didCliente, quien, lote, didCuenta, ml_qr_seguridad, fecha_inicio, flex, exterior, fechaunix, choferAsignado)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
-
+    // !modificacion harcodeo chofer asignado en a planta
     const result = await executeQuery(
         dbConnection,
         queryInsertEnvios,
-        [0, idshipment, senderid, clientId, 1, lote, accountId, JSON.stringify(dataQr), fecha_inicio, flex, externo, fechaunix, driverId],
+        [0, idshipment, senderid, clientId, userId, lote, accountId, JSON.stringify(dataQr), fecha_inicio, flex, externo, fechaunix, driverId],
     );
 
     if (result.insertId) {
