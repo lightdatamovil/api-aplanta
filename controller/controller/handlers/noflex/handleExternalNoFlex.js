@@ -5,7 +5,7 @@ import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/c
 import { informe } from "../../functions/informe.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 import { assign, executeQuery, getProductionDbConfig, logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
-import { clientsService, companiesService, qeueEstados, rabbitUrl } from "../../../../db.js";
+import { clientsService, companiesService, hostProductionDb, portProductionDb, qeueEstados, rabbitUrl } from "../../../../db.js";
 
 /// Esta funcion se conecta a la base de datos de la empresa externa
 /// Checkea si el envio ya fue colectado, entregado o cancelado
@@ -24,7 +24,7 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
     const externalCompany = await companiesService.getById(dataQr.empresa);
 
     /// Conecto a la base de datos de la empresa externa
-    const dbConfigExt = getProductionDbConfig(externalCompany);
+    const dbConfigExt = getProductionDbConfig(externalCompany, hostProductionDb, portProductionDb);
     const externalDbConnection = mysql2.createConnection(dbConfigExt);
     externalDbConnection.connect();
 
@@ -122,12 +122,11 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
         longitude,
     );
     logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios internos");
-
     await sendShipmentStateToStateMicroservice(
         qeueEstados,
         rabbitUrl,
         'aplanta',
-        companiesService.getById(dataQr.empresa),
+        externalCompany,
         driver,
         1,
         shipmentIdFromDataQr,
