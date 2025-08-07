@@ -1,9 +1,9 @@
 export class Constants {
     static headers = [
         'X-App-Version',
-        'x-Android-Version',
+        'X-Android-Version',
         'X-Model',
-        'x-Device-Id',
-        'x-Brand',
+        'X-Device-Id',
+        'X-Brand',
     ];
 }

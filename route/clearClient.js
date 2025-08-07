@@ -1,12 +1,11 @@
 import { Router } from "express";
-import { clientList } from "../db.js";
+import { clientsService } from "../db.js";
+import { Status } from "lightdata-tools";
 
 const clear = Router();
 
 clear.post("/clear", async (req, res) => {
-    for (const key in clientList) {
-        delete clientList[key];
-    }
-    res.status(200).json({ message: "Cache limpiada" });
+    clientsService.clearCache();
+    res.status(Status.ok).json({ message: "Cache limpiada" });
 })
 export default clear;

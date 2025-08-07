@@ -2,9 +2,8 @@ import { handleInternalFlex } from "./controller/handlers/flex/handleInternalFle
 import { handleExternalFlex } from "./controller/handlers/flex/handleExternalFlex.js";
 import { handleExternalNoFlex } from "./controller/handlers/noflex/handleExternalNoFlex.js";
 import { handleInternalNoFlex } from "./controller/handlers/noflex/handleInternalNoFlex.js";
-import { parseIfJson, LogisticaConfig, getShipmentIdFromQr, logCyan, CustomException, executeQuery, getAccountBySenderId } from "lightdata-tools";
-import { accountList } from "../db.js";
-
+import { parseIfJson, LogisticaConfig, getShipmentIdFromQr, logCyan, CustomException, executeQuery } from "lightdata-tools";
+import { accountsService } from "../db.js";
 
 export async function aplanta(dbConnection, req, company) {
 
@@ -67,10 +66,10 @@ export async function aplanta(dbConnection, req, company) {
             const result = await executeQuery(dbConnection, querySeller, [dataQr.id]);
 
             senderId = result[0].ml_vendedor_id;
-            account = await getAccountBySenderId(dbConnection, accountList, company.did, senderId);
+            account = await accountsService.getBySenderId(dbConnection, company.did, senderId);
         } else {
             senderId = dataQr.sender_id;
-            account = await getAccountBySenderId(dbConnection, accountList, company.did, dataQr.sender_id);
+            account = await accountsService.getBySenderId(dbConnection, company.did, dataQr.sender_id);
         }
 
         if (account) {
@@ -110,7 +109,5 @@ export async function aplanta(dbConnection, req, company) {
         }
     }
 
-
     return response;
-
 }

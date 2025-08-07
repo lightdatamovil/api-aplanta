@@ -1,5 +1,6 @@
-import { CustomException, executeQuery, getClientsByCompany, getDriversByCompany, logCyan, logPurple } from "lightdata-tools";
-import { clientList, driverList } from "../../../db.js";
+import { CustomException, executeQuery, logCyan, logPurple } from "lightdata-tools";
+import { clientsService, driversService } from "../../../db.js";
+
 const contadoresIngresados = {};
 
 export async function informe(dbConnection, company, clientId, userId, shipmentId) {
@@ -68,9 +69,9 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
         }
     }
 
-    const companyClients = await getClientsByCompany(dbConnection, clientList, companyId);
+    const companyClients = await clientsService.getByCompany(dbConnection, companyId);
 
-    const companyDrivers = await getDriversByCompany(dbConnection, driverList, companyId);
+    const companyDrivers = await driversService.getByCompany(dbConnection, companyId);
 
     if (companyClients[clientId] === undefined) {
         throw new CustomException({

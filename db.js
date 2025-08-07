@@ -1,7 +1,7 @@
 import redis from "redis";
 import dotenv from "dotenv";
 import mysql2 from "mysql2";
-import { logRed } from "lightdata-tools";
+import { AccountsService, ClientsService, CompaniesService, DriversService, logRed } from "lightdata-tools";
 
 dotenv.config({ path: process.env.ENV_FILE || ".env" });
 
@@ -31,10 +31,10 @@ redisClient.on("error", (error) => {
   logRed(`Error al conectar con Redis: ${error.stack}`);
 });
 
-export let companiesList = {};
-export let clientList = {};
-export let accountList = {};
-export let driverList = {};
+export let companiesService = new CompaniesService({ redisClient });
+export let clientsService = new ClientsService();
+export let accountsService = new AccountsService();
+export let driversService = new DriversService();
 
 export const poolLocal = mysql2.createPool({
   host: aplantaDBHost,

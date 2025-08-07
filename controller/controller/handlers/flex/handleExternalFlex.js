@@ -4,8 +4,8 @@ import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.j
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
-import { assign, checkIfFulfillment, CustomException, executeQuery, getCompanyByCode, getProductionDbConfig, logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
-import { companiesList } from "../../../../db.js";
+import { assign, checkIfFulfillment, CustomException, executeQuery, getProductionDbConfig, logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
+import { companiesService } from "../../../../db.js";
 
 /// Esta funcion busca las logisticas vinculadas
 /// Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
@@ -52,7 +52,7 @@ export async function handleExternalFlex(
     const nombreFantasia = logistica.nombre_fantasia;
     const syncCode = logistica.codigoVinculacionLogE;
 
-    const externalCompany = await getCompanyByCode(companiesList, syncCode);
+    const externalCompany = await companiesService.getByCode(syncCode);
     const externalCompanyId = externalCompany.did;
 
     const dbConfigExt = getProductionDbConfig(externalCompany);
