@@ -19,7 +19,9 @@ export async function handleExternalFlex(
   dbConnection,
   company,
   dataQr,
-  userId
+  userId,
+  latitude,
+  longitude
 ) {
   const senderid = dataQr.sender_id;
   const mlShipmentId = dataQr.id;
@@ -170,18 +172,25 @@ export async function handleExternalFlex(
         qeueEstados,
         rabbitUrl,
         'aplanta',
-        company.did,
+        company,
         userId,
-        internalShipmentId
+        0,
+        internalShipmentId,
+        latitude,
+        longitude,
       );
       logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica interna");
 
       await sendShipmentStateToStateMicroservice(
         qeueEstados,
         rabbitUrl,
-        externalCompanyId,
+        'aplanta',
+        externalCompany,
         driver,
-        externalShipmentId
+        0,
+        externalShipmentId,
+        latitude,
+        longitude,
       );
       logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica externa");
 

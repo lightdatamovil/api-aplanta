@@ -16,7 +16,9 @@ export async function handleInternalFlex(
   userId,
   dataQr,
   account,
-  senderId
+  senderId,
+  latitude,
+  longitude
 ) {
   const companyId = company.did;
   const mlShipmentId = dataQr.id;
@@ -78,9 +80,13 @@ export async function handleInternalFlex(
   await sendShipmentStateToStateMicroservice(
     qeueEstados,
     rabbitUrl,
-    companyId,
+    'aplanta',
+    company,
     userId,
-    shipmentId
+    0,
+    shipmentId,
+    latitude,
+    longitude,
   );
   logCyan(
     "Actualice el estado del envio y lo envie al microservicio de estados"

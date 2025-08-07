@@ -14,7 +14,7 @@ a_planta.post("/aplanta", verifyToken, async (req, res) => {
   let dbConnection;
 
   try {
-    verifyAll(req, res, [], ["dataQr", "ilat", "ilong"]);
+    verifyAll(req, res, [], ["dataQr", "latitude", "longitude"]);
     verifyHeaders(req, Constants.headers);
 
     const companyId = req.headers['x-company-id'];

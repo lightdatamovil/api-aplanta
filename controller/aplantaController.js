@@ -7,7 +7,8 @@ import { accountsService } from "../db.js";
 
 export async function aplanta(dbConnection, req, company) {
 
-    let { dataQr, userId } = req.body;
+    let { dataQr, latitude, longitude } = req.body;
+    const userId = req.headers['x-user-id'];
     dataQr = parseIfJson(dataQr);
 
     if (
@@ -74,7 +75,7 @@ export async function aplanta(dbConnection, req, company) {
 
         if (account) {
             logCyan("Es interno");
-            response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
+            response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId, latitude, longitude);
         } else if (!account && company.did == 144) {
             logCyan("Es interno (por verificación extra de empresa 144)");
             const queryCheck = `
@@ -89,23 +90,23 @@ export async function aplanta(dbConnection, req, company) {
 
             if (resultCheck.length > 0) {
                 senderId = dataQr.sender_id;
-                response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
+                response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId, latitude, longitude);
             } else {
                 logCyan("Es externo (empresa 144 pero sin coincidencias)");
-                response = await handleExternalFlex(dbConnection, company, dataQr, userId);
+                response = await handleExternalFlex(dbConnection, company, dataQr, userId, latitude, longitude);
             }
         } else {
             logCyan("Es externo");
-            response = await handleExternalFlex(dbConnection, company, dataQr, userId);
+            response = await handleExternalFlex(dbConnection, company, dataQr, userId, latitude, longitude);
         }
     } else {
         logCyan("No es flex");
         if (company.did == dataQr.empresa) {
             logCyan("Es interno");
-            response = await handleInternalNoFlex(dbConnection, dataQr, company, userId);
+            response = await handleInternalNoFlex(dbConnection, dataQr, company, userId, latitude, longitude);
         } else {
             logCyan("Es externo");
-            response = await handleExternalNoFlex(dbConnection, dataQr, company, userId);
+            response = await handleExternalNoFlex(dbConnection, dataQr, company, userId, latitude, longitude);
         }
     }
 

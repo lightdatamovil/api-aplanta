@@ -6,8 +6,7 @@ import { qeueEstados, rabbitUrl } from "../../../../db.js";
 /// Si el envio no esta asignado y se quiere autoasignar, lo asigna
 /// Actualiza el estado del envio en el micro servicio
 /// Actualiza el estado del envio en la base de datos
-export async function handleInternalNoFlex(dbConnection, dataQr, company, userId) {
-    const companyId = company.did;
+export async function handleInternalNoFlex(dbConnection, dataQr, company, userId, latitude, longitude) {
     const shipmentId = dataQr.did;
 
     const clientId = dataQr.cliente;
@@ -25,10 +24,20 @@ export async function handleInternalNoFlex(dbConnection, dataQr, company, userId
 
     logCyan("El envio no fue colectado, entregado o cancelado");
 
+    logCyan(`${latitude}, ${longitude}`);
+    logCyan(`${userId}, ${longitude}`);
     /// Actualizamos el estado del envio en el micro servicio
     await sendShipmentStateToStateMicroservice(
         qeueEstados,
-        rabbitUrl, companyId, userId, shipmentId, 0, null, null);
+        rabbitUrl,
+        'aplanta',
+        company,
+        userId,
+        0,
+        shipmentId,
+        latitude,
+        longitude
+    );
     logCyan("Se actualizo el estado del envio en el micro servicio");
 
     const body = await informe(dbConnection, company, clientId, userId, shipmentId);

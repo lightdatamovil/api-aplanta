@@ -14,7 +14,7 @@ import { clientsService, companiesService, qeueEstados, rabbitUrl } from "../../
 /// Asigno a la empresa externa
 /// Si es autoasignacion, asigno a la empresa interna
 /// Actualizo el estado del envio a colectado y envio el estado del envio en los microservicios
-export async function handleExternalNoFlex(dbConnection, dataQr, company, userId) {
+export async function handleExternalNoFlex(dbConnection, dataQr, company, userId, latitude, longitude) {
     const companyId = company.did;
     const shipmentIdFromDataQr = dataQr.did;
 
@@ -113,15 +113,27 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
     await sendShipmentStateToStateMicroservice(
         qeueEstados,
         rabbitUrl,
-        companyId,
+        'aplanta',
+        company,
         userId,
-        internalShipmentId
+        0,
+        internalShipmentId,
+        latitude,
+        longitude,
     );
     logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios internos");
 
     await sendShipmentStateToStateMicroservice(
         qeueEstados,
-        rabbitUrl, dataQr.empresa, driver, shipmentIdFromDataQr);
+        rabbitUrl,
+        'aplanta',
+        companiesService.getById(dataQr.empresa),
+        driver,
+        0,
+        shipmentIdFromDataQr,
+        latitude,
+        longitude,
+    );
     logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios externos");
 
     logCyan("Voy a asignar el envio en la logistica interna");
