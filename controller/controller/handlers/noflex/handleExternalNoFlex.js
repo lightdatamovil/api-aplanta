@@ -78,8 +78,8 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
             { id: "", sender_id: "" },
             0,
             1,
-            driver,
-            driver
+            0,
+            userId
         );
         logCyan("Inserté en envios");
     }

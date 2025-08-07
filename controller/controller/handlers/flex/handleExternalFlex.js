@@ -146,7 +146,7 @@ export async function handleExternalFlex(
           dataQr,
           1,
           1,
-          userId,
+          0,
           userId
         );
         logCyan("Inserte el envio en envios");
