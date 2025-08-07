@@ -4,7 +4,7 @@ import { crearLog } from "../src/funciones/crear_log.js";
 import { errorHandler, getProductionDbConfig, logPurple, Status, verifyAll, verifyToken, verifyHeaders } from "lightdata-tools";
 import mysql2 from "mysql2";
 import { Constants } from "../src/constants.js";
-import { companiesService } from "../db.js";
+import { companiesService, hostProductionDb, portProductionDb } from "../db.js";
 
 const a_planta = Router();
 
@@ -21,7 +21,7 @@ a_planta.post("/aplanta", verifyToken, async (req, res) => {
 
     const company = await companiesService.getById(companyId);
 
-    const dbConfig = getProductionDbConfig(company);
+    const dbConfig = getProductionDbConfig(company, hostProductionDb, portProductionDb);
     dbConnection = mysql2.createConnection(dbConfig);
     dbConnection.connect();
 

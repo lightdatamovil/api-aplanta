@@ -5,7 +5,7 @@ import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/c
 import { informe } from "../../functions/informe.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 import { assign, executeQuery, getProductionDbConfig, logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
-import { clientsService, companiesService } from "../../../../db.js";
+import { clientsService, companiesService, qeueEstados, rabbitUrl } from "../../../../db.js";
 
 /// Esta funcion se conecta a la base de datos de la empresa externa
 /// Checkea si el envio ya fue colectado, entregado o cancelado
@@ -110,10 +110,18 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
         );
     }
 
-    await sendShipmentStateToStateMicroservice(companyId, userId, internalShipmentId);
+    await sendShipmentStateToStateMicroservice(
+        qeueEstados,
+        rabbitUrl,
+        companyId,
+        userId,
+        internalShipmentId
+    );
     logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios internos");
 
-    await sendShipmentStateToStateMicroservice(dataQr.empresa, driver, shipmentIdFromDataQr);
+    await sendShipmentStateToStateMicroservice(
+        qeueEstados,
+        rabbitUrl, dataQr.empresa, driver, shipmentIdFromDataQr);
     logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios externos");
 
     logCyan("Voy a asignar el envio en la logistica interna");

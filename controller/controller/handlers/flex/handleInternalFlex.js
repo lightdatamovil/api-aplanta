@@ -3,6 +3,7 @@ import { insertEnvios } from "../../functions/insertEnvios.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
 import { checkIfFulfillment, executeQuery, logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
+import { qeueEstados, rabbitUrl } from "../../../../db.js";
 
 /// Busco el envio
 /// Si no existe, lo inserto y tomo el did
@@ -74,7 +75,13 @@ export async function handleInternalFlex(
   }
 
   /// Actualizo el estado del envío y lo envío al microservicio de estados
-  await sendShipmentStateToStateMicroservice(companyId, userId, shipmentId);
+  await sendShipmentStateToStateMicroservice(
+    qeueEstados,
+    rabbitUrl,
+    companyId,
+    userId,
+    shipmentId
+  );
   logCyan(
     "Actualice el estado del envio y lo envie al microservicio de estados"
   );

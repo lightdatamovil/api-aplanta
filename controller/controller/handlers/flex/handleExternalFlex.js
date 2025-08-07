@@ -5,7 +5,7 @@ import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/c
 import { informe } from "../../functions/informe.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 import { assign, checkIfFulfillment, CustomException, executeQuery, getProductionDbConfig, logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
-import { companiesService } from "../../../../db.js";
+import { companiesService, qeueEstados, rabbitUrl } from "../../../../db.js";
 
 /// Esta funcion busca las logisticas vinculadas
 /// Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
@@ -167,6 +167,8 @@ export async function handleExternalFlex(
       }
 
       await sendShipmentStateToStateMicroservice(
+        qeueEstados,
+        rabbitUrl,
         'aplanta',
         company.did,
         userId,
@@ -175,6 +177,8 @@ export async function handleExternalFlex(
       logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica interna");
 
       await sendShipmentStateToStateMicroservice(
+        qeueEstados,
+        rabbitUrl,
         externalCompanyId,
         driver,
         externalShipmentId

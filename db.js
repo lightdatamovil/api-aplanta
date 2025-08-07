@@ -19,6 +19,13 @@ const aplantaDbUserForLogs = process.env.APLANTA_DB_USER_FOR_LOGS;
 const aplantaDbPasswordForLogs = process.env.APLANTA_DB_PASSWORD_FOR_LOGS;
 const aplantaDbNameForLogs = process.env.APLANTA_DB_NAME_FOR_LOGS;
 
+
+export const rabbitUrl = process.env.RABBIT_URL;
+export const qeueEstados = process.env.QUEUE_ESTADOS;
+// Produccion
+export const hostProductionDb = process.env.PRODUCTION_DB_HOST;
+export const portProductionDb = process.env.PRODUCTION_DB_PORT;
+
 export const redisClient = redis.createClient({
   socket: {
     host: redisHost,
