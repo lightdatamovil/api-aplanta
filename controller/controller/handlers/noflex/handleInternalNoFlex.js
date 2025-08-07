@@ -33,7 +33,7 @@ export async function handleInternalNoFlex(dbConnection, dataQr, company, userId
         'aplanta',
         company,
         userId,
-        0,
+        1,
         shipmentId,
         latitude,
         longitude

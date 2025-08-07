@@ -83,7 +83,7 @@ export async function handleInternalFlex(
     'aplanta',
     company,
     userId,
-    0,
+    1,
     shipmentId,
     latitude,
     longitude,
