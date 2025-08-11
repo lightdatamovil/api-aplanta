@@ -71,8 +71,6 @@ export async function handleExternalFlex(
 
 
       if (!driver) {
-        externalDbConnection.end();
-
         continue;
       }
 
@@ -101,7 +99,6 @@ export async function handleExternalFlex(
 
         if (rowsCuentas.length == 0) {
           logCyan("No se encontró cuenta asociada, paso a la siguiente logística");
-          externalDbConnection.end();
           continue;
         }
 
