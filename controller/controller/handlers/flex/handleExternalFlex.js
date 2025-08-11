@@ -5,7 +5,7 @@ import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/c
 import { informe } from "../../functions/informe.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 import { assign, checkIfFulfillment, CustomException, executeQuery, getProductionDbConfig, logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
-import { companiesService, qeueEstados, rabbitUrl } from "../../../../db.js";
+import { companiesService, hostProductionDb, portProductionDb, qeueEstados, rabbitUrl } from "../../../../db.js";
 
 /// Esta funcion busca las logisticas vinculadas
 /// Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
@@ -57,20 +57,14 @@ export async function handleExternalFlex(
     const externalCompany = await companiesService.getByCode(syncCode);
     const externalCompanyId = externalCompany.did;
 
-    const dbConfigExt = getProductionDbConfig(externalCompany);
+    const dbConfigExt = getProductionDbConfig(externalCompany, hostProductionDb, portProductionDb);
     const externalDbConnection = mysql2.createConnection(dbConfigExt);
     externalDbConnection.connect();
 
     try {
-      const driver = await checkIfExistLogisticAsDriverInExternalCompany(
-        externalDbConnection,
-        codLocal
-      );
-
+      const driver = await checkIfExistLogisticAsDriverInExternalCompany(externalDbConnection, codLocal);
 
       if (!driver) {
-        externalDbConnection.end();
-
         continue;
       }
 
@@ -99,7 +93,6 @@ export async function handleExternalFlex(
 
         if (rowsCuentas.length == 0) {
           logCyan("No se encontró cuenta asociada, paso a la siguiente logística");
-          externalDbConnection.end();
           continue;
         }
 
