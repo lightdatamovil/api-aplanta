@@ -78,6 +78,11 @@ export async function aplanta(company, dataQr, userId) {
             } else {
                 senderId = dataQr.sender_id;
                 account = await getAccountBySenderId(dbConnection, company.did, dataQr.sender_id);
+                if (company.did == 167 && account == undefined) {
+                    logCyan("Es JSL");
+                    return await handleInternalFlex(dbConnection, company, userId, dataQr, 0, senderId);
+                }
+
             }
 
             if (account) {

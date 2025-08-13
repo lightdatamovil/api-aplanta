@@ -5,6 +5,7 @@ const contadoresIngresados = {};
 
 export async function informe(dbConnection, company, clientId, userId, shipmentId) {
     const companyId = company.did;
+    console.log('entre a informe 1');
     // cambio a la fecha de hoy
     const hoy = new Date().toISOString().split('T')[0];
     if (!clientId) {
@@ -33,6 +34,7 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
             amountOfAPlanta++;
         }
     });
+    console.log('entre a informe 2');
 
 
     // Función para incrementar el contador
@@ -74,13 +76,16 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
     const companyDrivers = await getDriversByCompany(dbConnection, companyId);
 
     if (companyClients[clientId] === undefined) {
-        throw new CustomException({
-            title: "Cliente no encontrado",
-            message: `No se encontró el cliente con ID: ${clientId}`,
-            stack: ''
-        });
+        /* throw new CustomException({
+             title: "Cliente no encontrado",
+             message: `No se encontró el cliente con ID: ${clientId}`,
+             stack: ''
+         });
+         */
+        logCyan("El cliente no fue encontrado");
     }
-    logCyan("El cliente fue encontrado");
+    logCyan("El cliente no fue encontrado");
+
 
     const chofer = companyDrivers[choferasignado]?.nombre || "Sin información";
     if (!companyDrivers[choferasignado]) {
@@ -92,7 +97,7 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
     logCyan("Se generó el informe");
 
     return {
-        cliente: `${companyClients[clientId]?.nombre || 'Sin información'}`,
+        cliente: `${companyClients[clientId]?.nombre ?? 'Sin información'}`,
         aingresarhoy: amountOfAPlanta,
         ingresadoshot: amountOfARetirarAndRetirados,
         ingresadosahora: ingresadosHoyChofer,
