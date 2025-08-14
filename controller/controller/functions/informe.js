@@ -1,11 +1,9 @@
-import CustomException from "../../../classes/custom_exception.js";
 import { executeQuery, getClientsByCompany, getDriversByCompany } from "../../../db.js";
 import { logCyan, logPurple } from "../../../src/funciones/logsCustom.js";
 const contadoresIngresados = {};
 
 export async function informe(dbConnection, company, clientId, userId, shipmentId) {
     const companyId = company.did;
-    console.log('entre a informe 1');
     // cambio a la fecha de hoy
     const hoy = new Date().toISOString().split('T')[0];
     if (!clientId) {
@@ -34,8 +32,6 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
             amountOfAPlanta++;
         }
     });
-    console.log('entre a informe 2');
-
 
     // Función para incrementar el contador
 

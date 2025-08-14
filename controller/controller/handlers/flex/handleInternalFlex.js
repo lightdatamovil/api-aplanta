@@ -87,7 +87,6 @@ export async function handleInternalFlex(
   );
 
   if (companyId == 144 || companyId == 167) {
-    console.log('entre a informe 0')
     const body = await informe(
       dbConnection,
       company,
