@@ -78,17 +78,17 @@ export async function aplanta(company, dataQr, userId) {
             } else {
                 senderId = dataQr.sender_id;
                 account = await getAccountBySenderId(dbConnection, company.did, dataQr.sender_id);
-                if (company.did == 167 && account == undefined) {
-                    logCyan("Es JSL");
-                    return await handleInternalFlex(dbConnection, company, userId, dataQr, 0, senderId);
-                }
+                // if (company.did == 167 && account == undefined) {
+                //     logCyan("Es JSL");
+                //     return await handleInternalFlex(dbConnection, company, userId, dataQr, 0, senderId);
+                // }
 
             }
 
             if (account) {
                 logCyan("Es interno");
                 response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
-            } else if (!account && company.did == 144) {
+            } else if (!account && (company.did == 144 || company.did == 167)) {
                 logCyan("Es interno (por verificación extra de empresa 144)");
                 const queryCheck = `
                   SELECT did
