@@ -25,8 +25,6 @@ export async function handleInternalFlex(
   await checkIfFulfillment(dbConnection, mlShipmentId);
 
   let shipmentId;
-  let row = null;
-  let didClienteSafe = 0;
 
   /// Busco el envio
   const sql = `
@@ -41,42 +39,43 @@ export async function handleInternalFlex(
     senderId,
   ], true);
 
+  const row = resultBuscarEnvio[0];
 
-  if (Array.isArray(resultBuscarEnvio) && resultBuscarEnvio.length > 0) {
+
+  /// Si no existe, lo inserto y tomo el did
+  if (resultBuscarEnvio.length > 0) {
     logCyan("Encontre el envio");
-    row = resultBuscarEnvio[0];
     shipmentId = row.did;
-    didClienteSafe = row.didCliente ?? 0;
-
+    /// Checkea si el envio ya fue puesto a planta, entregado, entregado 2da o cancelado
     const check = await checkearEstadoEnvio(dbConnection, shipmentId);
+    console.log("llegue a Check estado envio:", check);
     if (check) return check;
-
+    logCyan("El envio no fue puesto a planta, entregado, entregado 2da o cancelado");
     const queryUpdateEnvios = `
-      UPDATE envios 
-      SET ml_qr_seguridad = ?
-      WHERE superado = 0 AND elim = 0 AND did = ?
-      LIMIT 1
-    `;
-    await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId], true);
+                UPDATE envios 
+                SET ml_qr_seguridad = ?
+                WHERE superado = 0 AND elim = 0 AND did = ?
+                LIMIT 1
+            `;
+
+    await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,], true);
     logCyan("Actualice el ml_qr_seguridad del envio");
   } else {
-    logCyan("No encontre el envio, lo inserto");
     shipmentId = await insertEnvios(
       dbConnection,
       companyId,
-      didClienteSafe ?? 0,
-      account?.didCuenta ?? 0,
+      account.didCliente,
+      account.didCuenta,
       dataQr,
       1,
       0,
       0,
-      userId
+      userId,
     );
-
     resultBuscarEnvio = await executeQuery(dbConnection, sql, [
       mlShipmentId,
       senderId,
-    ], true);
+    ]);
     logCyan("Inserte el envio");
   }
 
@@ -86,11 +85,11 @@ export async function handleInternalFlex(
     "Actualice el estado del envio y lo envie al microservicio de estados"
   );
 
-  if (companyId == 144 || companyId == 167) {
+  if (companyId == 144) {
     const body = await informe(
       dbConnection,
       company,
-      didClienteSafe ?? 0,
+      row.didCliente,
       userId,
       shipmentId
     );
@@ -101,7 +100,6 @@ export async function handleInternalFlex(
     };
 
   }
-
   const body = await informe(
     dbConnection,
     company,
