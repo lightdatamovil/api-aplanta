@@ -93,13 +93,13 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
     logCyan("Se generó el informe");
 
     return {
-        cliente: ``,
-        aingresarhoy: 0,
-        ingresadoshot: 0,
-        ingresadosahora: 0,
-        chofer: '',
-        zonaentrega: '',
-        sucursal: ''
+        cliente: `${companyClients[clientId]?.nombre ?? 'Sin información'}`,
+        aingresarhoy: amountOfAPlanta,
+        ingresadoshot: amountOfARetirarAndRetirados,
+        ingresadosahora: ingresadosHoyChofer,
+        chofer,
+        zonaentrega,
+        sucursal
     };
 }
 
