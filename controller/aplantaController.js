@@ -94,6 +94,7 @@ export async function aplanta(company, dataQr, userId) {
                   SELECT did
                   FROM envios
                   WHERE ml_vendedor_id = ?
+                  AND ml_shipment_id = ?
                   AND superado = 0
                   AND elim = 0
                   LIMIT 1
