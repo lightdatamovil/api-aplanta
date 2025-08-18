@@ -94,7 +94,7 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
 
     return {
         cliente: `${companyClients[clientId]?.nombre ?? 'Sin información'}`,
-        aingresarhoy: amountOfAPlanta,
+        aingresarhoy: 0,
         ingresadoshot: amountOfARetirarAndRetirados,
         ingresadosahora: ingresadosHoyChofer,
         chofer,
