@@ -95,11 +95,11 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
     return {
         cliente: `${companyClients[clientId]?.nombre ?? 'Sin información'}`,
         aingresarhoy: 0,
-        ingresadoshot: amountOfARetirarAndRetirados,
-        ingresadosahora: ingresadosHoyChofer,
-        chofer,
-        zonaentrega,
-        sucursal
+        ingresadoshot: 0,
+        ingresadosahora: 0,
+        chofer: '',
+        zonaentrega: '',
+        sucursal: ''
     };
 }
 
