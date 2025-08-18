@@ -88,7 +88,7 @@ export async function aplanta(company, dataQr, userId) {
             if (account) {
                 logCyan("Es interno");
                 response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
-            } else if (!account && (company.did == 144 || company.did == 167)) {
+            } else if (company.did == 144 || company.did == 167) {
                 logCyan("Es interno (por verificación extra de empresa 144)");
                 const queryCheck = `
                   SELECT did
