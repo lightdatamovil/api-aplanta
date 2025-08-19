@@ -85,6 +85,7 @@ export async function handleInternalFlex(
     "Actualice el estado del envio y lo envie al microservicio de estados"
   );
 
+  //! jls 167 tambien usa una cuenta no vinculada -- gonzalo no lo saques
   if (companyId == 144 || companyId == 167) {
     const body = await informe(
       dbConnection,
