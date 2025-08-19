@@ -85,7 +85,7 @@ export async function handleInternalFlex(
     "Actualice el estado del envio y lo envie al microservicio de estados"
   );
 
-  if (companyId == 144) {
+  if (companyId == 144 || companyId == 167) {
     const body = await informe(
       dbConnection,
       company,
