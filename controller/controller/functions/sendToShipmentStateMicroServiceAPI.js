@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { logCyan, logGreen, logRed } from '../../../src/funciones/logsCustom.js';
+import { logGreen, logRed } from '../../../src/funciones/logsCustom.js';
 import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
 import axios from 'axios';
 import { generarTokenFechaHoy } from '../../../src/funciones/generarTokenFechaHoy.js';
@@ -27,7 +27,6 @@ export async function sendToShipmentStateMicroServiceAPI(
         longitud,
         tkn: generarTokenFechaHoy(),
     };
-    logCyan(`Enviando mensaje a RabbitMQ: ${JSON.stringify(message)}`);
     try {
         const response = await axios.post(BACKUP_ENDPOINT, message);
         logGreen(`✅ Enviado por HTTP con status ${response.status}`);
