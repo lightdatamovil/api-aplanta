@@ -51,7 +51,88 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
     return result.insertId;
 }
 
-export async function insertEnviosFlexMicroservicio(
+export async function insertEnviosMicroservicio(
+    companyId,
+    clientId,
+    accountId,
+    dataQr,
+    flex,
+    externo,
+    driverId,
+    userId
+) {
+    const lote = "apl";
+    const fechaInicio = new Date(Date.now() - 3 * 60 * 60 * 1000)
+        .toISOString().slice(0, 19).replace("T", " ");
+
+    // Normaliza campos de dataQr
+    const shipmentId = dataQr?.shipmentId ?? dataQr?.id ?? "";
+    const senderId = dataQr?.senderId ?? dataQr?.sender_id ?? 0;
+    const securityDigit = dataQr?.security_digit ?? "0";
+
+    const payload = {
+        data: {
+            didCuenta: Number(accountId),
+            didCliente: Number(clientId),
+            idEmpresa: Number(companyId),
+            flex: Number(flex),
+            ml_shipment_id: String(shipmentId),
+            ml_vendedor_id: Number(senderId),
+            ml_qr_seguridad: String(securityDigit),
+            lote,
+            enviosDireccionesDestino: {},
+            fecha_inicio: fechaInicio,
+            didDeposito: 1,
+            didServicio: 1,
+        },
+    };
+
+    const url = flex === 1
+        ? "https://altaenvios.lightdata.com.ar/api/altaenvioflex"
+        : "https://altaenvios.lightdata.com.ar/api/altaenvio";
+
+    console.log("📤 POST ->", url);
+    console.dir(payload, { depth: null });
+
+    try {
+        const res = await axios.post(url, payload, {
+            headers: { "Content-Type": "application/json" },
+        });
+        console.log("✅ Respuesta:", res.data);
+        const insertId = res.data?.did ?? null;
+
+        if (insertId) {
+            const redisPayload = {
+                idEmpresa: companyId,
+                estado: 1,
+                did: insertId,
+                ml_shipment_id: shipmentId,
+                ml_vendedor_id: senderId,
+            };
+            console.log("📤 Notificando enviosMLredis:", redisPayload);
+            await axios.post(
+                "https://altaenvios.lightdata.com.ar/api/enviosMLredis",
+                redisPayload,
+                { headers: { "Content-Type": "application/json" } }
+            );
+        }
+
+        return insertId;
+    } catch (error) {
+        console.error("❌ Error microservicio");
+        if (error.response) {
+            console.error("📥 Status:", error.response.status);
+            console.error("📥 Body:", error.response.data);
+        } else {
+            console.error("📥 Error:", error.message);
+        }
+        throw error;
+    }
+}
+
+
+
+export async function insertEnviosNoFlexMicroservicio(
     companyId,
     clientId,
     accountId,
@@ -64,20 +145,20 @@ export async function insertEnviosFlexMicroservicio(
     const lote = "apl";  // default si no viene
     const fecha_actual = new Date();
     fecha_actual.setHours(fecha_actual.getHours() - 3);
-    const fecha_inicio = fecha_actual.toISOString().slice(0, 19).replace("T", " ");
-    const fechaunix = Math.floor(Date.now() / 1000);
 
-    // 🔹 Payload mínimo para el endpoint Flex
     const payload = {
         data: {
-            didCuenta: accountId,
-            didCliente: clientId,
-            idEmpresa: companyId,
-            flex: flex,
-            ml_shipment_id: dataQr.id,
-            ml_vendedor_id: dataQr.sender_id,
-            ml_qr_seguridad: dataQr.security_digit || "", // default si no existe
-            lote: lote
+            didCuenta: Number(accountId),
+            didCliente: Number(clientId ?? 0),
+            idEmpresa: Number(companyId),
+            flex: Number(flex ?? 1),
+            ml_shipment_id: String(dataQr?.id ?? ""),
+            ml_vendedor_id: Number(dataQr?.sender_id ?? 0),
+            ml_qr_seguridad: String(dataQr?.security_digit ?? "0"),
+            lote,
+            // ! ESTA CLAVE ES OBLIGATORIA
+            enviosDireccionesDestino: {
+            }
         }
     };
 
@@ -111,8 +192,7 @@ export async function insertEnviosFlexMicroservicio(
     }
 }
 
-
-export async function insertEnviosNoFlexMicroservicio(
+export async function insertEnviosFlexMicroservicio(
     companyId,
     clientId,
     accountId,

@@ -1,6 +1,6 @@
 import { executeQuery } from "../../../../db.js";
 
-import { insertEnviosFlexMicroservicio } from "../../functions/insertEnvios.js";
+import { insertEnviosFlexMicroservicio, insertEnviosMicroservicio } from "../../functions/insertEnvios.js";
 import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
@@ -61,7 +61,7 @@ export async function handleInternalFlex(
     logCyan("Actualice el ml_qr_seguridad del envio");
   } else {
     logCyan("No encontre el envio, lo inserto");
-    shipmentId = await insertEnviosFlexMicroservicio(
+    shipmentId = await insertEnviosMicroservicio(
       //  dbConnection,
       companyId,
       didClienteSafe ?? 0,

@@ -1,6 +1,6 @@
 import { executeQuery, getProdDbConfig, getCompanyByCode } from "../../../../db.js";
 import mysql2 from "mysql2";
-import { insertEnviosFlexMicroservicio } from "../../functions/insertEnvios.js";
+import { insertEnviosMicroservicio } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
 import { sendToShipmentStateMicroService as sendShipmentStateToStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
@@ -11,7 +11,7 @@ import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInv
 import CustomException from "../../../../classes/custom_exception.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
 
-/// Esta funcion busca las logisticas vinculadas
+/// Esta funcion busca las logisticas vinculadsas
 /// Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
 /// Si el envio existe, tomo el did
 /// Si no existe, lo inserto y tomo el did
@@ -105,7 +105,7 @@ export async function handleExternalFlex(
         const didcliente_ext = rowsCuentas[0].didCliente;
         const didcuenta_ext = rowsCuentas[0].did;
 
-        const result = await insertEnviosFlexMicroservicio(
+        const result = await insertEnviosMicroservicio(
           // externalDbConnection,
           externalCompanyId,
           didcliente_ext,
@@ -135,7 +135,7 @@ export async function handleExternalFlex(
         internalShipmentId = internalShipmentId[0].didLocal;
         logCyan("Encontre el envio en envios exteriores");
       } else {
-        internalShipmentId = await insertEnviosFlexMicroservicio(
+        internalShipmentId = await insertEnviosMicroservicio(
           // dbConnection,
           company.did,
           externalLogisticId,
