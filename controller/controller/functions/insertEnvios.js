@@ -131,7 +131,7 @@ export async function insertEnviosMicroservicio(
 }
 
 
-
+/**
 export async function insertEnviosNoFlexMicroservicio(
     companyId,
     clientId,
@@ -278,3 +278,4 @@ export async function insertEnviosFlexMicroservicio(
         throw error; // lo re-lanzo para que lo capture tu handler global
     }
 }
+ */
