@@ -55,7 +55,7 @@ export async function sendToShipmentStateMicroService(
         estadoML: null,
         fecha: formatFechaUTC3(),
         quien: userId,
-        operacion: 'colecta',
+        operacion: 'aplanta',
         latitud,
         longitud,
         tkn: generarTokenFechaHoy(),

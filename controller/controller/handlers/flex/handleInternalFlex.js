@@ -1,11 +1,11 @@
 import { executeQuery } from "../../../../db.js";
 
 import { insertEnvios } from "../../functions/insertEnvios.js";
-import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
 import { logCyan } from "../../../../src/funciones/logsCustom.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
+import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
 
 /// Busco el envio
 /// Si no existe, lo inserto y tomo el did
@@ -80,7 +80,7 @@ export async function handleInternalFlex(
   }
 
   /// Actualizo el estado del envío y lo envío al microservicio de estados
-  await sendToShipmentStateMicroService(companyId, userId, shipmentId);
+  await sendToShipmentStateMicroServiceAPI(companyId, userId, shipmentId);
   logCyan(
     "Actualice el estado del envio y lo envie al microservicio de estados"
   );
