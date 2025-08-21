@@ -119,7 +119,7 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
     await sendToShipmentStateMicroService(dataQr.empresa, driver, shipmentIdFromDataQr);
     logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios externos");
 
-    logCyan("Voy a asignar el envio en la logistica interna");
+    logCyan(`Voy a asignar el envio en la logistica interna 2 con driver: ${driver}  jj`);
     await assign(externalCompany.did, userId, 3, dataQr, driver);
     const body = await informe(dbConnection, company, externalClient[0].did, userId, internalShipmentId);
 

@@ -120,7 +120,7 @@ export async function handleExternalFlex(
         rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [
           result,
           senderid,
-        ]);
+        ], true);
         logCyan("Inserte el envio en la logistica externa");
         externalShipmentId = rowsEnvios[0].did;
       }
@@ -129,7 +129,7 @@ export async function handleExternalFlex(
         "SELECT didLocal FROM envios_exteriores WHERE didExterno = ?";
       let internalShipmentId = await executeQuery(dbConnection, consulta, [
         externalShipmentId,
-      ]);
+      ], true);
 
       if (internalShipmentId.length > 0 && internalShipmentId[0]?.didLocal) {
         internalShipmentId = internalShipmentId[0].didLocal;
@@ -159,7 +159,7 @@ export async function handleExternalFlex(
       }
 
       const checkLI = "SELECT valor FROM envios_logisticainversa WHERE didEnvio = ?";
-      const rows = await executeQuery(externalDbConnection, checkLI, [externalShipmentId]);
+      const rows = await executeQuery(externalDbConnection, checkLI, [externalShipmentId], true);
 
       if (rows.length > 0) {
         await insertEnviosLogisticaInversa(
@@ -191,8 +191,8 @@ export async function handleExternalFlex(
         cliente: externalLogisticId,
       };
 
-      logCyan("Voy a asignar el envio en la logistica interna");
-      await assign(externalCompanyId, userId, 0, dqrext, userId);
+      logCyan("Voy a asignar el envio en la logistica interna 1");
+      await assign(externalCompanyId, userId, 0, dqrext, driver);
 
       const resultInforme = await informe(
         dbConnection,
