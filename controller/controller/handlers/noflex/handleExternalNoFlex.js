@@ -1,7 +1,6 @@
 import { executeQuery, getClientsByCompany, getCompanyById, getProdDbConfig } from "../../../../db.js";
 import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
 import mysql2 from "mysql2";
-import { insertEnvios } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
@@ -70,8 +69,8 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
         internalShipmentId = internalShipmentId[0].didLocal;
         logCyan("Se encontró el didLocal en envios_exteriores");
     } else {
-        internalShipmentId = await insertEnvios(
-            dbConnection,
+        internalShipmentId = await insertEnviosMicroservicio(
+            // dbConnection,
             companyId,
             externalClient[0].did,
             0,

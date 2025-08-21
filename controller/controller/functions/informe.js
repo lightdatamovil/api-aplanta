@@ -1,4 +1,4 @@
-import CustomException from "../../../classes/custom_exception.js";
+
 import { executeQuery, getClientsByCompany, getDriversByCompany } from "../../../db.js";
 import { logCyan, logPurple } from "../../../src/funciones/logsCustom.js";
 const contadoresIngresados = {};

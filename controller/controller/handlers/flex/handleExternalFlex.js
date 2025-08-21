@@ -1,6 +1,6 @@
 import { executeQuery, getProdDbConfig, getCompanyByCode } from "../../../../db.js";
 import mysql2 from "mysql2";
-import { insertEnvios } from "../../functions/insertEnvios.js";
+import { insertEnviosFlexMicroservicio } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
 import { sendToShipmentStateMicroService as sendShipmentStateToStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
@@ -105,8 +105,8 @@ export async function handleExternalFlex(
         const didcliente_ext = rowsCuentas[0].didCliente;
         const didcuenta_ext = rowsCuentas[0].did;
 
-        const result = await insertEnvios(
-          externalDbConnection,
+        const result = await insertEnviosFlexMicroservicio(
+          // externalDbConnection,
           externalCompanyId,
           didcliente_ext,
           didcuenta_ext,
@@ -135,8 +135,8 @@ export async function handleExternalFlex(
         internalShipmentId = internalShipmentId[0].didLocal;
         logCyan("Encontre el envio en envios exteriores");
       } else {
-        internalShipmentId = await insertEnvios(
-          dbConnection,
+        internalShipmentId = await insertEnviosFlexMicroservicio(
+          // dbConnection,
           company.did,
           externalLogisticId,
           0,
