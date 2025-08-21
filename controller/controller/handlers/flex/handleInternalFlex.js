@@ -1,6 +1,6 @@
 import { executeQuery } from "../../../../db.js";
 
-import { insertEnviosFlexMicroservicio, insertEnviosMicroservicio } from "../../functions/insertEnvios.js";
+import { insertEnviosMicroservicio } from "../../functions/insertEnvios.js";
 import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";

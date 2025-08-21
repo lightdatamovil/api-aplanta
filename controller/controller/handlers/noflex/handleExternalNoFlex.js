@@ -1,12 +1,13 @@
 import { executeQuery, getClientsByCompany, getCompanyById, getProdDbConfig } from "../../../../db.js";
 import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
 import mysql2 from "mysql2";
-import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
+import { insertEnviosExteriores, insertEnviosExterioresMicroservicio } from "../../functions/insertEnviosExteriores.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
 import { logCyan } from "../../../../src/funciones/logsCustom.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 import { assign } from "../../functions/assing.js";
+import { insertEnviosMicroservicio } from "../../functions/insertEnvios.js";
 
 /// Esta funcion se conecta a la base de datos de la empresa externa
 /// Checkea si el envio ya fue colectado, entregado o cancelado
@@ -84,12 +85,12 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
     }
 
     /// Inserto en envios exteriores en la empresa interna
-    await insertEnviosExteriores(
+    await insertEnviosExterioresMicroservicio(
         dbConnection,
         internalShipmentId,
         shipmentIdFromDataQr,
-        0,
         client.nombre || "",
+        0,
         externalCompany.did,
     );
     logCyan("Inserté en envios exteriores");

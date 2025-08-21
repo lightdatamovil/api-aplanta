@@ -69,7 +69,6 @@ export async function handleExternalFlex(
         codLocal
       );
 
-
       if (!driver) {
         continue;
       }
@@ -148,11 +147,11 @@ export async function handleExternalFlex(
         );
         logCyan("Inserte el envio en envios");
         await insertEnviosExteriores(
-          dbConnection,
+          //  dbConnection,
           internalShipmentId,
           externalShipmentId,
-          1,
           nombreFantasia,
+          1,
           externalCompanyId
         );
         logCyan("Inserte el envio en envios exteriores");
