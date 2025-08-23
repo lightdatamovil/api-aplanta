@@ -2,7 +2,7 @@ import { executeQuery } from '../../../db.js';
 import axios from "axios";
 
 export async function insertEnvios(dbConnection, companyId, clientId, accountId, dataQr, flex, externo, driverId, userId) {
-    const lote = Math.random().toString(36).substring(2, 15);
+    const lote = "aplanta";
     const fecha_actual = new Date();
     fecha_actual.setHours(fecha_actual.getHours() - 3);
     const fecha_inicio = fecha_actual.toISOString().slice(0, 19).replace('T', ' ');
