@@ -1,5 +1,6 @@
 import { executeQuery } from '../../../db.js';
 import axios from "axios";
+import { senToDataML } from './sendToDataML.js';
 
 export async function insertEnvios(dbConnection, companyId, clientId, accountId, dataQr, flex, externo, driverId, userId) {
     const lote = "aplanta";
@@ -30,6 +31,17 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
             `;
 
         await executeQuery(dbConnection, updateSql, [result.insertId, result.insertId]);
+
+        if (companyId == 12) {
+
+            await senToDataML(
+                companyId,
+                result.insertId,
+                senderid,
+                idshipment
+            );
+        }
+
         await axios.post(
             'https://altaenvios.lightdata.com.ar/api/enviosMLredis',
             {
