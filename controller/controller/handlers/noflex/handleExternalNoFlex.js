@@ -1,5 +1,4 @@
 import { executeQuery, getClientsByCompany, getCompanyById, getProdDbConfig } from "../../../../db.js";
-import { sendToShipmentStateMicroService } from "../../functions/sendToShipmentStateMicroService.js";
 import mysql2 from "mysql2";
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
@@ -8,6 +7,7 @@ import { informe } from "../../functions/informe.js";
 import { logCyan } from "../../../../src/funciones/logsCustom.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 import { assign } from "../../functions/assing.js";
+import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
 
 /// Esta funcion se conecta a la base de datos de la empresa externa
 /// Checkea si el envio ya fue colectado, entregado o cancelado
@@ -113,13 +113,13 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
         );
     }
 
-    await sendToShipmentStateMicroService(companyId, userId, internalShipmentId);
+    await sendToShipmentStateMicroServiceAPI(companyId, userId, internalShipmentId);
     logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios internos");
 
-    await sendToShipmentStateMicroService(dataQr.empresa, driver, shipmentIdFromDataQr);
+    await sendToShipmentStateMicroServiceAPI(dataQr.empresa, driver, shipmentIdFromDataQr);
     logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios externos");
 
-    logCyan("Voy a asignar el envio en la logistica interna");
+    logCyan(`Voy a asignar el envio en la logistica interna 2 con driver: ${driver}  jj`);
     await assign(externalCompany.did, userId, 3, dataQr, driver);
     const body = await informe(dbConnection, company, externalClient[0].did, userId, internalShipmentId);
 

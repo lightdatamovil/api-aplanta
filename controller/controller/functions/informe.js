@@ -10,6 +10,9 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
         clientId = 0;
     }
 
+    // En algún lugar donde se registre un nuevo ingreso:
+    incrementarIngresados(hoy, companyId, userId);
+
     const queryIngresadosHoy = `
             SELECT eh.estado 
             FROM envios_historial AS eh
@@ -21,6 +24,7 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
         `;
 
     const resultIngresadosHoy = await executeQuery(dbConnection, queryIngresadosHoy, [clientId, `${hoy} 00:00:00`, `${hoy} 23:59:59`]);
+
 
     let amountOfAPlanta = 0;
     let amountOfARetirarAndRetirados = 0;
@@ -35,8 +39,6 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
 
     // Función para incrementar el contador
 
-    // En algún lugar donde se registre un nuevo ingreso:
-    incrementarIngresados(hoy, companyId, userId);
 
     // Reemplazo de la consulta SQL con la variable local
     const ingresadosHoyChofer = obtenerIngresados(hoy, companyId, userId);
@@ -78,16 +80,16 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
              stack: ''
          });
          */
-        logCyan("El cliente no fue encontrado");
+        logCyan("El cliente no fue encontrado1");
     }
-    logCyan("El cliente no fue encontrado");
+    logCyan("El cliente no fue encontrado2");
 
 
     const chofer = companyDrivers[choferasignado]?.nombre || "Sin información";
     if (!companyDrivers[choferasignado]) {
-        logCyan("El chofer no fue encontrado");
+        logCyan("El chofer no fue encontrado1");
     } else {
-        logCyan("El chofer fue encontrado");
+        logCyan("El chofer fue encontrado2");
     }
 
     logCyan("Se generó el informe");
