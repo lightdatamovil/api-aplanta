@@ -25,6 +25,7 @@ export async function sendToShipmentStateMicroServiceAPI(
         operacion: 'aplanta',
         latitud,
         longitud,
+        desde: "aplanta",
         tkn: generarTokenFechaHoy(),
     };
     try {
