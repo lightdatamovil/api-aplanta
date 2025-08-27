@@ -42,7 +42,7 @@ export async function aplanta(dbConnection, req, company) {
                     message: "El envío no está ingresado en su sistema",
                 }]);
             }
-
+            // holi
             const shipmentIdExterno = await getShipmentIdFromQr(empresaVinculada, dataQr);
 
             dataQr = {
