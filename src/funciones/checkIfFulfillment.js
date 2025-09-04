@@ -6,8 +6,8 @@ export async function checkIfFulfillment(dbConnection, mlShipmentId) {
     const ffaRows = await executeQuery(dbConnection, checkIfFFA, [mlShipmentId]);
     if (ffaRows.length > 0) {
         throw new CustomException({
-            title: "Fulfillment Error",
-            message: "El paquete todavia no esta armado, espera a terminar el proceso y vuelva a intentarlo.",
+            title: "Orden pendiente de armado - Fulfillment",
+            message: "Orden pendiente de armado, espera a terminar el proceso y vuelva a intentarlo.",
         });
     }
 }
