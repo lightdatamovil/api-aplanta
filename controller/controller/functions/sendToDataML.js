@@ -1,6 +1,6 @@
 import { connect } from 'amqplib';
 import dotenv from 'dotenv';
-import { logCyan, logGreen, logRed, logYellow } from '../../../src/funciones/logsCustom.js';
+import { logCyan, logGreen, logRed, logYellow } from 'lightdata-tools';
 
 dotenv.config({ path: process.env.ENV_FILE || '.env' });
 

@@ -1,11 +1,8 @@
-import { executeQuery } from "../../../../db.js";
-
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
-import { logCyan } from "../../../../src/funciones/logsCustom.js";
-import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
 import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
+import { checkIfFulfillment, executeQuery, logCyan } from "lightdata-tools";
 
 /// Busco el envio
 /// Si no existe, lo inserto y tomo el did

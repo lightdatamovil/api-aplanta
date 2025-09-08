@@ -1,13 +1,12 @@
-import { executeQuery, getClientsByCompany, getCompanyById, getProdDbConfig } from "../../../../db.js";
 import mysql2 from "mysql2";
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
-import { logCyan } from "../../../../src/funciones/logsCustom.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
-import { assign } from "../../functions/assing.js";
+import { assign, executeQuery, getProductionDbConfig, logCyan } from "lightdata-tools";
 import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
+import { companiesService } from "../../../../db.js";
 
 /// Esta funcion se conecta a la base de datos de la empresa externa
 /// Checkea si el envio ya fue colectado, entregado o cancelado
@@ -23,10 +22,10 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
     const clientIdFromDataQr = dataQr.cliente;
 
     /// Busco la empresa externa
-    const externalCompany = await getCompanyById(dataQr.empresa);
+    const externalCompany = await companiesService.getCompanyById(dataQr.empresa);
 
     /// Conecto a la base de datos de la empresa externa
-    const dbConfigExt = getProdDbConfig(externalCompany);
+    const dbConfigExt = getProductionDbConfig(externalCompany);
     const externalDbConnection = mysql2.createConnection(dbConfigExt);
     externalDbConnection.connect();
 
@@ -40,10 +39,10 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
     // }
     logCyan("El envio no es colectado, entregado o cancelado");
 
-    const companyClientList = await getClientsByCompany(externalDbConnection, externalCompany.did);
+    const companyClientList = await companiesService.getClientsByCompany(externalDbConnection, externalCompany.did);
     const client = companyClientList[clientIdFromDataQr];
 
-    const internalCompany = await getCompanyById(companyId);
+    const internalCompany = await companiesService.getCompanyById(companyId);
 
     /// Busco el chofer que se crea en la vinculacion de logisticas
     const driver = await checkIfExistLogisticAsDriverInExternalCompany(externalDbConnection, internalCompany.codigo);

@@ -1,9 +1,9 @@
 import express, { json, urlencoded } from 'express';
-import a_planta from './route/aplanta.js';
-import { redisClient } from './db.js';
-import { logBlue } from './src/funciones/logsCustom.js';
+import a_planta from './routes/aplanta.js';
+import { jwtSecret, redisClient } from './db.js';
 import cors from 'cors';
-import clear from './route/clearClient.js';
+import clear from './routes/clearClient.js';
+import { logBlue, verifyToken } from 'lightdata-tools';
 
 const app = express();
 
@@ -16,6 +16,7 @@ const PORT = process.env.PORT;
 
 app.use("/api", a_planta)
 app.use("/client", clear)
+app.use(verifyToken(jwtSecret));
 app.get('/ping', (req, res) => {
   const currentDate = new Date();
   currentDate.setHours(currentDate.getHours()); // Resta 3 horas

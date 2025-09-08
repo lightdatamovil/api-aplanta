@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
-import { logGreen, logRed } from '../../../src/funciones/logsCustom.js';
-import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
 import axios from 'axios';
+import { logGreen, logRed } from 'lightdata-tools';
+import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
 import { generarTokenFechaHoy } from '../../../src/funciones/generarTokenFechaHoy.js';
 dotenv.config({ path: process.env.ENV_FILE || '.env' });
 

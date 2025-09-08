@@ -1,5 +1,4 @@
-import { executeQuery } from "../../../../db.js";
-import { logCyan } from "../../../../src/funciones/logsCustom.js";
+import { executeQuery, logCyan } from "lightdata-tools";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
 import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";

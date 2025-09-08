@@ -1,6 +1,4 @@
-
-
-import { executeQuery } from "../../../db.js";
+import { executeQuery } from "lightdata-tools";
 
 
 export async function checkIfExistLogisticAsDriverInExternalCompany(dbConnection, syncCode) {
