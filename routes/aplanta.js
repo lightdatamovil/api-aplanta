@@ -4,7 +4,7 @@ import { buildHandler } from "./_handler.js";
 
 const a_planta = Router();
 
-a_planta.get(
+a_planta.post(
   '/aplanta',
   buildHandler({
     controller: async ({ db, req, company }) => {

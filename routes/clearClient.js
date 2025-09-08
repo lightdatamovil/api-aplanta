@@ -4,7 +4,7 @@ import { buildHandler } from "../routes/_handler.js";
 
 const clients = Router();
 
-clients.get(
+clients.post(
     '/clear-client-list',
     buildHandler({
         needsDb: false,
