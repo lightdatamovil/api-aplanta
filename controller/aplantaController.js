@@ -7,11 +7,12 @@ import { companiesService } from "../db.js";
 
 
 export async function aplanta(dbConnection, req, company) {
-    let { dataQr } = req.body;
     const { userId } = req.user;
-    let response;
+
+    let { dataQr } = req.body;
     dataQr = parseIfJson(dataQr);
 
+    let response;
     if (
         LogisticaConfig.hasBarcodeEnabled(company.did) &&
         (
@@ -112,8 +113,7 @@ export async function aplanta(dbConnection, req, company) {
             response = await handleInternalNoFlex(dbConnection, dataQr, company, userId);
         } else {
             logCyan("Es externo");
-            logPurple(JSON.stringify(dataQr));
-            response = await handleExternalNoFlex(dbConnection, dataQr, company, userId);
+            response = await handleExternalNoFlex(dbConnection, dataQr, company, userId, latit);
         }
     }
 

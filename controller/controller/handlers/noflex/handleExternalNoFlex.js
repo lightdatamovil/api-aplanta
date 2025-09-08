@@ -4,9 +4,8 @@ import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.j
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
-import { assign, executeQuery, getProductionDbConfig, logCyan } from "lightdata-tools";
-import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
-import { companiesService } from "../../../../db.js";
+import { assign, executeQuery, getProductionDbConfig, logCyan, sendShipmentStateToStateMicroserviceAPI } from "lightdata-tools";
+import { companiesService, urlEstadosMicroservice } from "../../../../db.js";
 
 /// Esta funcion se conecta a la base de datos de la empresa externa
 /// Checkea si el envio ya fue colectado, entregado o cancelado
@@ -15,7 +14,12 @@ import { companiesService } from "../../../../db.js";
 /// Asigno a la empresa externa
 /// Si es autoasignacion, asigno a la empresa interna
 /// Actualizo el estado del envio a colectado y envio el estado del envio en los microservicios
-export async function handleExternalNoFlex(dbConnection, dataQr, company, userId) {
+export async function handleExternalNoFlex(
+    dbConnection,
+    dataQr,
+    company,
+    userId
+) {
     const companyId = company.did;
     const shipmentIdFromDataQr = dataQr.did;
 
@@ -112,10 +116,22 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
         );
     }
 
-    await sendToShipmentStateMicroServiceAPI(companyId, userId, internalShipmentId);
+    await sendShipmentStateToStateMicroserviceAPI(
+        urlEstadosMicroservice,
+        company,
+        userId,
+        internalShipmentId,
+        1
+    );
     logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios internos");
-
-    await sendToShipmentStateMicroServiceAPI(dataQr.empresa, driver, shipmentIdFromDataQr);
+    const companyFromQr = await companiesService.getCompanyById(dataQr.empresa);
+    await sendShipmentStateToStateMicroserviceAPI(
+        urlEstadosMicroservice,
+        companyFromQr,
+        driver,
+        shipmentIdFromDataQr,
+        1
+    );
     logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios externos");
 
     logCyan(`Voy a asignar el envio en la logistica interna 2 con driver: ${driver}  jj`);

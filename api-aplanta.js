@@ -3,7 +3,7 @@ import a_planta from './routes/aplanta.js';
 import { jwtSecret, redisClient } from './db.js';
 import cors from 'cors';
 import clear from './routes/clearClient.js';
-import { logBlue, verifyToken } from 'lightdata-tools';
+import { logBlue, Status, verifyToken } from 'lightdata-tools';
 
 const app = express();
 
@@ -19,16 +19,14 @@ app.use("/client", clear)
 app.use(verifyToken(jwtSecret));
 app.get('/ping', (req, res) => {
   const currentDate = new Date();
-  currentDate.setHours(currentDate.getHours()); // Resta 3 horas
-
-  // Formatear la hora en el formato HH:MM:SS
+  currentDate.setHours(currentDate.getHours());
   const hours = currentDate.getHours().toString().padStart(2, '0');
   const minutes = currentDate.getMinutes().toString().padStart(2, '0');
   const seconds = currentDate.getSeconds().toString().padStart(2, '0');
 
   const formattedTime = `${hours}:${minutes}:${seconds}`;
 
-  res.status(200).json({
+  res.status(Status.ok).json({
     hora: formattedTime
   });
 });

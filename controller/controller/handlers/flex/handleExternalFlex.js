@@ -4,8 +4,8 @@ import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.j
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
-import { assign, checkIfFulfillment, CustomException, executeQuery, getProductionDbConfig, logCyan, sendShipmentStateToStateMicroservice } from "lightdata-tools";
-import { companiesService } from "../../../../db.js";
+import { assign, checkIfFulfillment, CustomException, executeQuery, getProductionDbConfig, logCyan, sendShipmentStateToStateMicroserviceAPI } from "lightdata-tools";
+import { companiesService, urlEstadosMicroservice } from "../../../../db.js";
 
 /// Esta funcion busca las logisticas vinculadas
 /// Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
@@ -116,7 +116,7 @@ export async function handleExternalFlex(
         rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [
           result,
           senderid,
-        ], true);
+        ]);
         logCyan("Inserte el envio en la logistica externa");
         externalShipmentId = rowsEnvios[0].did;
       }
@@ -125,7 +125,7 @@ export async function handleExternalFlex(
         "SELECT didLocal FROM envios_exteriores WHERE didExterno = ?";
       let internalShipmentId = await executeQuery(dbConnection, consulta, [
         externalShipmentId,
-      ], true);
+      ]);
 
       if (internalShipmentId.length > 0 && internalShipmentId[0]?.didLocal) {
         internalShipmentId = internalShipmentId[0].didLocal;
@@ -166,17 +166,21 @@ export async function handleExternalFlex(
         );
       }
 
-      await sendShipmentStateToStateMicroservice(
-        company.did,
+      await sendShipmentStateToStateMicroserviceAPI(
+        urlEstadosMicroservice,
+        company,
         userId,
-        internalShipmentId
+        internalShipmentId,
+        1,
       );
       logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica interna");
 
-      await sendShipmentStateToStateMicroservice(
-        externalCompanyId,
+      await sendShipmentStateToStateMicroserviceAPI(
+        urlEstadosMicroservice,
+        externalCompany,
         driver,
-        externalShipmentId
+        externalShipmentId,
+        1,
       );
       logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica externa");
 
