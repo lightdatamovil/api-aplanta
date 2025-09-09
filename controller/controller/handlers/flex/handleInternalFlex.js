@@ -1,8 +1,8 @@
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
-import { checkIfFulfillment, executeQuery, logCyan, sendToShipmentStateMicroServiceAPI } from "lightdata-tools";
-import { queueEstados, rabbitUrl } from "../../../../db.js";
+import { checkIfFulfillment, executeQuery, logCyan, sendShipmentStateToStateMicroserviceAPI, } from "lightdata-tools";
+import { urlEstadosMicroservice } from "../../../../db.js";
 
 /// Busco el envio
 /// Si no existe, lo inserto y tomo el did
@@ -77,13 +77,12 @@ export async function handleInternalFlex(
   }
 
   /// Actualizo el estado del envío y lo envío al microservicio de estados
-  await sendToShipmentStateMicroServiceAPI(
-    queueEstados,
-    rabbitUrl,
-    'aplanta',
+  await sendShipmentStateToStateMicroserviceAPI(
+    urlEstadosMicroservice,
     companyId,
     userId,
-    shipmentId
+    shipmentId,
+    1,
   );
   logCyan(
     "Actualice el estado del envio y lo envie al microservicio de estados"
