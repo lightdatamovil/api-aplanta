@@ -7,6 +7,8 @@ const a_planta = Router();
 a_planta.post(
   '/aplanta',
   buildHandlerWrapper({
+    required: ['dataQr'],
+    optional: ['latitude', 'longitude'],
     controller: async ({ db, req, company }) => {
       const result = await aplanta(db, req, company);
       return result;

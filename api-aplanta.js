@@ -1,6 +1,6 @@
 import express, { json, urlencoded } from 'express';
 import a_planta from './routes/aplanta.js';
-import { jwtSecret, redisClient } from './db.js';
+import { jwtSecret, jwtIssuer, jwtAudience, redisClient } from './db.js';
 import cors from 'cors';
 import clear from './routes/clearClient.js';
 import { logBlue, Status, verifyToken } from 'lightdata-tools';
@@ -16,7 +16,7 @@ const PORT = process.env.PORT;
 
 app.use("/api", a_planta)
 app.use("/client", clear)
-app.use(verifyToken(jwtSecret));
+app.use(verifyToken({ jwtSecret, jwtIssuer, jwtAudience }));
 app.get('/ping', (req, res) => {
   const currentDate = new Date();
   currentDate.setHours(currentDate.getHours());
