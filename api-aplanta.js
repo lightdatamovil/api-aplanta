@@ -14,9 +14,9 @@ app.use(cors());
 
 const PORT = process.env.PORT;
 
-app.use("/api", a_planta)
 app.use("/client", clear)
 app.use(verifyToken({ jwtSecret, jwtIssuer, jwtAudience }));
+app.use("/api", a_planta)
 app.get('/ping', (req, res) => {
   const currentDate = new Date();
   currentDate.setHours(currentDate.getHours());
