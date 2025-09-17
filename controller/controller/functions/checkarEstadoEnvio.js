@@ -3,7 +3,7 @@ import { executeQuery } from "lightdata-tools";
 /// Checkea si el envio ya fue puesto a planta, entregado, entregado 2da o cancelado
 export async function checkearEstadoEnvio(dbConnection, shipmentId) {
     const querySelectEstadoEnvio = 'SELECT estado_envio FROM envios WHERE did = ? and superado = 0 and elim = 0 LIMIT 1 ';
-    const estado = await executeQuery(dbConnection, querySelectEstadoEnvio, [shipmentId], true);
+    const estado = await executeQuery(dbConnection, querySelectEstadoEnvio, [shipmentId]);
 
 
     if (estado.length > 0) {
