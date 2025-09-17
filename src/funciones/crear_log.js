@@ -27,10 +27,10 @@ export async function crearLog(req, tiempo, resultado, exito) {
     brand,
   ];
 
-  await executeQueryFromPool(poolLocal, sql, values, true);
+  await executeQueryFromPool(poolLocal, sql, values);
   const now = new Date();
   const pad = (n) => String(n).padStart(2, "0");
-  const fechaFormateada = `${now.getFullYear()}-09-22 ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const fechaFormateada = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   logGreen(`${fechaFormateada} Log creado correctamente`);
   logGreen(`Endpoint: ${req.originalUrl} | Usuario: ${userId} | Empresa: ${companyId} | Perfil: ${profile}`);
   logPurple(`En ${tiempo} ms | Éxito: ${exito ? "sí" : "no"}`);

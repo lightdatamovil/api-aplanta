@@ -25,7 +25,7 @@ export async function handleInternalNoFlex(dbConnection, dataQr, company, userId
     logCyan("El envio no fue colectado, entregado o cancelado");
 
     /// Actualizamos el estado del envio en el micro servicio
-    await sendShipmentStateToStateMicroserviceAPI(urlEstadosMicroservice, company, userId, shipmentId, 0, null, null);
+    await sendShipmentStateToStateMicroserviceAPI(urlEstadosMicroservice, company, userId, shipmentId, 1);
     logCyan("Se actualizo el estado del envio en el micro servicio");
 
     const body = await informe(dbConnection, company, clientId, userId, shipmentId);
