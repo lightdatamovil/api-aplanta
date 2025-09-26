@@ -1,4 +1,5 @@
 import { executeQuery } from "../../../../db.js";
+import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
 import { logCyan } from "../../../../src/funciones/logsCustom.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
@@ -12,7 +13,7 @@ export async function handleInternalNoFlex(dbConnection, dataQr, company, userId
     const shipmentId = dataQr.did;
 
     const clientId = dataQr.cliente;
-
+    await checkIfFulfillment(dbConnection, dataQr.did, false);
     /// Chequeo si el envio ya fue colectado, entregado o cancelado
     const check = await checkearEstadoEnvio(dbConnection, shipmentId);
     if (check) return check;
