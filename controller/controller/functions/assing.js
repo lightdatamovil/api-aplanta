@@ -1,6 +1,6 @@
-import axios from "axios";
 import { logGreen, logRed } from "../../../src/funciones/logsCustom.js";
 import CustomException from "../../../classes/custom_exception.js";
+import { axiosInstance } from "../../../db.js";
 
 export async function assign(companyId, userId, profile, dataQr, driverId) {
   const payload = {
@@ -18,7 +18,7 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
   };
 
   try {
-    const result = await axios.post(
+    const result = await axiosInstance.post(
       "https://asignaciones.lightdata.app/api/asignaciones/asignar",
       payload
     );

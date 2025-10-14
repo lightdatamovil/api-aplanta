@@ -2,9 +2,9 @@ import { connect } from 'amqplib';
 import dotenv from 'dotenv';
 import { logGreen, logRed } from '../../../src/funciones/logsCustom.js';
 import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
-import axios from 'axios';
 import CustomException from '../../../classes/custom_exception.js';
 import { generarTokenFechaHoy } from '../../../src/funciones/generarTokenFechaHoy.js';
+import { axiosInstance } from '../../../db.js';
 
 dotenv.config({ path: process.env.ENV_FILE || '.env' });
 
@@ -88,7 +88,7 @@ export async function sendToShipmentStateMicroService(
         logRed(`❌ Falló RabbitMQ, intentando enviar por HTTP: ${error.message}`);
 
         try {
-            const response = await axios.post(BACKUP_ENDPOINT, message);
+            const response = await axiosInstance.post(BACKUP_ENDPOINT, message);
             logGreen(`✅ Enviado por HTTP con status ${response.status}`);
         } catch (httpError) {
             logRed(`❌ Falló el envío por HTTP también: ${httpError.message}`);
