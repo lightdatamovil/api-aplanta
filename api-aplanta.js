@@ -4,6 +4,7 @@ import { redisClient } from './db.js';
 import { logBlue } from './src/funciones/logsCustom.js';
 import cors from 'cors';
 import clear from './route/clearClient.js';
+import { getAllActiveLocal } from './src/funciones/dbList.js';
 
 const app = express();
 
@@ -30,6 +31,13 @@ app.get('/ping', (req, res) => {
   res.status(200).json({
     hora: formattedTime
   });
+});
+app.get('/active-db', (req, res) => {
+  try {
+    res.status(200).json(getAllActiveLocal());
+  } catch (e) {
+    res.status(500).json({ error: 'No se pudo obtener el estado local' });
+  }
 });
 
 await redisClient.connect();
