@@ -1,5 +1,5 @@
 import { executeQuery, getClientsByCompany, getDriversByCompany } from "../../../db.js";
-import { logCyan, logPurple } from "../../../src/funciones/logsCustom.js";
+import { logCyan } from "../../../src/funciones/logsCustom.js";
 const contadoresIngresados = {};
 
 export async function informe(dbConnection, company, clientId, userId, shipmentId) {
@@ -42,8 +42,6 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
 
     // Reemplazo de la consulta SQL con la variable local
     const ingresadosHoyChofer = obtenerIngresados(hoy, companyId, userId);
-    logPurple(`Ingresados hoy por chofer: ${ingresadosHoyChofer}`);
-
 
     let choferasignado;
     let zonaentrega;
