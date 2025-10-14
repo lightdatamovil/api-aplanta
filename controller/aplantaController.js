@@ -8,12 +8,14 @@ import { logCyan, logPurple } from "../src/funciones/logsCustom.js";
 import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
 import { parseIfJson } from "../src/funciones/isValidJson.js";
 import LogisticaConf from "../classes/logistica_conf.js";
+import { decrActiveLocal, incrActiveLocal } from "../src/funciones/dbList.js";
 
 
 export async function aplanta(company, dataQr, userId) {
     const dbConfig = getProdDbConfig(company);
     const dbConnection = mysql2.createConnection(dbConfig);
     dbConnection.connect();
+    incrActiveLocal(company.did);
 
     try {
         let response;
@@ -131,6 +133,7 @@ export async function aplanta(company, dataQr, userId) {
         throw error;
 
     } finally {
+        decrActiveLocal(company.did);
         dbConnection.end();
     };
 }
