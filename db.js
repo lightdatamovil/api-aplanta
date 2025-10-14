@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import { logRed, logYellow } from "./src/funciones/logsCustom.js";
 import mysql2 from "mysql2";
 import CustomException from "./classes/custom_exception.js";
+import https from "https";
+import axios from "axios";
 
 dotenv.config({ path: process.env.ENV_FILE || ".env" });
 
@@ -23,6 +25,20 @@ const aplantaDbNameForLogs = process.env.APLANTA_DB_NAME_FOR_LOGS;
 // Produccion
 const hostProductionDb = process.env.PRODUCTION_DB_HOST;
 const portProductionDb = process.env.PRODUCTION_DB_PORT;
+
+// 🔹 Agente HTTPS con keep-alive y hasta 100 conexiones simultáneas
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  maxSockets: 100,
+  timeout: 10000, // tiempo máximo de socket en ms
+  family: 4, // fuerza IPv4, evita delay IPv6
+});
+
+// 🔹 Axios preconfigurado (usa el agente y timeout)
+export const axiosInstance = axios.create({
+  httpsAgent,
+  timeout: 5000, // 5 segundos máximo por request
+});
 
 export const redisClient = redis.createClient({
   socket: {

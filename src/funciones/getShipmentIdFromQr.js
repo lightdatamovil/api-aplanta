@@ -1,6 +1,6 @@
-import axios from "axios";
 import { logRed } from "./logsCustom.js";
 import CustomException from "../../classes/custom_exception.js";
+import { axiosInstance } from "../../db.js";
 
 export async function getShipmentIdFromQr(companyId, dataQr) {
     const payload = {
@@ -16,7 +16,7 @@ export async function getShipmentIdFromQr(companyId, dataQr) {
         dataQr: dataQr
     };
     try {
-        const result = await axios.post('https://apimovil2.lightdata.app/api/qr/get-shipment-id', payload);
+        const result = await axiosInstance.post('https://apimovil2.lightdata.app/api/qr/get-shipment-id', payload);
         if (result.status == 200) {
             return result.data.body;
         } else {

@@ -1,8 +1,8 @@
 import CustomException from "../../classes/custom_exception.js";
 import { executeQuery } from "../../db.js";
 
-export async function checkIfFulfillment(dbConnection, mlShipmentId) {
-    const checkIfFFA = `SELECT elim FROM envios WHERE superado=0 AND elim=52 AND ml_shipment_id = ?`;
+export async function checkIfFulfillment(dbConnection, mlShipmentId, esFlex = true) {
+    const checkIfFFA = `SELECT elim FROM envios WHERE superado=0 AND elim=52 AND ${esFlex ? 'ml_shipment_id' : 'did'} = ?`;
     const ffaRows = await executeQuery(dbConnection, checkIfFFA, [mlShipmentId]);
     if (ffaRows.length > 0) {
         throw new CustomException({

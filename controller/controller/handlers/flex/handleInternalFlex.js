@@ -48,7 +48,7 @@ export async function handleInternalFlex(
     shipmentId = row.did;
     /// Checkea si el envio ya fue puesto a planta, entregado, entregado 2da o cancelado
     const check = await checkearEstadoEnvio(dbConnection, shipmentId);
-    console.log("llegue a Check estado envio:", check);
+
     if (check) return check;
     logCyan("El envio no fue puesto a planta, entregado, entregado 2da o cancelado");
     const queryUpdateEnvios = `

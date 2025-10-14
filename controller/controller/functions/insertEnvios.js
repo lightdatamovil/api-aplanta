@@ -1,5 +1,4 @@
-import { executeQuery } from '../../../db.js';
-import axios from "axios";
+import { axiosInstance, executeQuery } from '../../../db.js';
 import { senToDataML } from './sendToDataML.js';
 
 export async function insertEnvios(dbConnection, companyId, clientId, accountId, dataQr, flex, externo, driverId, userId) {
@@ -42,7 +41,7 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
             );
         }
 
-        await axios.post(
+        await axiosInstance.post(
             'https://altaenvios.lightdata.com.ar/api/enviosMLredis',
             {
                 idEmpresa: companyId,
