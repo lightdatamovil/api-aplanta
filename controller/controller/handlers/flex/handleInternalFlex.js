@@ -3,7 +3,7 @@ import { executeQuery } from "../../../../db.js";
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
-import { logCyan } from "../../../../src/funciones/logsCustom.js";
+import { logBlue, logCyan } from "../../../../src/funciones/logsCustom.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
 import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
 
@@ -22,7 +22,11 @@ export async function handleInternalFlex(
 ) {
   const companyId = company.did;
   const mlShipmentId = dataQr.id;
+  const startTime = performance.now();
+
+  logBlue(`Inicio handleInternalFlex - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
   await checkIfFulfillment(dbConnection, mlShipmentId);
+  logBlue(`Fin checkIfFulfillment - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
 
   let shipmentId;
 
@@ -37,8 +41,8 @@ export async function handleInternalFlex(
   let resultBuscarEnvio = await executeQuery(dbConnection, sql, [
     mlShipmentId,
     senderId,
-  ], true);
-
+  ]);
+  logBlue(`Fin executeQuery buscar envio - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
   const row = resultBuscarEnvio[0];
 
 
@@ -48,7 +52,7 @@ export async function handleInternalFlex(
     shipmentId = row.did;
     /// Checkea si el envio ya fue puesto a planta, entregado, entregado 2da o cancelado
     const check = await checkearEstadoEnvio(dbConnection, shipmentId);
-
+    logBlue(`Fin checkearEstadoEnvio - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
     if (check) return check;
     logCyan("El envio no fue puesto a planta, entregado, entregado 2da o cancelado");
     const queryUpdateEnvios = `
@@ -58,7 +62,8 @@ export async function handleInternalFlex(
                 LIMIT 1
             `;
 
-    await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,], true);
+    await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,]);
+    logBlue(`Fin executeQuery update envio - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
     logCyan("Actualice el ml_qr_seguridad del envio");
   } else {
     shipmentId = await insertEnvios(
@@ -72,15 +77,18 @@ export async function handleInternalFlex(
       0,
       userId,
     );
+    logBlue(`Fin insertEnvios - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
     resultBuscarEnvio = await executeQuery(dbConnection, sql, [
       mlShipmentId,
       senderId,
     ]);
+    logBlue(`Fin executeQuery buscar envio 2 - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
     logCyan("Inserte el envio");
   }
 
   /// Actualizo el estado del envío y lo envío al microservicio de estados
   await sendToShipmentStateMicroServiceAPI(companyId, userId, shipmentId);
+  logBlue(`Fin sendToShipmentStateMicroServiceAPI - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
   logCyan(
     "Actualice el estado del envio y lo envie al microservicio de estados"
   );
@@ -94,6 +102,7 @@ export async function handleInternalFlex(
       userId,
       shipmentId
     );
+    logBlue(`Fin informe2 - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
     return {
       success: true,
       message: "Paquete insertado y puesto a planta  - FLEX",
@@ -108,6 +117,7 @@ export async function handleInternalFlex(
     userId,
     shipmentId
   );
+  logBlue(`Fin informe - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
   return {
     success: true,
     message: "Paquete insertado y puesto a planta  - FLEX",
