@@ -24,9 +24,9 @@ export async function handleInternalFlex(
   const mlShipmentId = dataQr.id;
   const startTime = performance.now();
 
-  logBlue(`Inicio handleInternalFlex - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
+  logBlue(`Inicio handleInternalFlex - ${((performance.now() - startTime)).toFixed(2)} seg`);
   await checkIfFulfillment(dbConnection, mlShipmentId);
-  logBlue(`Fin checkIfFulfillment - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
+  logBlue(`Fin checkIfFulfillment - ${((performance.now() - startTime)).toFixed(2)} seg`);
 
   let shipmentId;
 
@@ -42,7 +42,7 @@ export async function handleInternalFlex(
     mlShipmentId,
     senderId,
   ]);
-  logBlue(`Fin executeQuery buscar envio - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
+  logBlue(`Fin executeQuery buscar envio - ${((performance.now() - startTime)).toFixed(2)} seg`);
   const row = resultBuscarEnvio[0];
 
 
@@ -52,7 +52,7 @@ export async function handleInternalFlex(
     shipmentId = row.did;
     /// Checkea si el envio ya fue puesto a planta, entregado, entregado 2da o cancelado
     const check = await checkearEstadoEnvio(dbConnection, shipmentId);
-    logBlue(`Fin checkearEstadoEnvio - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
+    logBlue(`Fin checkearEstadoEnvio - ${((performance.now() - startTime)).toFixed(2)} seg`);
     if (check) return check;
     logCyan("El envio no fue puesto a planta, entregado, entregado 2da o cancelado");
     const queryUpdateEnvios = `
@@ -63,7 +63,7 @@ export async function handleInternalFlex(
             `;
 
     await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,]);
-    logBlue(`Fin executeQuery update envio - ${((performance.now() - startTime) / 1000).toFixed(2)} seg`);
+    logBlue(`Fin executeQuery update envio - ${((performance.now() - startTime)).toFixed(2)} seg`);
     logCyan("Actualice el ml_qr_seguridad del envio");
   } else {
     shipmentId = await insertEnvios(
