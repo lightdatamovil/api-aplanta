@@ -16,10 +16,10 @@ export function logRed(message) {
 }
 
 export function logBlue(message) {
-    //     if (isLocal) {
-    //         console.log(`\x1b[34m%s\x1b[0m`, `🔵 ${message}
-    // --------------------------------------------------`);
-    //     }
+    if (isLocal) {
+        console.log(`\x1b[34m%s\x1b[0m`, `🔵 ${message}
+    --------------------------------------------------`);
+    }
 }
 
 export function logYellow(message) {
