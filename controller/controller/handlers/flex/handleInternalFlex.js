@@ -22,11 +22,8 @@ export async function handleInternalFlex(
 ) {
   const companyId = company.did;
   const mlShipmentId = dataQr.id;
-  const startTime = performance.now();
 
-  logBlue(`Inicio handleInternalFlex - ${((performance.now() - startTime)).toFixed(2)} ms`);
   await checkIfFulfillment(dbConnection, mlShipmentId);
-  logBlue(`Fin checkIfFulfillment - ${((performance.now() - startTime)).toFixed(2)} ms`);
 
   let shipmentId;
 
@@ -42,7 +39,6 @@ export async function handleInternalFlex(
     mlShipmentId,
     senderId,
   ]);
-  logBlue(`Fin executeQuery buscar envio - ${((performance.now() - startTime)).toFixed(2)} ms`);
   const row = resultBuscarEnvio[0];
 
 
@@ -52,7 +48,6 @@ export async function handleInternalFlex(
     shipmentId = row.did;
     /// Checkea si el envio ya fue puesto a planta, entregado, entregado 2da o cancelado
     const check = await checkearEstadoEnvio(dbConnection, shipmentId);
-    logBlue(`Fin checkearEstadoEnvio - ${((performance.now() - startTime)).toFixed(2)} ms`);
     if (check) return check;
     logCyan("El envio no fue puesto a planta, entregado, entregado 2da o cancelado");
     const queryUpdateEnvios = `
@@ -63,7 +58,6 @@ export async function handleInternalFlex(
             `;
 
     await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,]);
-    logBlue(`Fin executeQuery update envio - ${((performance.now() - startTime)).toFixed(2)} ms`);
     logCyan("Actualice el ml_qr_seguridad del envio");
   } else {
     shipmentId = await insertEnvios(
@@ -77,15 +71,14 @@ export async function handleInternalFlex(
       0,
       userId,
     );
-    logBlue(`Fin insertEnvios - ${((performance.now() - startTime)).toFixed(2)} ms`);
     resultBuscarEnvio = await executeQuery(dbConnection, sql, [
       mlShipmentId,
       senderId,
     ]);
-    logBlue(`Fin executeQuery buscar envio 2 - ${((performance.now() - startTime)).toFixed(2)} ms`);
     logCyan("Inserte el envio");
   }
 
+  const startTime = performance.now();
   /// Actualizo el estado del envío y lo envío al microservicio de estados
   await sendToShipmentStateMicroServiceAPI(companyId, userId, shipmentId);
   logBlue(`Fin sendToShipmentStateMicroServiceAPI - ${((performance.now() - startTime)).toFixed(2)} ms`);
@@ -102,7 +95,6 @@ export async function handleInternalFlex(
       userId,
       shipmentId
     );
-    logBlue(`Fin informe2 - ${((performance.now() - startTime)).toFixed(2)} ms`);
     return {
       success: true,
       message: "Paquete insertado y puesto a planta  - FLEX",
@@ -117,7 +109,6 @@ export async function handleInternalFlex(
     userId,
     shipmentId
   );
-  logBlue(`Fin informe - ${((performance.now() - startTime)).toFixed(2)} ms`);
   return {
     success: true,
     message: "Paquete insertado y puesto a planta  - FLEX",
