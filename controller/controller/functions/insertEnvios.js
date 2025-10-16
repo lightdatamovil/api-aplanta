@@ -31,7 +31,7 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
 
         await executeQuery(dbConnection, updateSql, [result.insertId, result.insertId]);
 
-        if (companyId == 12 || companyId == 167 || companyId == 79) {
+        if (companyId == 12 || companyId == 167 || companyId == 79 || companyId == 288) {
 
             await senToDataML(
                 companyId,
