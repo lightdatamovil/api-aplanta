@@ -1,8 +1,7 @@
 import dotenv from 'dotenv';
-import { logGreen, logRed } from '../../../src/funciones/logsCustom.js';
+import { logGreen } from '../../../src/funciones/logsCustom.js';
 import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
 import { generarTokenFechaHoy } from '../../../src/funciones/generarTokenFechaHoy.js';
-import { sendToShipmentStateMicroService } from './sendToShipmentStateMicroService.js';
 import { axiosInstance } from '../../../db.js';
 
 dotenv.config({ path: process.env.ENV_FILE || '.env' });
@@ -32,17 +31,10 @@ export async function sendToShipmentStateMicroServiceAPI(
     };
 
     try {
+        console.log(message);
         const response = await axiosInstance.post(BACKUP_ENDPOINT, message);
         logGreen(`✅ Enviado por HTTP con status ${response.status}`);
     } catch (httpError) {
-        try {
-            await sendToShipmentStateMicroService(
-                companyId, userId, shipmentId, latitud, longitud
-            );
-            logGreen("↩️ Enviado por RabbitMQ (fallback)");
-        } catch (mqError) {
-            logRed(`❌ Falló HTTP y también MQ: ${httpError.message} | ${mqError.message}`);
-            throw mqError;
-        }
+        console.error('Error enviando a Shipment State MicroService API:', httpError.message);
     }
 }

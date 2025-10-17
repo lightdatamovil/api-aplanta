@@ -37,7 +37,7 @@ const httpsAgent = new https.Agent({
 // 🔹 Axios preconfigurado (usa el agente y timeout)
 export const axiosInstance = axios.create({
   httpsAgent,
-  timeout: 5000, // 5 segundos máximo por request
+  timeout: 7000, // 5 segundos máximo por request
 });
 
 export const redisClient = redis.createClient({
