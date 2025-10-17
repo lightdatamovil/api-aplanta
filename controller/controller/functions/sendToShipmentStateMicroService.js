@@ -10,7 +10,7 @@ dotenv.config({ path: process.env.ENV_FILE || '.env' });
 
 const RABBITMQ_URL = process.env.RABBITMQ_URL;
 const QUEUE_ESTADOS = process.env.QUEUE_ESTADOS;
-const BACKUP_ENDPOINT = "https://serverestado.lightdata.app/estados"
+const BACKUP_ENDPOINT = "http://10.70.0.69:13000/estados"
 
 let connection = null;
 let channel = null;
