@@ -5,6 +5,7 @@ import { aplanta } from "../controller/aplantaController.js";
 import { logPurple, logRed } from "../src/funciones/logsCustom.js";
 import { crearLog } from "../src/funciones/crear_log.js";
 import CustomException from "../classes/custom_exception.js";
+import { obtenerEstadoComparado } from "../controller/test_ip.js";
 
 const a_planta = Router();
 
@@ -38,6 +39,21 @@ a_planta.post("/aplanta", async (req, res) => {
     }
   } finally {
     logPurple(`Tiempo de ejecución: ${performance.now() - startTime} ms`);
+  }
+});
+
+
+
+a_planta.post("/asignar", async (req, res) => {
+  try {
+    const { data, status } = await obtenerEstadoComparado();
+    res.status(status).json(data);
+  } catch (e) {
+    res.status(e.status || 502).json({
+      ok: false,
+      error: "No se pudo obtener el estado",
+      detalle: e.message,
+    });
   }
 });
 
