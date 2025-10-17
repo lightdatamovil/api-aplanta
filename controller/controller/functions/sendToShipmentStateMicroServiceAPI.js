@@ -31,7 +31,6 @@ export async function sendToShipmentStateMicroServiceAPI(
     };
 
     try {
-        console.log(message);
         const response = await axiosInstance.post(BACKUP_ENDPOINT, message);
         logGreen(`✅ Enviado por HTTP con status ${response.status}`);
     } catch (httpError) {
