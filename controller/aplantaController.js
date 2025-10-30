@@ -23,7 +23,7 @@ export async function aplanta(company, dataQr, userId) {
             dataQr = dataQr.replace(/\s+/g, '');
         }
 
-        console.log("DATA QR:", dataQr);
+        //  console.log("DATA QR:", dataQr);
 
         dataQr = parseIfJson(dataQr);
 
