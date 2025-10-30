@@ -130,6 +130,7 @@ export async function aplanta(company, dataQr, userId) {
         return response;
     }
     catch (error) {
+        console.log(dbConfig);
         throw error;
 
     } finally {
