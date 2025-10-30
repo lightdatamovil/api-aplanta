@@ -19,7 +19,14 @@ export async function aplanta(company, dataQr, userId) {
 
     try {
         let response;
+        if (typeof dataQr === "string") {
+            dataQr = dataQr.replace(/\s+/g, '');
+        }
+
+        console.log("DATA QR:", dataQr);
+
         dataQr = parseIfJson(dataQr);
+
 
         if (
             LogisticaConf.hasBarcodeEnabled(company.did) &&
