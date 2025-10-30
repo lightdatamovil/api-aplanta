@@ -32,7 +32,7 @@ export async function handleExternalFlex({ db, req, company }) {
     });
 
   }
-  /// Por cada logística externa
+
   for (const logistica of logisticasExternas) {
     if (logistica.did == undefined) {
       throw new CustomException({
@@ -149,7 +149,6 @@ export async function handleExternalFlex({ db, req, company }) {
         });
       }
 
-
       const [rowLogisticaInversa] = await LightdataORM.select({
         dbConnection: dbDueña,
         table: "envios_logisticainversa",
@@ -169,7 +168,6 @@ export async function handleExternalFlex({ db, req, company }) {
           quien: userId,
         });
       }
-
 
       await sendShipmentStateToStateMicroserviceAPI({
         urlEstadosMicroservice,
