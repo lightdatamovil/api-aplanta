@@ -1,4 +1,4 @@
-import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
+import { checkIfExistLogisticAsDriverInDueñaCompany } from "../../functions/checkIfExistLogisticAsDriverInDueñaCompany.js";
 import { informe } from "../../functions/informe.js";
 import { altaEnvioBasica, assign, connectMySQL, CustomException, EstadosEnvio, getProductionDbConfig, LightdataORM, sendShipmentStateToStateMicroserviceAPI } from "lightdata-tools";
 import { companiesService, hostProductionDb, portProductionDb, urlEstadosMicroservice, urlAsignacionMicroservice, axiosInstance, urlAltaEnvioMicroservice, queueEstadosML, urlAltaEnvioRedisMicroservice, rabbitService } from "../../../../db.js";
@@ -45,7 +45,7 @@ export async function handleExternalNoFlex({ db, req, company }) {
 
         const client = companyClientList[clientIdFromDataQr];
 
-        const driver = await checkIfExistLogisticAsDriverInExternalCompany({ db: dbDueña, syncCode: company.codigo });
+        const driver = await checkIfExistLogisticAsDriverInDueñaCompany({ db: dbDueña, syncCode: company.codigo });
 
         if (!driver) {
             return { success: false, message: "No se encontró chofer asignado" };
