@@ -2,14 +2,14 @@ import { handleInternalFlex } from "./controller/handlers/flex/handleInternalFle
 import { handleExternalFlex } from "./controller/handlers/flex/handleExternalFlex.js";
 import { handleExternalNoFlex } from "./controller/handlers/noflex/handleExternalNoFlex.js";
 import { handleInternalNoFlex } from "./controller/handlers/noflex/handleInternalNoFlex.js";
-import { executeQuery, getShipmentIdFromQr, logCyan, LogisticaConfig, logPurple, parseIfJson } from "lightdata-tools";
-import { companiesService } from "../db.js";
+import { CustomException, getShipmentIdFromQr, LightdataORM, LogisticaConfig, parseIfJson } from "lightdata-tools";
+import { companiesService, urlApimovilGetShipmentId, axiosInstance } from "../db.js";
 
 
-export async function aplanta(dbConnection, req, company) {
+export async function aplanta({ db, req, company }) {
     const { userId } = req.user;
 
-    let { dataQr } = req.body;
+    let { dataQr, latitude, longitude } = req.body;
     dataQr = parseIfJson(dataQr);
 
     let response;
@@ -21,8 +21,13 @@ export async function aplanta(dbConnection, req, company) {
         )
     ) {
         try {
-            // obtenemos el envío
-            const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
+            const shipmentId = await getShipmentIdFromQr({
+                url: urlApimovilGetShipmentId,
+                axiosInstance,
+                req,
+                dataQr,
+                desde: 'aplanta'
+            });
             const cliente = LogisticaConfig.getSenderId(company.did);
 
             dataQr = {
@@ -32,18 +37,27 @@ export async function aplanta(dbConnection, req, company) {
                 empresa: company.did
             };
 
-        } catch (error) {
+        } catch {
 
             const cliente = LogisticaConfig.getSenderId(company.did);
             const empresaVinculada = LogisticaConfig.getEmpresaVinculada(company.did);
             // que pasa si es 211 o  55 que no tienen empresa vinculada
             if (empresaVinculada === null) {
                 // preguntar a cris 
-                throw new Error("El envio no esta igresado en su sistema");
-            };
+                throw new CustomException({
+                    title: "El envio no esta igresado en su sistema",
+                    message: "El envio no esta igresado en su sistema y su empresa no tiene una empresa vinculada para buscar el envio en otra empresa. Por favor contacte a soporte."
+                });
+            }
 
-            const shipmentIdExterno = await getShipmentIdFromQr(empresaVinculada, dataQr);
-
+            const shipmentIdExterno = await getShipmentIdFromQr({
+                url: urlApimovilGetShipmentId,
+                axiosInstance,
+                req,
+                dataQr,
+                desde: 'aplanta',
+                companyId: empresaVinculada
+            });
             //no encontre shipmentiD : cambiar en el qr la empresa x la externa --- si no esta lo inserta 
             dataQr = {
                 local: '1',
@@ -54,69 +68,57 @@ export async function aplanta(dbConnection, req, company) {
         }
     }
     const isCollectShipmentML = Object.prototype.hasOwnProperty.call(dataQr, "t");
-    /// Me fijo si es flex o no
+
     const isFlex = Object.prototype.hasOwnProperty.call(dataQr, "sender_id") || isCollectShipmentML;
 
     if (isFlex) {
-        logCyan("Es flex");
-        /// Busco la cuenta del cliente
         let account = null;
         let senderId = null;
         if (isCollectShipmentML) {
             //! Esto quiere decir que es un envio de colecta de ML
-            const querySeller = `SELECT ml_vendedor_id FROM envios WHERE ml_shipment_id = ? AND flex = 1 AND superado=0 AND elim=0`;
-            const result = await executeQuery(dbConnection, querySeller, [dataQr.id]);
-
-            senderId = result[0].ml_vendedor_id;
-            account = await companiesService.getAccountBySenderId(dbConnection, company.did, senderId);
+            const [result] = await LightdataORM.select({
+                dbConnection: db,
+                where: {
+                    ml_shipment_id: dataQr.id,
+                    flex: 1,
+                },
+                table: 'envios',
+            });
+            senderId = result.ml_vendedor_id;
+            account = await companiesService.getAccountBySenderId(db, company.did, senderId);
         } else {
             senderId = dataQr.sender_id;
-            account = await companiesService.getAccountBySenderId(dbConnection, company.did, dataQr.sender_id);
-            // if (company.did == 167 && account == undefined) {
-            //     logCyan("Es JSL");
-            //     return await handleInternalFlex(dbConnection, company, userId, dataQr, 0, senderId);
-            // }
-
+            account = await companiesService.getAccountBySenderId(db, company.did, dataQr.sender_id);
         }
 
         if (account) {
-            logCyan("Es interno");
-            response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
+            response = await handleInternalFlex(db, company, userId, dataQr, account, senderId);
         } else if (company.did == 144 || company.did == 167) {
-            logCyan("Es interno (por verificación extra de empresa 144 o 167)");
-            const queryCheck = `
-                  SELECT did
-                  FROM envios
-                  WHERE ml_vendedor_id = ?
-                  AND ml_shipment_id = ?
-                  AND superado = 0
-                  AND elim = 0
-                  LIMIT 1
-                `;
-            const resultCheck = await executeQuery(dbConnection, queryCheck, [dataQr.sender_id, dataQr.id]);
+            const row = await LightdataORM.select({
+                dbConnection: db,
+                table: 'envios',
+                where: {
+                    ml_vendedor_id: dataQr.sender_id,
+                    ml_shipment_id: dataQr.id
+                },
+            });
 
-            if (resultCheck.length > 0) {
+            if (row.length > 0) {
                 senderId = dataQr.sender_id;
-                response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
+                response = await handleInternalFlex({ db, company, userId, dataQr, account, senderId, latitude, longitude });
             } else {
-                logCyan("Es externo (empresa 144 pero sin coincidencias)");
-                response = await handleExternalFlex(dbConnection, company, dataQr, userId);
+                response = await handleExternalFlex({ db, company, dataQr, userId, latitude, longitude });
             }
         } else {
-            logCyan("Es externo");
-            response = await handleExternalFlex(dbConnection, company, dataQr, userId);
+            response = await handleExternalFlex({ db, company, dataQr, userId, latitude, longitude });
         }
     } else {
-        logCyan("No es flex");
         if (company.did == dataQr.empresa) {
-            logCyan("Es interno");
-            response = await handleInternalNoFlex(dbConnection, dataQr, company, userId);
+            response = await handleInternalNoFlex({ db, req, company });
         } else {
-            logCyan("Es externo");
-            response = await handleExternalNoFlex(dbConnection, dataQr, company, userId, latit);
+            response = await handleExternalNoFlex({ db, req, company });
         }
     }
-
 
     return response;
 }

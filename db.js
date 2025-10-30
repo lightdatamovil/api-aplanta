@@ -1,7 +1,9 @@
 import redis from "redis";
 import dotenv from "dotenv";
 import mysql2 from 'mysql2/promise';
-import { CompaniesService, logRed } from "lightdata-tools";
+import https from 'https';
+import axios from 'axios';
+import { CompaniesService, logRed, RabbitService } from "lightdata-tools";
 
 dotenv.config({ path: process.env.ENV_FILE || ".env" });
 
@@ -38,7 +40,19 @@ export const poolLocal = mysql2.createPool({
   queueLimit: 0
 });
 
+export const httpsAgent = new https.Agent({
+  keepAlive: true,
+  maxSockets: 100,
+  timeout: 10000,
+  family: 4,
+});
 
+export const axiosInstance = axios.create({
+  httpsAgent,
+  timeout: 335000,
+});
+
+export const urlApimovilGetShipmentId = process.env.URL_APIMOVIL_GET_SHIPMENT_ID;
 /// MICROSERVICIO DE ESTADOS
 export const rabbitUrl = process.env.RABBIT_URL;
 export const queueEstados = process.env.QUEUE_ESTADOS;
@@ -59,3 +73,5 @@ export const companiesService = new CompaniesService({ redisClient, redisKey: "e
 redisClient.on("error", (error) => {
   logRed(`Error al conectar con Redis: ${error.stack}`);
 });
+
+export const rabbitService = new RabbitService(rabbitUrl);

@@ -1,13 +1,17 @@
-import { executeQuery } from "lightdata-tools";
+import { LightdataORM } from "lightdata-tools";
 
+export async function checkIfExistLogisticAsDriverInDueñaCompany({ db, syncCode }) {
 
-export async function checkIfExistLogisticAsDriverInExternalCompany(dbConnection, syncCode) {
-    const querySelectSistemUsuariosAccesos = 'SELECT usuario FROM sistema_usuarios_accesos WHERE codvinculacion = ?';
-    const chofer = await executeQuery(dbConnection, querySelectSistemUsuariosAccesos, [syncCode], true);
+    const [chofer] = await LightdataORM.select({
+        dbConnection: db,
+        table: 'sistema_usuarios_accesos',
+        where: { codvinculacion: syncCode },
+        select: ['usuario'],
+    });
 
-    if (chofer.length == 0) {
+    if (!chofer || chofer.length === 0) {
         return;
     }
 
-    return chofer[0].usuario;
+    return chofer.usuario;
 }

@@ -1,34 +1,44 @@
-import { executeQuery, logCyan, sendShipmentStateToStateMicroserviceAPI } from "lightdata-tools";
+import { EstadosEnvio, sendShipmentStateToStateMicroserviceAPI } from "lightdata-tools";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
-import { urlEstadosMicroservice } from "../../../../db.js";
+import { urlEstadosMicroservice, axiosInstance } from "../../../../db.js";
 /// Esta funcion checkea si el envio ya fue colectado, entregado o cancelado
 /// Si el envio no esta asignado y se quiere autoasignar, lo asigna
 /// Actualiza el estado del envio en el micro servicio
 /// Actualiza el estado del envio en la base de datos
-export async function handleInternalNoFlex(dbConnection, dataQr, company, userId) {
-    const shipmentId = dataQr.did;
+export async function handleInternalNoFlex({ db, req, company }) {
+    const { dataQr, latitude, longitude } = req.body;
+    const { userId } = req.user;
 
+    const shipmentId = dataQr.did;
     const clientId = dataQr.cliente;
 
-    /// Chequeo si el envio ya fue colectado, entregado o cancelado
-    const check = await checkearEstadoEnvio(dbConnection, shipmentId);
+    const check = await checkearEstadoEnvio({ db, shipmentId });
     if (check) return check;
 
+    await sendShipmentStateToStateMicroserviceAPI({
+        urlEstadosMicroservice,
+        axiosInstance,
+        company,
+        userId,
+        shipmentId,
+        estado: EstadosEnvio.value(EstadosEnvio.atProcessingPlant, company.did),
+        latitude,
+        longitude,
+        desde: "A planta API",
+    });
 
-    const q = `SELECT estado_envio FROM envios WHERE did = ? LIMIT 1`;
-    const estadoEnvio = await executeQuery(dbConnection, q, [shipmentId]);
-    if (estadoEnvio.length === 0) {
-        return { success: false, message: "El paquete no esta cargado" };
-    }
+    const body = await informe({
+        db,
+        company,
+        clientId,
+        userId,
+        shipmentId
+    });
 
-    logCyan("El envio no fue colectado, entregado o cancelado");
-
-    /// Actualizamos el estado del envio en el micro servicio
-    await sendShipmentStateToStateMicroserviceAPI(urlEstadosMicroservice, company, userId, shipmentId, 1);
-    logCyan("Se actualizo el estado del envio en el micro servicio");
-
-    const body = await informe(dbConnection, company, clientId, userId, shipmentId);
-
-    return { success: true, message: "Paquete puesto a planta  correctamente", body: body };
+    return {
+        success: true,
+        message: "Paquete puesto a planta  correctamente",
+        body
+    };
 }

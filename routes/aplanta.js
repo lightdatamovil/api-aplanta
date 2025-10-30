@@ -9,10 +9,7 @@ a_planta.post(
   buildHandlerWrapper({
     required: ['dataQr'],
     optional: ['latitude', 'longitude'],
-    controller: async ({ db, req, company }) => {
-      const result = await aplanta(db, req, company);
-      return result;
-    },
+    controller: async ({ db, req, company }) => await aplanta({ db, req, company }),
   })
 );
 

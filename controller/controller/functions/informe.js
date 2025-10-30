@@ -3,7 +3,7 @@ import { companiesService } from "../../../db.js";
 
 const contadoresIngresados = {};
 
-export async function informe(dbConnection, company, clientId, userId, shipmentId) {
+export async function informe({ db, company, clientId, userId, shipmentId }) {
     const companyId = company.did;
     // cambio a la fecha de hoy
     const hoy = new Date().toISOString().split('T')[0];
@@ -24,7 +24,7 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
             AND eh.estado IN (7, 0, 1);
         `;
 
-    const resultIngresadosHoy = await executeQuery(dbConnection, queryIngresadosHoy, [clientId, `${hoy} 00:00:00`, `${hoy} 23:59:59`]);
+    const resultIngresadosHoy = await executeQuery(db, queryIngresadosHoy, [clientId, `${hoy} 00:00:00`, `${hoy} 23:59:59`]);
 
 
     let amountOfAPlanta = 0;
@@ -61,7 +61,7 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
                 WHERE e.superado=0 AND e.elim=0 AND e.did = ?;
             `;
 
-        const resultEnvios = await executeQuery(dbConnection, queryEnvios, [shipmentId]);
+        const resultEnvios = await executeQuery(db, queryEnvios, [shipmentId]);
 
         if (resultEnvios.length > 0) {
             choferasignado = resultEnvios[0].choferAsignado || 'Sin asignar';
@@ -70,9 +70,9 @@ export async function informe(dbConnection, company, clientId, userId, shipmentI
         }
     }
 
-    const companyClients = await companiesService.getClientsByCompany(dbConnection, companyId);
+    const companyClients = await companiesService.getClientsByCompany(db, companyId);
 
-    const companyDrivers = await companiesService.getDriversByCompany(dbConnection, companyId);
+    const companyDrivers = await companiesService.getDriversByCompany(db, companyId);
 
     if (companyClients[clientId] === undefined) {
         /* throw new CustomException({
