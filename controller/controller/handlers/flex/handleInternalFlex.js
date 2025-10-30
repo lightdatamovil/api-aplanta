@@ -1,119 +1,100 @@
-import { insertEnvios } from "../../functions/insertEnvios.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
-import { checkIfFulfillment, executeQuery, logCyan, sendShipmentStateToStateMicroserviceAPI, } from "lightdata-tools";
-import { urlEstadosMicroservice } from "../../../../db.js";
+import { altaEnvioBasica, checkIfFulfillment, EstadosEnvio, LightdataORM, sendShipmentStateToStateMicroserviceAPI } from "lightdata-tools";
+import { urlEstadosMicroservice, urlAltaEnvioMicroservice, axiosInstance, queueEstadosML, urlAltaEnvioRedisMicroservice, rabbitService } from "../../../../db.js";
 
-/// Busco el envio
-/// Si no existe, lo inserto y tomo el did
-/// Checkeo si el envío ya fue colectado cancelado o entregado
-/// Actualizo el estado del envío y lo envío al microservicio de estados
-/// Asigno el envío al usuario si es necesario
-export async function handleInternalFlex(
-  dbConnection,
-  company,
-  userId,
-  dataQr,
-  account,
-  senderId
-) {
-  const companyId = company.did;
+export async function handleInternalFlex({ db, req, company, senderId, account }) {
+  const { dataQr, latitude, longitude } = req.body;
+  const { userId } = req.user;
+
   const mlShipmentId = dataQr.id;
-  await checkIfFulfillment(dbConnection, mlShipmentId);
 
-  let shipmentId;
+  await checkIfFulfillment({ db, mlShipmentId });
 
-  /// Busco el envio
-  const sql = `
-        SELECT did,didCliente
-        FROM envios 
-        WHERE ml_shipment_id = ? AND ml_vendedor_id = ? and superado = 0 and elim = 0
-        LIMIT 1
-    `;
+  let [rowEnvio] = LightdataORM.select({
+    dbConnection: db,
+    table: 'envios',
+    where: {
+      ml_shipment_id: mlShipmentId,
+      ml_vendedor_id: senderId,
+    },
+  });
 
-  let resultBuscarEnvio = await executeQuery(dbConnection, sql, [
-    mlShipmentId,
-    senderId,
-  ], true);
+  let shipmentId = rowEnvio.length > 0 ? rowEnvio.did : null;
+  let didCliente = rowEnvio.length > 0 ? rowEnvio.didCliente : null;
+  let mlQrSeguridad = rowEnvio.length > 0 ? rowEnvio.ml_qr_seguridad : null;
 
-  const row = resultBuscarEnvio[0];
-
-
-  /// Si no existe, lo inserto y tomo el did
-  if (resultBuscarEnvio.length > 0) {
-    logCyan("Encontre el envio");
-    shipmentId = row.did;
-    /// Checkea si el envio ya fue puesto a planta, entregado, entregado 2da o cancelado
-    const check = await checkearEstadoEnvio(dbConnection, shipmentId);
-    console.log("llegue a Check estado envio:", check);
+  if (rowEnvio) {
+    const check = await checkearEstadoEnvio({ db, shipmentId });
     if (check) return check;
-    logCyan("El envio no fue puesto a planta, entregado, entregado 2da o cancelado");
-    const queryUpdateEnvios = `
-                UPDATE envios 
-                SET ml_qr_seguridad = ?
-                WHERE superado = 0 AND elim = 0 AND did = ?
-                LIMIT 1
-            `;
-
-    await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,], true);
-    logCyan("Actualice el ml_qr_seguridad del envio");
   } else {
-    shipmentId = await insertEnvios(
-      dbConnection,
-      companyId,
-      account.didCliente,
-      account.didCuenta,
+    shipmentId = await altaEnvioBasica({
+      urlAltaEnvioMicroservice,
+      urlAltaEnvioRedisMicroservice,
+      axiosInstance,
+      rabbitServiceInstance: rabbitService,
+      queueEstadosML,
+      company,
+      clientId: account.didCliente,
+      accountId: account.didCuenta,
       dataQr,
-      1,
-      0,
-      0,
+      flex: 1,
+      externo: 0,
       userId,
-    );
-    resultBuscarEnvio = await executeQuery(dbConnection, sql, [
-      mlShipmentId,
-      senderId,
-    ]);
-    logCyan("Inserte el envio");
+      driverId: userId,
+      lote: "colecta",
+    });
+
+    [rowEnvio] = await LightdataORM.select({
+      dbConnection: db,
+      table: 'envios',
+      where: {
+        ml_shipment_id: mlShipmentId,
+        ml_vendedor_id: senderId,
+      },
+    });
   }
 
-  /// Actualizo el estado del envío y lo envío al microservicio de estados
-  await sendShipmentStateToStateMicroserviceAPI(
+  shipmentId = rowEnvio.did;
+  didCliente = rowEnvio.didCliente;
+  mlQrSeguridad = rowEnvio.ml_qr_seguridad;
+
+  if (!mlQrSeguridad) {
+    await LightdataORM.update({
+      dbConnection: db,
+      table: 'envios',
+      where: {
+        did: shipmentId
+      },
+      values: {
+        ml_qr_seguridad: JSON.stringify(dataQr)
+      }
+    });
+  }
+
+  await sendShipmentStateToStateMicroserviceAPI({
     urlEstadosMicroservice,
-    companyId,
+    axiosInstance,
+    company,
     userId,
     shipmentId,
-    1,
-  );
-  logCyan(
-    "Actualice el estado del envio y lo envie al microservicio de estados"
-  );
+    estado: EstadosEnvio.value(EstadosEnvio.atProcessingPlant, company.did),
+    latitude,
+    longitude,
+    desde: "A planta API",
+  });
 
-  //! jls 167 tambien usa una cuenta no vinculada -- gonzalo no lo saques
-  if (companyId == 144 || companyId == 167) {
-    const body = await informe(
-      dbConnection,
-      company,
-      row.didCliente,
-      userId,
-      shipmentId
-    );
-    return {
-      success: true,
-      message: "Paquete insertado y puesto a planta  - FLEX",
-      body: body,
-    };
-
-  }
-  const body = await informe(
-    dbConnection,
+  const body = await informe({
+    db,
     company,
-    account.didCliente || row.didCliente,
+    clientId: company.did == 144 || company.did == 167 ? didCliente : (account.didCliente || didCliente),
     userId,
     shipmentId
-  );
+  });
+
   return {
     success: true,
     message: "Paquete insertado y puesto a planta  - FLEX",
-    body: body,
+    body,
   };
 }

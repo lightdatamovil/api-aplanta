@@ -7,9 +7,8 @@ import { companiesService, urlApimovilGetShipmentId, axiosInstance } from "../db
 
 
 export async function aplanta({ db, req, company }) {
-    const { userId } = req.user;
+    let { dataQr } = req.body;
 
-    let { dataQr, latitude, longitude } = req.body;
     dataQr = parseIfJson(dataQr);
 
     let response;
@@ -92,7 +91,7 @@ export async function aplanta({ db, req, company }) {
         }
 
         if (account) {
-            response = await handleInternalFlex(db, company, userId, dataQr, account, senderId);
+            response = await handleInternalFlex(db, req, company, account, senderId);
         } else if (company.did == 144 || company.did == 167) {
             const row = await LightdataORM.select({
                 dbConnection: db,
@@ -105,12 +104,12 @@ export async function aplanta({ db, req, company }) {
 
             if (row.length > 0) {
                 senderId = dataQr.sender_id;
-                response = await handleInternalFlex({ db, company, userId, dataQr, account, senderId, latitude, longitude });
+                response = await handleInternalFlex({ db, req, company, account, senderId });
             } else {
-                response = await handleExternalFlex({ db, company, dataQr, userId, latitude, longitude });
+                response = await handleExternalFlex({ db, req, company });
             }
         } else {
-            response = await handleExternalFlex({ db, company, dataQr, userId, latitude, longitude });
+            response = await handleExternalFlex({ db, req, company });
         }
     } else {
         if (company.did == dataQr.empresa) {
