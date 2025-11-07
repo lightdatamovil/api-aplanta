@@ -15,15 +15,16 @@ export async function handleExternalNoFlex({ db, req, company }) {
 
     try {
         const [rowEncargadaShipmentId] = await LightdataORM.select({
-            dbConnection: db,
+            db,
             table: "envios_exteriores",
             where: { didExterno: shipmentIdFromDataQr },
             select: ["didLocal"],
         });
 
-        let encargadaShipmentId = rowEncargadaShipmentId.didLocal;
+        let encargadaShipmentId;
 
         if (rowEncargadaShipmentId) {
+            encargadaShipmentId = rowEncargadaShipmentId.didLocal;
             const estado = await checkearEstadoEnvio({ db, shipmentId: encargadaShipmentId });
             if (estado) return estado;
         }
@@ -52,7 +53,7 @@ export async function handleExternalNoFlex({ db, req, company }) {
         }
 
         const [rowDueñaClient] = await LightdataORM.select({
-            dbConnection: db,
+            db,
             table: "clientes",
             where: { codigoVinculacionLogE: companyDueña.codigo },
             select: ["did"],
@@ -84,7 +85,7 @@ export async function handleExternalNoFlex({ db, req, company }) {
         }
 
         const [rowLogisticaInversa] = await LightdataORM.select({
-            dbConnection: dbDueña,
+            db: dbDueña,
             table: "envios_logisticainversa",
             where: { didEnvio: shipmentIdFromDataQr },
             select: ["valor"],
@@ -92,7 +93,7 @@ export async function handleExternalNoFlex({ db, req, company }) {
 
         if (rowLogisticaInversa) {
             await LightdataORM.insert({
-                dbConnection: db,
+                db,
                 table: "envios_logisticainversa",
                 data: {
                     didEnvio: encargadaShipmentId,
@@ -123,7 +124,7 @@ export async function handleExternalNoFlex({ db, req, company }) {
             userId,
             driverId: driver,
             shipmentId: shipmentIdFromDataQr,
-            estado: EstadosEnvio.value(EstadosEnvio.collected, companyDueña.did),
+            estado: EstadosEnvio.value(EstadosEnvio.atProcessingPlant, companyDueña.did),
             latitude,
             longitude,
             desde: "A planta API",
@@ -136,6 +137,7 @@ export async function handleExternalNoFlex({ db, req, company }) {
             dataQr: dataQr,
             driverId: driver,
             desde: "A planta API",
+            companyId: companyDueña.did,
         });
 
         const body = await informe({

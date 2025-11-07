@@ -3,7 +3,7 @@ import { LightdataORM } from "lightdata-tools";
 /// Checkea si el envio ya fue colectado, entregado o cancelado
 export async function checkearEstadoEnvio({ db, shipmentId }) {
     const [row] = await LightdataORM.select({
-        dbConnection: db,
+        db,
         table: 'envios',
         where: { did: shipmentId },
         select: ['estado_envio'],
@@ -15,6 +15,6 @@ export async function checkearEstadoEnvio({ db, shipmentId }) {
     }
 
     if (row.estado_envio == 1) {
-        return { success: false, message: "El paquete ya se encuentra colectado" };
+        return { success: false, message: "El paquete ya se encuentra en a planta" };
     }
 }

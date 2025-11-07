@@ -1,17 +1,17 @@
-import { executeQuery, logCyan, logPurple } from "lightdata-tools";
+import { executeQuery } from "lightdata-tools";
 import { companiesService } from "../../../db.js";
 
 const contadoresIngresados = {};
 
 export async function informe({ db, company, clientId, userId, shipmentId }) {
     const companyId = company.did;
-    // cambio a la fecha de hoy
+
     const hoy = new Date().toISOString().split('T')[0];
+
     if (!clientId) {
         clientId = 0;
     }
 
-    // En algún lugar donde se registre un nuevo ingreso:
     incrementarIngresados(hoy, companyId, userId);
 
     const queryIngresadosHoy = `
@@ -24,7 +24,7 @@ export async function informe({ db, company, clientId, userId, shipmentId }) {
             AND eh.estado IN (7, 0, 1);
         `;
 
-    const resultIngresadosHoy = await executeQuery(db, queryIngresadosHoy, [clientId, `${hoy} 00:00:00`, `${hoy} 23:59:59`]);
+    const resultIngresadosHoy = await executeQuery({ db, query: queryIngresadosHoy, values: [clientId, `${hoy} 00:00:00`, `${hoy} 23:59:59`] });
 
 
     let amountOfAPlanta = 0;
@@ -38,13 +38,7 @@ export async function informe({ db, company, clientId, userId, shipmentId }) {
         }
     });
 
-    // Función para incrementar el contador
-
-
-    // Reemplazo de la consulta SQL con la variable local
     const ingresadosHoyChofer = obtenerIngresados(hoy, companyId, userId);
-    logPurple(`Ingresados hoy por chofer: ${ingresadosHoyChofer}`);
-
 
     let choferasignado;
     let zonaentrega;
@@ -61,7 +55,7 @@ export async function informe({ db, company, clientId, userId, shipmentId }) {
                 WHERE e.superado=0 AND e.elim=0 AND e.did = ?;
             `;
 
-        const resultEnvios = await executeQuery(db, queryEnvios, [shipmentId]);
+        const resultEnvios = await executeQuery({ db, query: queryEnvios, values: [shipmentId] });
 
         if (resultEnvios.length > 0) {
             choferasignado = resultEnvios[0].choferAsignado || 'Sin asignar';
@@ -70,30 +64,11 @@ export async function informe({ db, company, clientId, userId, shipmentId }) {
         }
     }
 
-    const companyClients = await companiesService.getClientsByCompany(db, companyId);
+    const companyClients = await companiesService.getClientsByCompany({ db, companyId });
 
-    const companyDrivers = await companiesService.getDriversByCompany(db, companyId);
-
-    if (companyClients[clientId] === undefined) {
-        /* throw new CustomException({
-             title: "Cliente no encontrado",
-             message: `No se encontró el cliente con ID: ${clientId}`,
-             stack: ''
-         });
-         */
-        logCyan("El cliente no fue encontrado1");
-    }
-    logCyan("El cliente no fue encontrado2");
-
+    const companyDrivers = await companiesService.getDriversByCompany({ db, companyId });
 
     const chofer = companyDrivers[choferasignado]?.nombre || "Sin información";
-    if (!companyDrivers[choferasignado]) {
-        logCyan("El chofer no fue encontrado1");
-    } else {
-        logCyan("El chofer fue encontrado2");
-    }
-
-    logCyan("Se generó el informe");
 
     return {
         cliente: `${companyClients[clientId]?.nombre ?? 'Sin información'}`,

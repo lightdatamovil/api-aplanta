@@ -38,7 +38,7 @@ export async function handleInternalNoFlex({ db, req, company }) {
 
     return {
         success: true,
-        message: "Paquete puesto a planta  correctamente",
+        message: "Paquete puesto a planta correctamente",
         body
     };
 }

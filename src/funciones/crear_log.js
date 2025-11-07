@@ -1,7 +1,7 @@
 import { executeQueryFromPool, getHeaders, logGreen, logPurple } from "lightdata-tools";
 import { poolLocal } from "../../db.js";
 
-export async function crearLog(req, tiempo, resultado, exito) {
+export async function crearLog({ req, tiempo, resultado, exito }) {
   const { appVersion, androidVersion, model, deviceId, brand, deviceFrom } = getHeaders(req);
   const { companyId, userId, profile } = req.user;
   const sql = `
@@ -27,7 +27,7 @@ export async function crearLog(req, tiempo, resultado, exito) {
     brand,
   ];
 
-  await executeQueryFromPool(poolLocal, sql, values);
+  await executeQueryFromPool({ pool: poolLocal, query: sql, values });
   const now = new Date();
   const pad = (n) => String(n).padStart(2, "0");
   const fechaFormateada = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;

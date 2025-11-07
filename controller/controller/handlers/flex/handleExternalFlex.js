@@ -20,7 +20,7 @@ export async function handleExternalFlex({ db, req, company }) {
             WHERE superado = 0 AND elim = 0 AND codigoVinculacionLogE != ''
         `;
   const logisticasExternas = await executeQuery({
-    dbConnection: db,
+    db,
     query: queryLogisticasExternas
   });
 
@@ -67,7 +67,7 @@ export async function handleExternalFlex({ db, req, company }) {
       }
 
       const [rowsEnvios] = await LightdataORM.select({
-        dbConnection: dbDueña,
+        db: dbDueña,
         table: 'envios',
         where: {
           ml_shipment_id: shipmentId,
@@ -119,7 +119,7 @@ export async function handleExternalFlex({ db, req, company }) {
       }
 
       let [internalShipmentId] = await LightdataORM.select({
-        dbConnection: db,
+        db,
         table: 'envios_exteriores',
         where: { didExterno: externalShipmentId },
         select: ['didLocal']
@@ -150,7 +150,7 @@ export async function handleExternalFlex({ db, req, company }) {
       }
 
       const [rowLogisticaInversa] = await LightdataORM.select({
-        dbConnection: dbDueña,
+        db: dbDueña,
         table: "envios_logisticainversa",
         where: { didEnvio: externalShipmentId },
         select: ["valor"],
@@ -158,7 +158,7 @@ export async function handleExternalFlex({ db, req, company }) {
 
       if (rowLogisticaInversa) {
         await LightdataORM.insert({
-          dbConnection: db,
+          db,
           table: "envios_logisticainversa",
           data: {
             didEnvio: internalShipmentId,
@@ -210,7 +210,7 @@ export async function handleExternalFlex({ db, req, company }) {
       });
 
       const [internalClient] = await LightdataORM.select({
-        dbConnection: db,
+        db,
         table: 'envios',
         where: { did: internalShipmentId },
         select: ['didCliente'],

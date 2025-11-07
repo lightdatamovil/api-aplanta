@@ -12,7 +12,7 @@ export async function handleInternalFlex({ db, req, company, senderId, account }
   await checkIfFulfillment({ db, mlShipmentId });
 
   let [rowEnvio] = LightdataORM.select({
-    dbConnection: db,
+    db,
     table: 'envios',
     where: {
       ml_shipment_id: mlShipmentId,
@@ -46,7 +46,7 @@ export async function handleInternalFlex({ db, req, company, senderId, account }
     });
 
     [rowEnvio] = await LightdataORM.select({
-      dbConnection: db,
+      db,
       table: 'envios',
       where: {
         ml_shipment_id: mlShipmentId,
@@ -61,7 +61,7 @@ export async function handleInternalFlex({ db, req, company, senderId, account }
 
   if (!mlQrSeguridad) {
     await LightdataORM.update({
-      dbConnection: db,
+      db,
       table: 'envios',
       where: {
         did: shipmentId

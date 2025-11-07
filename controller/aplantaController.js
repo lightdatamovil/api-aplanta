@@ -76,7 +76,7 @@ export async function aplanta({ db, req, company }) {
         if (isCollectShipmentML) {
             //! Esto quiere decir que es un envio de colecta de ML
             const [result] = await LightdataORM.select({
-                dbConnection: db,
+                db,
                 where: {
                     ml_shipment_id: dataQr.id,
                     flex: 1,
@@ -94,7 +94,7 @@ export async function aplanta({ db, req, company }) {
             response = await handleInternalFlex(db, req, company, account, senderId);
         } else if (company.did == 144 || company.did == 167) {
             const row = await LightdataORM.select({
-                dbConnection: db,
+                db,
                 table: 'envios',
                 where: {
                     ml_vendedor_id: dataQr.sender_id,
