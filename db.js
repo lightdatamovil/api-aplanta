@@ -215,7 +215,7 @@ async function loadDrivers(dbConnection, companyId) {
   }
 
   const queryUsers = `
-            SELECT sistema_usuarios.did, sistema_usuarios.usuario 
+            SELECT sistema_usuarios.did, sistema_usuarios.usuario, sistema_usuarios.nombre, sistema_usuarios.apellido 
             FROM sistema_usuarios_accesos
             INNER JOIN sistema_usuarios ON sistema_usuarios_accesos.did = sistema_usuarios.did
             WHERE sistema_usuarios_accesos.perfil IN (3, 6)
@@ -240,7 +240,8 @@ async function loadDrivers(dbConnection, companyId) {
       fecha_sincronizacion: row.fecha_sincronizacion,
       did: row.did,
       codigo: row.codigo_empleado,
-      nombre: row.usuario,
+      usuario: row.usuario,
+      nombre: row.nombre + " " + row.apellido,
     };
   }
 }
