@@ -15,7 +15,7 @@ export async function handleInternalNoFlex(dbConnection, dataQr, company, userId
     const clientId = dataQr.cliente;
     await checkIfFulfillment(dbConnection, dataQr.did, false);
     /// Chequeo si el envio ya fue colectado, entregado o cancelado
-    const check = await checkearEstadoEnvio(dbConnection, shipmentId);
+    const check = await checkearEstadoEnvio(dbConnection, shipmentId, companyId);
     if (check) return check;
 
 
