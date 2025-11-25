@@ -98,6 +98,7 @@ export async function aplanta(company, dataQr, userId) {
                 logCyan("Es interno");
                 response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
             } else if (company.did == 144 || company.did == 167 || company.did == 114) {
+                // el envio debe estar insertado en la tabla envios, sino no lo inserta al saltar esta verficacion en este if
                 logCyan("Es interno (por verificación extra de empresa 144 o 167)");
                 const queryCheck = `
                   SELECT did
