@@ -23,29 +23,29 @@ export function logBlue(message) {
 }
 
 export function logYellow(message) {
-    //     if (isLocal) {
-    //         console.log(`\x1b[33m%s\x1b[0m`, `⚠️  ${message}
-    // --------------------------------------------------`);
-    //     }
+    if (isLocal) {
+        console.log(`\x1b[33m%s\x1b[0m`, `⚠️  ${message}
+     --------------------------------------------------`);
+    }
 }
 
 export function logPurple(message) {
-    // if (isLocal) {
-    //     console.log(`\x1b[35m%s\x1b[0m`, `💜 ${message}
-    // --------------------------------------------------`);;
-    // }
+    if (isLocal) {
+        console.log(`\x1b[35m%s\x1b[0m`, `💜 ${message}
+     --------------------------------------------------`);;
+    }
 }
 
 export function logCyan(message) {
-    //     if (isLocal) {
-    //         console.log(`\x1b[36m%s\x1b[0m`, `💎 ${message}
-    // --------------------------------------------------`);
-    //     }
+    if (isLocal) {
+        console.log(`\x1b[36m%s\x1b[0m`, `💎 ${message}
+     --------------------------------------------------`);
+    }
 }
 export function logOrange(message) {
-    //     if (isLocal) {
-    //         // ANSI code 38;5;208 es un tono naranja
-    //         console.log(`\x1b[38;5;208m%s\x1b[0m`, `🟧 ${message}
-    // --------------------------------------------------`);
-    //     }
+    if (isLocal) {
+        //         // ANSI code 38;5;208 es un tono naranja
+        console.log(`\x1b[38;5;208m%s\x1b[0m`, `🟧 ${message}
+     --------------------------------------------------`);
+    }
 }
