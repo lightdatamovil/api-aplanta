@@ -9,6 +9,7 @@ import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
 import { parseIfJson } from "../src/funciones/isValidJson.js";
 import LogisticaConf from "../classes/logistica_conf.js";
 import { decrActiveLocal, incrActiveLocal } from "../src/funciones/dbList.js";
+import { logRed } from "lightdata-tools";
 
 
 export async function aplanta(company, dataQr, userId) {
@@ -28,17 +29,33 @@ export async function aplanta(company, dataQr, userId) {
         dataQr = parseIfJson(dataQr);
 
 
+        //es barcode
         if (
             LogisticaConf.hasBarcodeEnabled(company.did) &&
-            (
-                (typeof dataQr === "string" && dataQr.includes("MLAR")) ||
-                (typeof dataQr === "object" && dataQr !== null && Object.values(dataQr).some(val => typeof val === "string" && val.includes("MLAR")))
-            )
+            // mejor usar Object.hasOwn para chequear sólo properties propias
+            !Object.hasOwn(dataQr, 'local') &&
+            !Object.hasOwn(dataQr, 'sender_id')
         ) {
+            let cliente, shipmentId;
             try {
-                // obtenemos el envío
-                const shipmentId = await getShipmentIdFromQr(company.did, dataQr);
-                const cliente = LogisticaConf.getSenderId(company.did);
+                if (LogisticaConf.getExisteSioSi(company.did)) {
+                    const q = `
+                    SELECT didCliente,did
+                    FROM envios
+                    WHERE ml_shipment_id = ? AND superado = 0 AND elim = 0
+                    LIMIT 1
+                  `;
+                    const result = await executeQuery(dbConnection, q, [dataQr], true);
+                    if (result.length > 0) {
+                        cliente = result[0]?.didCliente ?? null;
+                        shipmentId = result[0]?.did ?? null;
+                    } else {
+                        throw new Error("No se encontró el envío en la base de datos.");
+                    }
+                } else {
+                    cliente = LogisticaConf.getSenderId(company.did, dataQr);
+                    shipmentId = await getShipmentIdFromQr(company.did, dataQr);
+                }
 
                 dataQr = {
                     local: '1',
@@ -48,7 +65,7 @@ export async function aplanta(company, dataQr, userId) {
                 };
 
             } catch (error) {
-
+                logRed(`Error al procesar código de barras: ${error.message}`);
                 const cliente = LogisticaConf.getSenderId(company.did);
                 const empresaVinculada = LogisticaConf.getEmpresaVinculada(company.did);
                 // que pasa si es 211 o  55 que no tienen empresa vinculada
@@ -56,8 +73,13 @@ export async function aplanta(company, dataQr, userId) {
                     // preguntar a cris 
                     throw new Error("El envio no esta igresado en su sistema");
                 };
+                let shipmentIdExterno;
+                try {
 
-                const shipmentIdExterno = await getShipmentIdFromQr(empresaVinculada, dataQr);
+                    shipmentIdExterno = await getShipmentIdFromQr(empresaVinculada, dataQr);
+                } catch (error) {
+                    throw new Error("Error envio no insertado ");
+                }
 
                 //no encontre shipmentiD : cambiar en el qr la empresa x la externa --- si no esta lo inserta 
                 dataQr = {
