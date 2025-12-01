@@ -60,6 +60,7 @@ export async function handleInternalFlex(
     await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,]);
     logCyan("Actualice el ml_qr_seguridad del envio");
   } else {
+    // para el caso de que no este vincualdo el cliente 167 o 114, el envio ya debe estar insertado 
     shipmentId = await insertEnvios(
       dbConnection,
       companyId,
@@ -87,7 +88,7 @@ export async function handleInternalFlex(
   );
 
   //! jls 167 tambien usa una cuenta no vinculada -- gonzalo no lo saques
-  if (companyId == 144 || companyId == 167) {
+  if (companyId == 144 || companyId == 167 || companyId == 114) {
     const body = await informe(
       dbConnection,
       company,

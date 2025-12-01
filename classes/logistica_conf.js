@@ -6,11 +6,9 @@ export default class LogisticaConf {
         12: { empresa_vinculada: 55, seller_id: 44 },
         55: { empresa_vinculada: null, seller_id: 184 },
         327: { empresa_vinculada: 55, seller_id: 15 },
-
     };
 
-    // planet 12   
-    // zuiden 55
+    static existeSioSi = [12];
 
     static hasBarcodeEnabled(did) {
         return String(did) in this.tieneBarcode;
@@ -22,5 +20,9 @@ export default class LogisticaConf {
 
     static getSenderId(did) {
         return this.tieneBarcode?.[String(did)]?.seller_id ?? 0;
+    }
+
+    static getExisteSioSi(did) {
+        return this.existeSioSi.includes(Number(did));
     }
 }
