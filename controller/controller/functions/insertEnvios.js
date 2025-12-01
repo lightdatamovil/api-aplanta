@@ -32,7 +32,7 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
         await executeQuery(dbConnection, updateSql, [result.insertId, result.insertId]);
 
         // Array de companyIds que deben enviar el mensaje
-        const companiesToSend = [12, 79, 167, 365, 364, 363, 362, 361, 360, 359, 358, 357, 356, 355, 354, 353, 352, 351, 350, 204, 334];
+        const companiesToSend = [12, 79, 167, 365, 364, 363, 362, 361, 360, 359, 358, 357, 356, 355, 354, 353, 352, 351, 350, 204, 334, 211];
 
 
         // Verificamos si el companyId actual está en la lista
