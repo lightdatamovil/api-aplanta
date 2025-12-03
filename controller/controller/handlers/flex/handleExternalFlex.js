@@ -193,11 +193,26 @@ export async function handleExternalFlex(
 
       logCyan("Voy a asignar el envio en la logistica interna 1");
       await assign(externalCompanyId, userId, 0, dqrext, driver);
-
+      const queryInternalClient = `
+        SELECT didCliente 
+        FROM envios 
+        WHERE ml_shipment_id = ? and elim = 0 and superado=0
+      `;
+      const internalClient = await executeQuery(
+        dbConnection,
+        queryInternalClient,
+        [mlShipmentId],
+      );
+      if (internalClient.length == 0) {
+        return {
+          success: false,
+          message: "No se encontró cliente asociado",
+        };
+      }
       const resultInforme = await informe(
         dbConnection,
         company,
-        userId,
+        internalClient[0].didCliente,
         userId,
         internalShipmentId
       );
