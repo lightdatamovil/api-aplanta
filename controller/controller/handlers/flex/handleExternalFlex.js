@@ -74,13 +74,13 @@ export async function handleExternalFlex(
         codLocal
       );
 
-
       if (!driver) {
         continue;
       }
 
-      const sqlEnvios = `SELECT did FROM envios  WHERE ml_shipment_id = ? AND ml_vendedor_id = ?  LIMIT 1  `;
-      let rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [mlShipmentId, senderid]);
+      const sqlEnvios = `SELECT did
+            FROM envios  WHERE ml_shipment_id = ? AND ml_vendedor_id = ?  and elim = 0 and superado = 0 LIMIT 1  `;
+      let rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [mlShipmentId, senderid], true);
 
       let externalShipmentId;
 
@@ -132,10 +132,11 @@ export async function handleExternalFlex(
 
       let internalShipmentId;
       const consulta =
-        "SELECT didLocal FROM envios_exteriores WHERE didExterno = ?";
+        "SELECT didLocal FROM envios_exteriores WHERE didExterno = ?  and didEmpresa =  ? and superado = 0 and elim = 0 LIMIT 1";
       internalShipmentId = await executeQuery(dbConnection, consulta, [
         externalShipmentId,
-      ]);
+        externalCompanyId
+      ], true);
 
       if (internalShipmentId.length > 0 && internalShipmentId[0]?.didLocal) {
         internalShipmentId = internalShipmentId[0].didLocal;
