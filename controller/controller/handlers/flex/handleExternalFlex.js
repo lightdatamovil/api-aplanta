@@ -10,7 +10,7 @@ import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInv
 import CustomException from "../../../../classes/custom_exception.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
 import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
-import { checkearEstadoEnvio } from "../../../../../api-colecta/controller/colectaController/functions/checkarEstadoEnvio.js";
+import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 
 /* Esta funcion busca las logisticas vinculadas
  Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
