@@ -10,15 +10,20 @@ import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInv
 import CustomException from "../../../../classes/custom_exception.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
 import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
+import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 
-/// Esta funcion busca las logisticas vinculadas
-/// Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
-/// Si el envio existe, tomo el did
-/// Si no existe, lo inserto y tomo el did
-/// Tomo los datos de los clientes de la logística externa para luego insertar los envios
-/// Inserto el envio en la tabla envios y envios exteriores de la logística interna
-/// Actualizo el estado del envío y lo envío al microservicio de estados en la logística interna
-/// Actualizo el estado del envío y lo envío al microservicio de estados en la logística externa
+/* Esta funcion busca las logisticas vinculadas
+ Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
+ Si el envio existe, tomo el did
+ Si no existe, lo inserto y tomo el did
+ Tomo los datos de los clientes de la logística externa para luego insertar los envios
+ Inserto el envio en la tabla envios y envios exteriores de la logística interna
+ Actualizo el estado del envío y lo envío al microservicio de estados en la logística interna
+ Actualizo el estado del envío y lo envío al microservicio de estados en la logística externa
+
+*/
+
+
 export async function handleExternalFlex(
   dbConnection,
   company,
@@ -69,17 +74,12 @@ export async function handleExternalFlex(
         codLocal
       );
 
-
       if (!driver) {
         continue;
       }
 
-      const sqlEnvios = `
-        SELECT did
-        FROM envios 
-        WHERE ml_shipment_id = ? AND ml_vendedor_id = ? 
-        LIMIT 1
-      `;
+      const sqlEnvios = `SELECT did
+            FROM envios  WHERE ml_shipment_id = ? AND ml_vendedor_id = ?  and elim = 0 and superado = 0 LIMIT 1  `;
       let rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [mlShipmentId, senderid], true);
 
       let externalShipmentId;
@@ -87,6 +87,11 @@ export async function handleExternalFlex(
       if (rowsEnvios.length > 0) {
         externalShipmentId = rowsEnvios[0].did;
         logCyan("Encontre el envio en la logistica externa");
+        const check = await checkearEstadoEnvio(
+          externalDbConnection,
+          externalShipmentId
+        );
+        if (check) return check;
       } else {
         logCyan("No encontre el envio en la logistica externa");
         //? Esto en algun momento puede llegar a funcionar mal si un seller trabaja con 2 logisticas
@@ -120,15 +125,17 @@ export async function handleExternalFlex(
         rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [
           result,
           senderid,
-        ], true);
+        ]);
         logCyan("Inserte el envio en la logistica externa");
         externalShipmentId = rowsEnvios[0].did;
       }
 
+      let internalShipmentId;
       const consulta =
-        "SELECT didLocal FROM envios_exteriores WHERE didExterno = ?";
-      let internalShipmentId = await executeQuery(dbConnection, consulta, [
+        "SELECT didLocal FROM envios_exteriores WHERE didExterno = ?  and didEmpresa =  ? and superado = 0 and elim = 0 LIMIT 1";
+      internalShipmentId = await executeQuery(dbConnection, consulta, [
         externalShipmentId,
+        externalCompanyId
       ], true);
 
       if (internalShipmentId.length > 0 && internalShipmentId[0]?.didLocal) {
@@ -193,11 +200,26 @@ export async function handleExternalFlex(
 
       logCyan("Voy a asignar el envio en la logistica interna 1");
       await assign(externalCompanyId, userId, 0, dqrext, driver);
-
+      const queryInternalClient = `
+        SELECT didCliente 
+        FROM envios 
+        WHERE did = ? and elim = 0 and superado=0
+      `;
+      const internalClient = await executeQuery(
+        dbConnection,
+        queryInternalClient,
+        [internalShipmentId],
+      );
+      if (internalClient.length == 0) {
+        return {
+          success: false,
+          message: "No se encontró cliente asociado",
+        };
+      }
       const resultInforme = await informe(
         dbConnection,
         company,
-        userId,
+        internalClient[0].didCliente,
         userId,
         internalShipmentId
       );
