@@ -1,6 +1,6 @@
 import { logGreen, logRed } from "../../../src/funciones/logsCustom.js";
 import CustomException from "../../../classes/custom_exception.js";
-import { axiosInstance } from "../../../db.js";
+import { axiosInstance, urlMicroserviciosAsignaciones } from "../../../db.js";
 
 export async function assign(companyId, userId, profile, dataQr, driverId) {
   const payload = {
@@ -19,7 +19,7 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
 
   try {
     const result = await axiosInstance.post(
-      "http://10.70.0.71:13000/api/asignaciones/asignar",
+      urlMicroserviciosAsignaciones,
       payload
     );
     if (result.status == 200) {

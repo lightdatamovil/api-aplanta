@@ -122,12 +122,8 @@ export async function handleExternalFlex(
           driver
         );
 
-        rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [
-          result,
-          senderid,
-        ]);
         logCyan("Inserte el envio en la logistica externa");
-        externalShipmentId = rowsEnvios[0].did;
+        externalShipmentId = result;
       }
 
       let internalShipmentId;

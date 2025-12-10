@@ -2,11 +2,9 @@ import dotenv from 'dotenv';
 import { logGreen } from '../../../src/funciones/logsCustom.js';
 import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
 import { generarTokenFechaHoy } from '../../../src/funciones/generarTokenFechaHoy.js';
-import { axiosInstance } from '../../../db.js';
+import { axiosInstance, urlMicroserviciosEstado } from '../../../db.js';
 
 dotenv.config({ path: process.env.ENV_FILE || '.env' });
-
-const BACKUP_ENDPOINT = "http://10.70.0.69:13000/estados";
 
 export async function sendToShipmentStateMicroServiceAPI(
     companyId,
@@ -31,7 +29,7 @@ export async function sendToShipmentStateMicroServiceAPI(
     };
 
     try {
-        const response = await axiosInstance.post(BACKUP_ENDPOINT, message);
+        const response = await axiosInstance.post(urlMicroserviciosEstado, message);
         logGreen(`✅ Enviado por HTTP con status ${response.status}`);
     } catch (httpError) {
         console.error('Error enviando a Shipment State MicroService API:', httpError.message);
