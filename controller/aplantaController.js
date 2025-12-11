@@ -92,13 +92,15 @@ export async function aplanta(company, dataQr, userId) {
         }
         const isCollectShipmentML = Object.prototype.hasOwnProperty.call(dataQr, "t");
         /// Me fijo si es flex o no
-        const isFlex = Object.prototype.hasOwnProperty.call(dataQr, "sender_id") || isCollectShipmentML;
+        const isFlex = Object.prototype.hasOwnProperty.call(dataQr, "sender_id") || isCollectShipmentML || Object.prototype.hasOwnProperty.call(dataQr, "id_orden");
 
         if (isFlex) {
             logCyan("Es flex");
             /// Busco la cuenta del cliente
             let account = null;
             let senderId = null;
+            let flex = null;
+            let mlShipmentId;
             if (isCollectShipmentML) {
                 //! Esto quiere decir que es un envio de colecta de ML
                 const querySeller = `SELECT ml_vendedor_id FROM envios WHERE ml_shipment_id = ? AND flex = 1 AND superado=0 AND elim=0`;
@@ -107,18 +109,17 @@ export async function aplanta(company, dataQr, userId) {
                 senderId = result[0].ml_vendedor_id;
                 account = await getAccountBySenderId(dbConnection, company.did, senderId);
             } else {
-                senderId = dataQr.sender_id;
-                account = await getAccountBySenderId(dbConnection, company.did, dataQr.sender_id);
-                // if (company.did == 167 && account == undefined) {
-                //     logCyan("Es JSL");
-                //     return await handleInternalFlex(dbConnection, company, userId, dataQr, 0, senderId);
-                // }
+                senderId = Object.prototype.hasOwnProperty.call(dataQr, "id_orden") ? dataQr.id_seller : dataQr.sender_id;
+                mlShipmentId = Object.prototype.hasOwnProperty.call(dataQr, "id_orden") ? dataQr.id_orden : dataQr.id;
+                flex = Object.prototype.hasOwnProperty.call(dataQr, "id_orden") ? 21 : 1;
+                account = await getAccountBySenderId(dbConnection, company.did, senderId);
 
+                console.log("senderId", senderId, "account", account, "mlShipmentId", mlShipmentId, "flex", flex);
             }
 
             if (account) {
                 logCyan("Es interno");
-                response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
+                response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId, mlShipmentId, flex);
             } else if (company.did == 144 || company.did == 167 || company.did == 114) {
                 // el envio debe estar insertado en la tabla envios, sino no lo inserta al saltar esta verficacion en este if
                 logCyan("Es interno (por verificación extra de empresa 144 o 167)");

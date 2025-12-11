@@ -18,10 +18,12 @@ export async function handleInternalFlex(
   userId,
   dataQr,
   account,
-  senderId
+  senderId,
+  mlShipmentId,
+  flex
 ) {
   const companyId = company.did;
-  const mlShipmentId = dataQr.id;
+
 
   await checkIfFulfillment(dbConnection, mlShipmentId);
 
@@ -60,6 +62,7 @@ export async function handleInternalFlex(
     await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,]);
     logCyan("Actualice el ml_qr_seguridad del envio");
   } else {
+    console.log("No encontre el envio, lo inserto");
     // para el caso de que no este vincualdo el cliente 167 o 114, el envio ya debe estar insertado 
     shipmentId = await insertEnvios(
       dbConnection,
@@ -67,15 +70,12 @@ export async function handleInternalFlex(
       account.didCliente,
       account.didCuenta,
       dataQr,
-      1,
+      flex,
       0,
       0,
       userId,
     );
-    resultBuscarEnvio = await executeQuery(dbConnection, sql, [
-      mlShipmentId,
-      senderId,
-    ]);
+    resultBuscarEnvio = shipmentId
     logCyan("Inserte el envio");
   }
 
