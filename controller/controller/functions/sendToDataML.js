@@ -42,7 +42,7 @@ export async function senToDataML(
         sellerId: sellerId,
         shipmentId: shipmentId
     };
-    logCyan(`Enviando mensaje a RabbitMQ: ${JSON.stringify(message)}`);
+    logCyan(`Enviando mensaje a RabbitMQ DataML: ${JSON.stringify(message)}`);
     try {
 
         logCyan(`Enviando mensaje a RabbitMQ: ${JSON.stringify(message)}`);
