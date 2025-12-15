@@ -1,4 +1,4 @@
-import { executeQuery, getClientsByCompany } from "../../../../db.js";
+import { executeQuery } from "../../../../db.js";
 
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
@@ -78,9 +78,6 @@ export async function handleInternalFlex(
   await sendToShipmentStateMicroServiceAPI(companyId, userId, shipmentId,
     null,
     null, dbConnection);
-  const clients = await getClientsByCompany(dbConnection, companyId);
-  console.log("account en internal", JSON.stringify(row));
-  const cliente = clients[row.didCliente];
   //! jls 167 tambien usa una cuenta no vinculada -- gonzalo no lo saques
   if (companyId == 144 || companyId == 167 || companyId == 114) {
     const body = await informe(
@@ -89,7 +86,7 @@ export async function handleInternalFlex(
       row.didCliente,
       userId,
       shipmentId,
-      cliente?.nombre
+      "ERROR MOMENTANEO"
     );
     return {
       success: true,
@@ -104,7 +101,7 @@ export async function handleInternalFlex(
     account.didCliente || row.didCliente,
     userId,
     shipmentId,
-    cliente?.nombre
+    "ERROR MOMENTANEO"
   );
   return {
     success: true,

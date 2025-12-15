@@ -1,4 +1,4 @@
-import { executeQuery, getProdDbConfig, getCompanyByCode, getClientsByCompany, getCompanyById, getAccountBySenderId } from "../../../../db.js";
+import { executeQuery, getProdDbConfig, getCompanyByCode } from "../../../../db.js";
 import mysql2 from "mysql2";
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
@@ -74,11 +74,6 @@ export async function handleExternalFlex(
         continue;
       }
 
-      const account = await getAccountBySenderId(externalDbConnection, externalCompany.did, dataQr.sender_id);
-      const clients = await getClientsByCompany(externalDbConnection, company.did);
-      console.log("account", account);
-      const cliente = clients[account.didCliente];
-      console.log("ssss", account);
       const sqlEnvios = `SELECT did
             FROM envios  WHERE ml_shipment_id = ? AND ml_vendedor_id = ?  and elim = 0 and superado = 0 LIMIT 1  `;
       let rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [mlShipmentId, senderid], true);
@@ -149,7 +144,7 @@ export async function handleExternalFlex(
           internalShipmentId,
           externalShipmentId,
           1,
-          cliente?.nombre || "",
+          "ERROR MOMENTANEO",
           externalCompanyId
         );
       }
@@ -214,7 +209,7 @@ export async function handleExternalFlex(
         internalClient[0].didCliente,
         userId,
         internalShipmentId,
-        cliente?.nombre ?? "Sin información"
+        "ERROR MOMENTANEO"
       );
 
       return {
