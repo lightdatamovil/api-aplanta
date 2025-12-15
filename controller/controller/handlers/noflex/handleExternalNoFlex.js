@@ -111,10 +111,10 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
         );
     }
 
-    await sendToShipmentStateMicroServiceAPI(companyId, userId, internalShipmentId);
+    await sendToShipmentStateMicroServiceAPI(companyId, userId, internalShipmentId, dbConnection);
     logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios internos");
 
-    await sendToShipmentStateMicroServiceAPI(dataQr.empresa, driver, shipmentIdFromDataQr);
+    await sendToShipmentStateMicroServiceAPI(dataQr.empresa, driver, shipmentIdFromDataQr, externalDbConnection);
     logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios externos");
 
     logCyan(`Voy a asignar el envio en la logistica interna 2 con driver: ${driver}  jj`);

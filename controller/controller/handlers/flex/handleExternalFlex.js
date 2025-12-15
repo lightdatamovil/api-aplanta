@@ -176,14 +176,16 @@ export async function handleExternalFlex(
       await sendToShipmentStateMicroServiceAPI(
         company.did,
         userId,
-        internalShipmentId
+        internalShipmentId,
+        dbConnection
       );
       logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica interna");
 
       await sendToShipmentStateMicroServiceAPI(
         externalCompanyId,
         driver,
-        externalShipmentId
+        externalShipmentId,
+        externalDbConnection
       );
       logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica externa");
 
