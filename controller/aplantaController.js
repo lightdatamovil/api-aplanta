@@ -23,8 +23,6 @@ export async function aplanta(company, dataQr, userId) {
             dataQr = dataQr.replace(/\s+/g, '');
         }
 
-        //  console.log("DATA QR:", dataQr);
-
         dataQr = parseIfJson(dataQr);
 
 
@@ -149,9 +147,8 @@ export async function aplanta(company, dataQr, userId) {
         return response;
     }
     catch (error) {
-        console.log(dbConfig);
+        logRed(`Error en aplanta: ${error}`);
         throw error;
-
     } finally {
         decrActiveLocal(company.did);
         dbConnection.end();

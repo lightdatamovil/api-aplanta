@@ -207,7 +207,6 @@ export async function handleExternalFlex(
           message: "No se encontró cliente asociado",
         };
       }
-      console.log("hice todo falta informe");
       const resultInforme = await informe(
         dbConnection,
         company,
