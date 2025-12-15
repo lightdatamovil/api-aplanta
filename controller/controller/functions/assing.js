@@ -30,6 +30,7 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
       logRed("Error al asignar");
       console.log(urlMicroserviciosAsignaciones);
       console.log(payload);
+      console.log(result);
       throw new CustomException({
         title: "Error al asignar",
         message: `Código de estado: ${result.status}`,
@@ -49,7 +50,7 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
 }
 export async function sendToService(endpoint, message, retries = 3) {
   try {
-    await axiosInstance.post(endpoint, message);
+    return await axiosInstance.post(endpoint, message);
   } catch (err) {
     if (retries > 0) {
       await new Promise(r => setTimeout(r, 300 * (4 - retries)));
