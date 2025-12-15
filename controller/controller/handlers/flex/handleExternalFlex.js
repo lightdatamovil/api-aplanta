@@ -208,8 +208,7 @@ export async function handleExternalFlex(
         company,
         internalClient[0].didCliente,
         userId,
-        internalShipmentId,
-        "ERROR MOMENTANEO"
+        internalShipmentId
       );
 
       return {

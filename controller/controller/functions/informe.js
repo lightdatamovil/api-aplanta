@@ -7,7 +7,7 @@ setInterval(() => {
     Object.keys(contadoresIngresados).forEach(k => delete contadoresIngresados[k]);
 }, 14 * 24 * 60 * 60 * 1000); // 14 días
 
-export async function informe(dbConnection, company, clientId = 0, userId, shipmentId = 0, clienteNombre) {
+export async function informe(dbConnection, company, clientId = 0, userId, shipmentId = 0) {
     const companyId = company.did;
     const hoy = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
@@ -56,10 +56,11 @@ export async function informe(dbConnection, company, clientId = 0, userId, shipm
             : Promise.resolve([]);
 
     // Obtener clientes y choferes en paralelo
-    const [resultIngresadosHoy, resultEnvioDetalle, companyDrivers] =
+    const [resultIngresadosHoy, resultEnvioDetalle, companyClients, companyDrivers] =
         await Promise.all([
             promIngresadosHoy,
             promEnvioDetalle,
+            getClientsByCompany(dbConnection, companyId),
             getDriversByCompany(dbConnection, companyId),
         ]);
 
@@ -79,12 +80,12 @@ export async function informe(dbConnection, company, clientId = 0, userId, shipm
     const choferAsignado = envioDetalle.choferAsignado || 0;
     const zonaEntrega = envioDetalle.zona || "Sin información";
     const sucursal = envioDetalle.sucursal || "Sin información";
-
+    const cliente = companyClients[clientId]?.nombre ?? "Sin información";
     const chofer = companyDrivers[choferAsignado]?.nombre ?? "Sin información";
 
     // 🔹 Resultado final
     return {
-        cliente: clienteNombre || "Sin información",
+        cliente,
         aingresarhoy: amountAPlanta,
         ingresadoshot: amountRetirados,
         ingresadosahora: ingresadosHoyChofer,

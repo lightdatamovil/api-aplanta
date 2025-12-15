@@ -115,7 +115,7 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
         null, externalDbConnection);
 
     await assign(externalCompany.did, userId, 3, dataQr, driver);
-    const body = await informe(dbConnection, company, externalClient[0].did, userId, internalShipmentId, client?.nombre ?? "Sin información");
+    const body = await informe(dbConnection, company, externalClient[0].did, userId, internalShipmentId);
 
     externalDbConnection.end();
 

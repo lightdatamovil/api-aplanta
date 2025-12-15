@@ -85,8 +85,7 @@ export async function handleInternalFlex(
       company,
       row.didCliente,
       userId,
-      shipmentId,
-      "ERROR MOMENTANEO"
+      shipmentId
     );
     return {
       success: true,
@@ -100,8 +99,7 @@ export async function handleInternalFlex(
     company,
     account.didCliente || row.didCliente,
     userId,
-    shipmentId,
-    "ERROR MOMENTANEO"
+    shipmentId
   );
   return {
     success: true,
