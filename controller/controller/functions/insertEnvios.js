@@ -41,6 +41,7 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
         }
 
 
+        /*
         await axiosInstance.post(
             'https://altaenvios.lightdata.com.ar/api/enviosMLredis',
             {
@@ -56,8 +57,10 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
                 }
             },
         );
+        */
 
     }
+
 
     return result.insertId;
 }
