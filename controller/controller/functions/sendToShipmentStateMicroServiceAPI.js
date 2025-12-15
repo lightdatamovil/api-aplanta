@@ -34,8 +34,7 @@ export async function sendToShipmentStateMicroServiceAPI(
             await actualizarEstadoLocal(db, [shipmentId], "aplanta", message.fecha, userId, message.estado);
             return;
         }
-        const response = await axiosInstance.post(urlMicroserviciosEstado, message);
-        logGreen(`✅ Enviado por HTTP con status ${response.status}`);
+        await axiosInstance.post(urlMicroserviciosEstado, message);
     } catch (httpError) {
         logRed(`Error enviando a Shipment State MicroService API: ${httpError.message}`);
     }
