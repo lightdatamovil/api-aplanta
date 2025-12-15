@@ -30,6 +30,7 @@ export async function sendToShipmentStateMicroServiceAPI(
     };
 
     try {
+        console.log(`Enviando ${urlMicroserviciosEstadoCaido} de envío ${shipmentId} a Shipment State MicroService API...`);
         if (urlMicroserviciosEstadoCaido) {
             await actualizarEstadoLocal(db, [shipmentId], "aplanta", message.fecha, userId, message.estado);
             return;

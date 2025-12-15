@@ -177,6 +177,8 @@ export async function handleExternalFlex(
         company.did,
         userId,
         internalShipmentId,
+        null,
+        null,
         dbConnection
       );
       logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica interna");
@@ -185,6 +187,8 @@ export async function handleExternalFlex(
         externalCompanyId,
         driver,
         externalShipmentId,
+        null,
+        null,
         externalDbConnection
       );
       logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica externa");

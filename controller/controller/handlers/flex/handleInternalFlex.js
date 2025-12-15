@@ -81,7 +81,9 @@ export async function handleInternalFlex(
 
   const startTime = performance.now();
   /// Actualizo el estado del envío y lo envío al microservicio de estados
-  await sendToShipmentStateMicroServiceAPI(companyId, userId, shipmentId, dbConnection);
+  await sendToShipmentStateMicroServiceAPI(companyId, userId, shipmentId,
+    null,
+    null, dbConnection);
   logBlue(`Fin sendToShipmentStateMicroServiceAPI - ${((performance.now() - startTime)).toFixed(2)} ms`);
   logCyan(
     "Actualice el estado del envio y lo envie al microservicio de estados"
