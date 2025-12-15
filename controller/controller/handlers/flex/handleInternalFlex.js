@@ -97,8 +97,8 @@ export async function handleInternalFlex(
     };
 
   }
-  console.log("asd:" + account);
-  console.log("asd2:" + row);
+  console.log("asd:" + JSON.stringify(account));
+  console.log("asd2:" + JSON.stringify(row));
   const body = await informe(
     dbConnection,
     company,
