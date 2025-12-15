@@ -27,7 +27,7 @@ const hostProductionDb = process.env.PRODUCTION_DB_HOST;
 const portProductionDb = process.env.PRODUCTION_DB_PORT;
 
 export const urlMicroserviciosEstado = process.env.LOCAL == "true" ? process.env.URL_MICROSERVICIOS_ESTADO : process.env.URL_MICROSERVICIOS_ESTADO_NODO;
-export const urlMicroserviciosAsignaciones = process.env.LOCAL == "true" ? process.env.URL_MICROSERVICIOS_ASIGNACIONES : process.env.URL_MICROSERVICIOS_ASIGNACIONES_NODO;
+export const urlMicroserviciosAsignaciones = process.env.LOCAL == "true" ? process.env.URL_ASIGNACION_MICROSERVICE : process.env.URL_ASIGNACION_MICROSERVICE_RED;
 export const urlMicroserviciosEstadoCaido = process.env.URL_ESTADOS_MICROSERVICE_CAIDO == "true";
 
 // 🔹 Agente HTTPS con keep-alive y hasta 100 conexiones simultáneas
