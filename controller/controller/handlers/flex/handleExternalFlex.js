@@ -199,7 +199,7 @@ export async function handleExternalFlex(
       const internalClient = await executeQuery(
         dbConnection,
         queryInternalClient,
-        [internalShipmentId],
+        [internalShipmentId], true
       );
       if (internalClient.length == 0) {
         return {
@@ -207,6 +207,7 @@ export async function handleExternalFlex(
           message: "No se encontró cliente asociado",
         };
       }
+      console.log("hice todo falta informe");
       const resultInforme = await informe(
         dbConnection,
         company,
