@@ -3,7 +3,6 @@ import { executeQuery } from "../../../../db.js";
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
-import { logBlue } from "../../../../src/funciones/logsCustom.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
 import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
 
@@ -75,12 +74,10 @@ export async function handleInternalFlex(
     ]);
   }
 
-  const startTime = performance.now();
   /// Actualizo el estado del envío y lo envío al microservicio de estados
   await sendToShipmentStateMicroServiceAPI(companyId, userId, shipmentId,
     null,
     null, dbConnection);
-  logBlue(`Fin sendToShipmentStateMicroServiceAPI - ${((performance.now() - startTime)).toFixed(2)} ms`);
 
   //! jls 167 tambien usa una cuenta no vinculada -- gonzalo no lo saques
   if (companyId == 144 || companyId == 167 || companyId == 114) {

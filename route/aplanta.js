@@ -2,7 +2,7 @@ import { Router } from "express";
 import { verifyParameters } from "../src/funciones/verifyParameters.js";
 import { getCompanyById } from "../db.js";
 import { aplanta } from "../controller/aplantaController.js";
-import { logRed } from "../src/funciones/logsCustom.js";
+import { logPurple, logRed } from "../src/funciones/logsCustom.js";
 import { crearLog } from "../src/funciones/crear_log.js";
 import CustomException from "../classes/custom_exception.js";
 import { obtenerEstadoComparado } from "../controller/test_ip.js";
@@ -37,6 +37,8 @@ a_planta.post("/aplanta", async (req, res) => {
       crearLog(company, userId, profile, body, performance.now() - startTime, JSON.stringify(error.message), "api", false);
       res.status(500).json({ title: 'Error interno del servidor', message: 'Unhandled Error', stack: error.stack });
     }
+  } finally {
+    logPurple(`Tiempo de ejecución: ${performance.now() - startTime} ms`);
   }
 });
 
