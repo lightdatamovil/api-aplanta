@@ -19,10 +19,11 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
 
   try {
     console.log("urlMicroserviciosAsignaciones");
-    const result = await axiosInstance.post(
+    const result = await sendToService(
       urlMicroserviciosAsignaciones,
       payload
     );
+    console.log(JSON.stringify(result.data));
     if (result.status == 200) {
       logGreen("Asignado correctamente");
     } else {
@@ -44,5 +45,16 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
       message: `Código de estado: ${error.status}`,
       stack: error.stack || '',
     });
+  }
+}
+export async function sendToService(endpoint, message, retries = 3) {
+  try {
+    await axiosInstance.post(endpoint, message);
+  } catch (err) {
+    if (retries > 0) {
+      await new Promise(r => setTimeout(r, 300 * (4 - retries)));
+      return sendToService(endpoint, message, retries - 1);
+    }
+    throw err;
   }
 }
