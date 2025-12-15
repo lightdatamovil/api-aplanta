@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { logGreen } from '../../../src/funciones/logsCustom.js';
+import { logGreen, logRed } from '../../../src/funciones/logsCustom.js';
 import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
 import { generarTokenFechaHoy } from '../../../src/funciones/generarTokenFechaHoy.js';
 import { axiosInstance, executeQuery, urlMicroserviciosEstado, urlMicroserviciosEstadoCaido } from '../../../db.js';
@@ -30,7 +30,6 @@ export async function sendToShipmentStateMicroServiceAPI(
     };
 
     try {
-        console.log(`Enviando ${urlMicroserviciosEstadoCaido} de envío ${shipmentId} a Shipment State MicroService API...`);
         if (urlMicroserviciosEstadoCaido) {
             await actualizarEstadoLocal(db, [shipmentId], "aplanta", message.fecha, userId, message.estado);
             return;
@@ -38,7 +37,7 @@ export async function sendToShipmentStateMicroServiceAPI(
         const response = await axiosInstance.post(urlMicroserviciosEstado, message);
         logGreen(`✅ Enviado por HTTP con status ${response.status}`);
     } catch (httpError) {
-        console.error('Error enviando a Shipment State MicroService API:', httpError.message);
+        logRed(`Error enviando a Shipment State MicroService API: ${httpError.message}`);
     }
 }
 
