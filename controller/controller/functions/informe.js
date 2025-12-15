@@ -7,7 +7,7 @@ setInterval(() => {
     Object.keys(contadoresIngresados).forEach(k => delete contadoresIngresados[k]);
 }, 14 * 24 * 60 * 60 * 1000); // 14 días
 
-export async function informe(dbConnection, company, clientId = 0, userId, shipmentId = 0) {
+export async function informe(dbConnection, company, clientId = 0, userId, shipmentId = 0, clienteNombre) {
     const companyId = company.did;
     const hoy = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
@@ -81,13 +81,11 @@ export async function informe(dbConnection, company, clientId = 0, userId, shipm
     const zonaEntrega = envioDetalle.zona || "Sin información";
     const sucursal = envioDetalle.sucursal || "Sin información";
 
-    // 🔹 Datos del cliente y chofer
-    const cliente = companyClients[clientId]?.nombre ?? "Sin información";
     const chofer = companyDrivers[choferAsignado]?.nombre ?? "Sin información";
 
     // 🔹 Resultado final
     return {
-        cliente,
+        clienteNombre,
         aingresarhoy: amountAPlanta,
         ingresadoshot: amountRetirados,
         ingresadosahora: ingresadosHoyChofer,

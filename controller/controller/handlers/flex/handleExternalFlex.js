@@ -1,4 +1,4 @@
-import { executeQuery, getProdDbConfig, getCompanyByCode } from "../../../../db.js";
+import { executeQuery, getProdDbConfig, getCompanyByCode, getClientsByCompany, getCompanyById, getAccountBySenderId } from "../../../../db.js";
 import mysql2 from "mysql2";
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
@@ -9,7 +9,7 @@ import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInv
 import CustomException from "../../../../classes/custom_exception.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
 import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
-import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
+
 
 /* Esta funcion busca las logisticas vinculadas
  Reviso si el envío ya fue colectado cancelado o entregado en la logística externa
@@ -55,7 +55,6 @@ export async function handleExternalFlex(
   /// Por cada logística externa
   for (const logistica of logisticasExternas) {
     const externalLogisticId = logistica.did;
-    const nombreFantasia = logistica.nombre_fantasia;
     const syncCode = logistica.codigoVinculacionLogE;
 
     const externalCompany = await getCompanyByCode(syncCode);
@@ -75,6 +74,10 @@ export async function handleExternalFlex(
         continue;
       }
 
+      const account = await getAccountBySenderId(externalDbConnection, externalCompany.did, dataQr.sender_id);
+      const clients = await getClientsByCompany(externalDbConnection, company.did);
+      const cliente = clients[account.didCliente];
+
       const sqlEnvios = `SELECT did
             FROM envios  WHERE ml_shipment_id = ? AND ml_vendedor_id = ?  and elim = 0 and superado = 0 LIMIT 1  `;
       let rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [mlShipmentId, senderid], true);
@@ -83,11 +86,7 @@ export async function handleExternalFlex(
 
       if (rowsEnvios.length > 0) {
         externalShipmentId = rowsEnvios[0].did;
-        const check = await checkearEstadoEnvio(
-          externalDbConnection,
-          externalShipmentId
-        );
-        if (check) return check;
+
       } else {
         //? Esto en algun momento puede llegar a funcionar mal si un seller trabaja con 2 logisticas
         const sqlCuentas = `
@@ -130,6 +129,7 @@ export async function handleExternalFlex(
       if (internalShipmentId.length > 0 && internalShipmentId[0]?.didLocal) {
         internalShipmentId = internalShipmentId[0].didLocal;
       } else {
+        console.log("no encontre el envio");
         internalShipmentId = await insertEnvios(
           dbConnection,
           company.did,
@@ -142,12 +142,13 @@ export async function handleExternalFlex(
           userId
         );
 
+
         await insertEnviosExteriores(
           dbConnection,
           internalShipmentId,
           externalShipmentId,
           1,
-          nombreFantasia,
+          cliente?.nombre || "",
           externalCompanyId
         );
       }
@@ -211,7 +212,8 @@ export async function handleExternalFlex(
         company,
         internalClient[0].didCliente,
         userId,
-        internalShipmentId
+        internalShipmentId,
+        cliente.nombre
       );
 
       return {
