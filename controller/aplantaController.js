@@ -4,7 +4,7 @@ import { handleExternalFlex } from "./controller/handlers/flex/handleExternalFle
 import { handleExternalNoFlex } from "./controller/handlers/noflex/handleExternalNoFlex.js";
 import { handleInternalNoFlex } from "./controller/handlers/noflex/handleInternalNoFlex.js";
 import mysql2 from "mysql2";
-import { logCyan, logPurple } from "../src/funciones/logsCustom.js";
+import { logPurple } from "../src/funciones/logsCustom.js";
 import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
 import { parseIfJson } from "../src/funciones/isValidJson.js";
 import LogisticaConf from "../classes/logistica_conf.js";
@@ -95,7 +95,6 @@ export async function aplanta(company, dataQr, userId) {
         const isFlex = Object.prototype.hasOwnProperty.call(dataQr, "sender_id") || isCollectShipmentML;
 
         if (isFlex) {
-            logCyan("Es flex");
             /// Busco la cuenta del cliente
             let account = null;
             let senderId = null;
@@ -110,18 +109,15 @@ export async function aplanta(company, dataQr, userId) {
                 senderId = dataQr.sender_id;
                 account = await getAccountBySenderId(dbConnection, company.did, dataQr.sender_id);
                 // if (company.did == 167 && account == undefined) {
-                //     logCyan("Es JSL");
                 //     return await handleInternalFlex(dbConnection, company, userId, dataQr, 0, senderId);
                 // }
 
             }
 
             if (account) {
-                logCyan("Es interno");
                 response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
             } else if (company.did == 144 || company.did == 167 || company.did == 114) {
                 // el envio debe estar insertado en la tabla envios, sino no lo inserta al saltar esta verficacion en este if
-                logCyan("Es interno (por verificación extra de empresa 144 o 167)");
                 const queryCheck = `
                   SELECT did
                   FROM envios
@@ -137,20 +133,15 @@ export async function aplanta(company, dataQr, userId) {
                     senderId = dataQr.sender_id;
                     response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
                 } else {
-                    logCyan("Es externo (empresa 144 pero sin coincidencias)");
                     response = await handleExternalFlex(dbConnection, company, dataQr, userId);
                 }
             } else {
-                logCyan("Es externo");
                 response = await handleExternalFlex(dbConnection, company, dataQr, userId);
             }
         } else {
-            logCyan("No es flex");
             if (company.did == dataQr.empresa) {
-                logCyan("Es interno");
                 response = await handleInternalNoFlex(dbConnection, dataQr, company, userId);
             } else {
-                logCyan("Es externo");
                 logPurple(JSON.stringify(dataQr));
                 response = await handleExternalNoFlex(dbConnection, dataQr, company, userId);
             }

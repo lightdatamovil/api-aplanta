@@ -1,6 +1,6 @@
 import { connect } from 'amqplib';
 import dotenv from 'dotenv';
-import { logCyan, logGreen, logRed, logYellow } from '../../../src/funciones/logsCustom.js';
+import { logGreen, logRed, logYellow } from '../../../src/funciones/logsCustom.js';
 
 dotenv.config({ path: process.env.ENV_FILE || '.env' });
 
@@ -42,10 +42,7 @@ export async function senToDataML(
         sellerId: sellerId,
         shipmentId: shipmentId
     };
-    logCyan(`Enviando mensaje a RabbitMQ DataML: ${JSON.stringify(message)}`);
     try {
-
-        logCyan(`Enviando mensaje a RabbitMQ: ${JSON.stringify(message)}`);
         const ch = await getChannel();
         const sent = ch.sendToQueue(
             QUEUE_ESTADOS,

@@ -3,7 +3,7 @@ import { executeQuery } from "../../../../db.js";
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
-import { logBlue, logCyan } from "../../../../src/funciones/logsCustom.js";
+import { logBlue } from "../../../../src/funciones/logsCustom.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
 import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
 
@@ -44,12 +44,10 @@ export async function handleInternalFlex(
 
   /// Si no existe, lo inserto y tomo el did
   if (resultBuscarEnvio.length > 0) {
-    logCyan("Encontre el envio");
     shipmentId = row.did;
     /// Checkea si el envio ya fue puesto a planta, entregado, entregado 2da o cancelado
     const check = await checkearEstadoEnvio(dbConnection, shipmentId, companyId);
     if (check) return check;
-    logCyan("El envio no fue puesto a planta, entregado, entregado 2da o cancelado");
     const queryUpdateEnvios = `
                 UPDATE envios 
                 SET ml_qr_seguridad = ?
@@ -58,7 +56,6 @@ export async function handleInternalFlex(
             `;
 
     await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,]);
-    logCyan("Actualice el ml_qr_seguridad del envio");
   } else {
     // para el caso de que no este vincualdo el cliente 167 o 114, el envio ya debe estar insertado 
     shipmentId = await insertEnvios(
@@ -76,7 +73,6 @@ export async function handleInternalFlex(
       mlShipmentId,
       senderId,
     ]);
-    logCyan("Inserte el envio");
   }
 
   const startTime = performance.now();
@@ -85,9 +81,6 @@ export async function handleInternalFlex(
     null,
     null, dbConnection);
   logBlue(`Fin sendToShipmentStateMicroServiceAPI - ${((performance.now() - startTime)).toFixed(2)} ms`);
-  logCyan(
-    "Actualice el estado del envio y lo envie al microservicio de estados"
-  );
 
   //! jls 167 tambien usa una cuenta no vinculada -- gonzalo no lo saques
   if (companyId == 144 || companyId == 167 || companyId == 114) {

@@ -4,7 +4,6 @@ import { insertEnvios } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
-import { logCyan } from "../../../../src/funciones/logsCustom.js";
 import { assign } from "../../functions/assing.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 import CustomException from "../../../../classes/custom_exception.js";
@@ -45,7 +44,6 @@ export async function handleExternalFlex(
     dbConnection,
     queryLogisticasExternas, []
   );
-  logCyan("Me traigo las logisticas externas");
   if (logisticasExternas.length == 0) {
     throw new CustomException({
       title: "No se encontraron logísticas externas",
@@ -56,7 +54,6 @@ export async function handleExternalFlex(
   }
   /// Por cada logística externa
   for (const logistica of logisticasExternas) {
-    logCyan(`logistica externa actual: ${logistica.nombre_fantasia}`);
     const externalLogisticId = logistica.did;
     const nombreFantasia = logistica.nombre_fantasia;
     const syncCode = logistica.codigoVinculacionLogE;
@@ -86,14 +83,12 @@ export async function handleExternalFlex(
 
       if (rowsEnvios.length > 0) {
         externalShipmentId = rowsEnvios[0].did;
-        logCyan("Encontre el envio en la logistica externa");
         const check = await checkearEstadoEnvio(
           externalDbConnection,
           externalShipmentId
         );
         if (check) return check;
       } else {
-        logCyan("No encontre el envio en la logistica externa");
         //? Esto en algun momento puede llegar a funcionar mal si un seller trabaja con 2 logisticas
         const sqlCuentas = `
           SELECT did, didCliente 
@@ -103,7 +98,6 @@ export async function handleExternalFlex(
         const rowsCuentas = await executeQuery(externalDbConnection, sqlCuentas, [senderid]);
 
         if (rowsCuentas.length == 0) {
-          logCyan("No se encontró cuenta asociada, paso a la siguiente logística");
           continue;
         }
 
@@ -122,7 +116,6 @@ export async function handleExternalFlex(
           driver
         );
 
-        logCyan("Inserte el envio en la logistica externa");
         externalShipmentId = result;
       }
 
@@ -136,7 +129,6 @@ export async function handleExternalFlex(
 
       if (internalShipmentId.length > 0 && internalShipmentId[0]?.didLocal) {
         internalShipmentId = internalShipmentId[0].didLocal;
-        logCyan("Encontre el envio en envios exteriores");
       } else {
         internalShipmentId = await insertEnvios(
           dbConnection,
@@ -149,7 +141,7 @@ export async function handleExternalFlex(
           0,
           userId
         );
-        logCyan("Inserte el envio en envios");
+
         await insertEnviosExteriores(
           dbConnection,
           internalShipmentId,
@@ -158,7 +150,6 @@ export async function handleExternalFlex(
           nombreFantasia,
           externalCompanyId
         );
-        logCyan("Inserte el envio en envios exteriores");
       }
 
       const checkLI = "SELECT valor FROM envios_logisticainversa WHERE didEnvio = ?";
@@ -181,7 +172,6 @@ export async function handleExternalFlex(
         null,
         dbConnection
       );
-      logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica interna");
 
       await sendToShipmentStateMicroServiceAPI(
         externalCompanyId,
@@ -191,7 +181,6 @@ export async function handleExternalFlex(
         null,
         externalDbConnection
       );
-      logCyan("Actualice el estado del envio y lo envie al microservicio de estados en la logistica externa");
 
       const dqrext = {
         did: externalShipmentId,
@@ -200,7 +189,6 @@ export async function handleExternalFlex(
         cliente: externalLogisticId,
       };
 
-      logCyan("Voy a asignar el envio en la logistica interna 1");
       await assign(externalCompanyId, userId, 0, dqrext, driver);
       const queryInternalClient = `
         SELECT didCliente 
@@ -233,7 +221,6 @@ export async function handleExternalFlex(
       };
 
     } catch (error) {
-      logCyan(`Error en la logística externa: ${error.message}`);
       throw new CustomException({
         title: "Error en la logística externa",
         message: error.message,
