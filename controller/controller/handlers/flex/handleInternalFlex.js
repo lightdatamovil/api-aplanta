@@ -82,12 +82,14 @@ export async function handleInternalFlex(
   const cliente = clients[row.didCliente];
   //! jls 167 tambien usa una cuenta no vinculada -- gonzalo no lo saques
   if (companyId == 144 || companyId == 167 || companyId == 114) {
+    console.log(4);
     const body = await informe(
       dbConnection,
       company,
       row.didCliente,
       userId,
-      shipmentId
+      shipmentId,
+      cliente?.nombre
     );
     return {
       success: true,
@@ -96,6 +98,7 @@ export async function handleInternalFlex(
     };
 
   }
+  console.log(5);
   const body = await informe(
     dbConnection,
     company,
