@@ -76,7 +76,6 @@ export async function handleExternalFlex(
 
       const account = await getAccountBySenderId(externalDbConnection, externalCompany.did, dataQr.sender_id);
       const clients = await getClientsByCompany(externalDbConnection, company.did);
-      console.log(1);
       const cliente = clients[account.didCliente];
 
       const sqlEnvios = `SELECT did
@@ -101,7 +100,6 @@ export async function handleExternalFlex(
           continue;
         }
 
-        console.log(2);
         const didcliente_ext = rowsCuentas[0].didCliente;
         const didcuenta_ext = rowsCuentas[0].did;
 
@@ -209,7 +207,6 @@ export async function handleExternalFlex(
           message: "No se encontró cliente asociado",
         };
       }
-      console.log(3);
       const resultInforme = await informe(
         dbConnection,
         company,
