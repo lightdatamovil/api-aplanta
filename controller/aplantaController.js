@@ -4,7 +4,6 @@ import { handleExternalFlex } from "./controller/handlers/flex/handleExternalFle
 import { handleExternalNoFlex } from "./controller/handlers/noflex/handleExternalNoFlex.js";
 import { handleInternalNoFlex } from "./controller/handlers/noflex/handleInternalNoFlex.js";
 import mysql2 from "mysql2";
-import { logPurple } from "../src/funciones/logsCustom.js";
 import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
 import { parseIfJson } from "../src/funciones/isValidJson.js";
 import LogisticaConf from "../classes/logistica_conf.js";
@@ -142,7 +141,6 @@ export async function aplanta(company, dataQr, userId) {
             if (company.did == dataQr.empresa) {
                 response = await handleInternalNoFlex(dbConnection, dataQr, company, userId);
             } else {
-                logPurple(JSON.stringify(dataQr));
                 response = await handleExternalNoFlex(dbConnection, dataQr, company, userId);
             }
         }
