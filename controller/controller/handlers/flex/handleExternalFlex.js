@@ -78,7 +78,7 @@ export async function handleExternalFlex(
       const clients = await getClientsByCompany(externalDbConnection, company.did);
       console.log("account", account);
       const cliente = clients[account.didCliente];
-
+      console.log("ssss", account);
       const sqlEnvios = `SELECT did
             FROM envios  WHERE ml_shipment_id = ? AND ml_vendedor_id = ?  and elim = 0 and superado = 0 LIMIT 1  `;
       let rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [mlShipmentId, senderid], true);
