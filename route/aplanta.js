@@ -10,6 +10,7 @@ import { obtenerEstadoComparado } from "../controller/test_ip.js";
 const a_planta = Router();
 
 a_planta.post("/aplanta", async (req, res) => {
+  console.log("---- APLANTA ROUTE ----");
   const startTime = performance.now();
   const errorMessage = verifyParameters(req.body, ["dataQr", "deviceFrom"]);
 
