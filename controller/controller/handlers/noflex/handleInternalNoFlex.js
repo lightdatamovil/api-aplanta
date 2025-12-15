@@ -1,4 +1,4 @@
-import { executeQuery } from "../../../../db.js";
+import { executeQuery, getClientsByCompany } from "../../../../db.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
@@ -29,7 +29,10 @@ export async function handleInternalNoFlex(dbConnection, dataQr, company, userId
         null,
         null, dbConnection);
 
-    const body = await informe(dbConnection, company, clientId, userId, shipmentId);
+    const clients = await getClientsByCompany(dbConnection, companyId);
+    const cliente = clients[clientId];
+
+    const body = await informe(dbConnection, company, clientId, userId, shipmentId, cliente?.nombre ?? "Sin información");
 
     return { success: true, message: "Paquete puesto a planta  correctamente", body: body };
 }

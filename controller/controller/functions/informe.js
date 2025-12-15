@@ -56,11 +56,10 @@ export async function informe(dbConnection, company, clientId = 0, userId, shipm
             : Promise.resolve([]);
 
     // Obtener clientes y choferes en paralelo
-    const [resultIngresadosHoy, resultEnvioDetalle, companyClients, companyDrivers] =
+    const [resultIngresadosHoy, resultEnvioDetalle, companyDrivers] =
         await Promise.all([
             promIngresadosHoy,
             promEnvioDetalle,
-            getClientsByCompany(dbConnection, companyId),
             getDriversByCompany(dbConnection, companyId),
         ]);
 
@@ -85,7 +84,7 @@ export async function informe(dbConnection, company, clientId = 0, userId, shipm
 
     // 🔹 Resultado final
     return {
-        clienteNombre,
+        cliente: clienteNombre || "Sin información",
         aingresarhoy: amountAPlanta,
         ingresadoshot: amountRetirados,
         ingresadosahora: ingresadosHoyChofer,

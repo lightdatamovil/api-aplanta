@@ -129,7 +129,7 @@ export async function handleExternalFlex(
       if (internalShipmentId.length > 0 && internalShipmentId[0]?.didLocal) {
         internalShipmentId = internalShipmentId[0].didLocal;
       } else {
-        console.log("no encontre el envio");
+
         internalShipmentId = await insertEnvios(
           dbConnection,
           company.did,
@@ -213,7 +213,7 @@ export async function handleExternalFlex(
         internalClient[0].didCliente,
         userId,
         internalShipmentId,
-        cliente.nombre
+        cliente?.nombre ?? "Sin información"
       );
 
       return {
