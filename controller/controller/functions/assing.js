@@ -18,6 +18,7 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
   };
 
   try {
+    console.log("urlMicroserviciosAsignaciones");
     const result = await axiosInstance.post(
       urlMicroserviciosAsignaciones,
       payload
@@ -26,6 +27,8 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
       logGreen("Asignado correctamente");
     } else {
       logRed("Error al asignar");
+      console.log(urlMicroserviciosAsignaciones);
+      console.log(payload);
       throw new CustomException({
         title: "Error al asignar",
         message: `Código de estado: ${result.status}`,
@@ -34,6 +37,8 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
     }
   } catch (error) {
     logRed(`Error al asignar: ${error.stack}`);
+    console.log(urlMicroserviciosAsignaciones);
+    console.log(payload);
     throw new CustomException({
       title: "Error al asignar",
       message: `Código de estado: ${error.status}`,
