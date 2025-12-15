@@ -76,7 +76,7 @@ export async function handleExternalFlex(
 
       const account = await getAccountBySenderId(externalDbConnection, externalCompany.did, dataQr.sender_id);
       const clients = await getClientsByCompany(externalDbConnection, company.did);
-      console.log("account", account);
+
       const cliente = clients[account.didCliente];
 
       const sqlEnvios = `SELECT did
