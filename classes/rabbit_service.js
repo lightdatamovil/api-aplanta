@@ -1,6 +1,6 @@
 import { connect } from "amqplib";
-import { CustomException } from "../classes/custom_exception.js";
-import { logRed } from "../functions/logs_custom.js";
+import CustomException from "./custom_exception.js";
+import { logRed } from "../src/funciones/logsCustom.js";
 
 /* ============================================================
    🐇 RabbitMQ Service (instanciable, con conexión propia)
