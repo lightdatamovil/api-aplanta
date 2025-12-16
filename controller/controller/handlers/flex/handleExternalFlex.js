@@ -77,7 +77,7 @@ export async function handleExternalFlex(
 
       const sqlEnvios = `SELECT did
             FROM envios  WHERE ml_shipment_id = ? AND ml_vendedor_id = ?  and elim = 0 and superado = 0 LIMIT 1  `;
-      let rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [mlShipmentId, senderid], true);
+      let rowsEnvios = await executeQuery(externalDbConnection, sqlEnvios, [mlShipmentId, senderid]);
 
       let externalShipmentId;
 
@@ -121,7 +121,7 @@ export async function handleExternalFlex(
       internalShipmentId = await executeQuery(dbConnection, consulta, [
         externalShipmentId,
         externalCompanyId
-      ], true);
+      ]);
 
       if (internalShipmentId.length > 0 && internalShipmentId[0]?.didLocal) {
         internalShipmentId = internalShipmentId[0].didLocal;
@@ -151,7 +151,7 @@ export async function handleExternalFlex(
       }
 
       const checkLI = "SELECT valor FROM envios_logisticainversa WHERE didEnvio = ?";
-      const rows = await executeQuery(externalDbConnection, checkLI, [externalShipmentId], true);
+      const rows = await executeQuery(externalDbConnection, checkLI, [externalShipmentId]);
 
       if (rows.length > 0) {
         await insertEnviosLogisticaInversa(
@@ -196,7 +196,7 @@ export async function handleExternalFlex(
       const internalClient = await executeQuery(
         dbConnection,
         queryInternalClient,
-        [internalShipmentId], true
+        [internalShipmentId]
       );
       if (internalClient.length == 0) {
         return {
