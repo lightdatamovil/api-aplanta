@@ -8,7 +8,7 @@ import { assign } from "../../functions/assing.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 import CustomException from "../../../../classes/custom_exception.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
-import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
+import { changeState } from "../../functions/changeState.js";
 
 
 /* Esta funcion busca las logisticas vinculadas
@@ -162,7 +162,7 @@ export async function handleExternalFlex(
         );
       }
 
-      await sendToShipmentStateMicroServiceAPI(
+      await changeState(
         company.did,
         userId,
         internalShipmentId,
@@ -171,7 +171,7 @@ export async function handleExternalFlex(
         dbConnection
       );
 
-      await sendToShipmentStateMicroServiceAPI(
+      await changeState(
         externalCompanyId,
         driver,
         externalShipmentId,

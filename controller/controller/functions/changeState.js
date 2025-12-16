@@ -1,13 +1,9 @@
-import dotenv from 'dotenv';
 import { logRed } from '../../../src/funciones/logsCustom.js';
 import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
 import { generarTokenFechaHoy } from '../../../src/funciones/generarTokenFechaHoy.js';
-import { axiosInstance, executeQuery, queueEstados, rabbitService, urlMicroserviciosEstado } from '../../../db.js';
-import { microservicioEstados } from '../../../classes/microservicio_estados.js';
+import { executeQuery, microservicioEstadosService, queueEstados, rabbitService } from '../../../db.js';
 
-dotenv.config({ path: process.env.ENV_FILE || '.env' });
-
-export async function sendToShipmentStateMicroServiceAPI(
+export async function changeState(
     companyId,
     userId,
     shipmentId,
@@ -15,30 +11,31 @@ export async function sendToShipmentStateMicroServiceAPI(
     longitud = null,
     db
 ) {
-    if (microservicioEstados.estaCaido()) {
+    const message = {
+        didempresa: companyId,
+        didenvio: shipmentId,
+        estado: 1,
+        subestado: null,
+        estadoML: null,
+        fecha: formatFechaUTC3(),
+        quien: userId,
+        operacion: 'aplanta',
+        latitud,
+        longitud,
+        desde: "aplanta",
+        tkn: generarTokenFechaHoy(),
+    };
+    if (microservicioEstadosService.estaCaido()) {
         await actualizarEstadoLocal(db, [shipmentId], "aplanta", formatFechaUTC3(), userId, 1);
+        await rabbitService.send(queueEstados, message);
     } else {
-        const message = {
-            didempresa: companyId,
-            didenvio: shipmentId,
-            estado: 1,
-            subestado: null,
-            estadoML: null,
-            fecha: formatFechaUTC3(),
-            quien: userId,
-            operacion: 'aplanta',
-            latitud,
-            longitud,
-            desde: "aplanta",
-            tkn: generarTokenFechaHoy(),
-        };
         try {
-            await axiosInstance.post(urlMicroserviciosEstado, message);
-        } catch (httpError) {
-            logRed(`Error enviando a Shipment State MicroService API: ${httpError.message}`);
-            microservicioEstados.setEstadoCaido();
-            await rabbitService.send(queueEstados, message)
+            await microservicioEstadosService.sendEstadoAPI(message);
+        } catch (error) {
+            logRed(`Error enviando a Shipment State MicroService API: ${error.message}`);
+            microservicioEstadosService.setEstadoCaido();
             await actualizarEstadoLocal(db, [shipmentId], "aplanta", formatFechaUTC3(), userId, 1);
+            await rabbitService.send(queueEstados, message);
         }
     }
 }

@@ -6,6 +6,7 @@ import CustomException from "./classes/custom_exception.js";
 import https from "https";
 import axios from "axios";
 import { RabbitService } from "./classes/rabbit_service.js";
+import { MicroservicioEstadosService } from "./classes/microservicio_estados.js";
 
 dotenv.config({ path: process.env.ENV_FILE || ".env" });
 
@@ -31,6 +32,7 @@ export const urlMicroserviciosEstado = local ? process.env.URL_MICROSERVICIOS_ES
 export const urlMicroserviciosAsignaciones = local ? process.env.URL_ASIGNACION_MICROSERVICE : process.env.URL_ASIGNACION_MICROSERVICE_NODO;
 export const urlMicroserviciosEstadoCaido = process.env.URL_ESTADOS_MICROSERVICE_CAIDO == "true";
 
+
 // 🔹 Agente HTTPS con keep-alive y hasta 100 conexiones simultáneas
 const httpsAgent = new https.Agent({
   keepAlive: true,
@@ -44,6 +46,8 @@ export const axiosInstance = axios.create({
   httpsAgent,
   timeout: 5000, // 5 segundos máximo por request
 });
+
+export const microservicioEstadosService = new MicroservicioEstadosService(60000, axiosInstance, urlMicroserviciosEstado);
 
 export const redisClient = redis.createClient({
   socket: {

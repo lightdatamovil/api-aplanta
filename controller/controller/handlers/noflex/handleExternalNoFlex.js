@@ -6,8 +6,8 @@ import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/c
 import { informe } from "../../functions/informe.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 import { assign } from "../../functions/assing.js";
-import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
+import { changeState } from "../../functions/changeState.js";
 
 /**  Esta funcion se conecta a la base de datos de la empresa externa
  Checkea si el envio ya fue colectado, entregado o cancelado
@@ -106,13 +106,9 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
         );
     }
 
-    await sendToShipmentStateMicroServiceAPI(companyId, userId, internalShipmentId,
-        null,
-        null, dbConnection);
+    await changeState(companyId, userId, internalShipmentId, null, null, dbConnection);
 
-    await sendToShipmentStateMicroServiceAPI(dataQr.empresa, driver, shipmentIdFromDataQr,
-        null,
-        null, externalDbConnection);
+    await changeState(dataQr.empresa, driver, shipmentIdFromDataQr, null, null, externalDbConnection);
 
     await assign(externalCompany.did, userId, 3, dataQr, driver);
     const body = await informe(dbConnection, company, externalClient[0].did, userId, internalShipmentId);

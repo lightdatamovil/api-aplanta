@@ -1,5 +1,7 @@
-class MicroservicioEstados {
-    constructor(timeoutMs = 60000) {
+export class MicroservicioEstadosService {
+    constructor(timeoutMs = 60000, axiosInstance, url) {
+        this.axiosInstance = axiosInstance;
+        this.url = url;
         this.estado = true;
         this.timeoutMs = timeoutMs;
         this._timer = null;
@@ -16,6 +18,8 @@ class MicroservicioEstados {
     estaCaido() {
         return this.estado == false;
     }
-}
 
-export const microservicioEstados = new MicroservicioEstados();
+    async sendEstadoAPI(message) {
+        await this.axiosInstance.post(this.url, message);
+    }
+}

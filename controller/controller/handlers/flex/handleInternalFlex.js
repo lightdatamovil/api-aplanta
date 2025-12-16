@@ -4,7 +4,7 @@ import { insertEnvios } from "../../functions/insertEnvios.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
-import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
+import { changeState } from "../../functions/changeState.js";
 
 /// Busco el envio
 /// Si no existe, lo inserto y tomo el did
@@ -78,9 +78,7 @@ export async function handleInternalFlex(
   }
 
   /// Actualizo el estado del envío y lo envío al microservicio de estados
-  await sendToShipmentStateMicroServiceAPI(companyId, userId, shipmentId,
-    null,
-    null, dbConnection);
+  await changeState(companyId, userId, shipmentId, null, null, dbConnection);
   //! jls 167 tambien usa una cuenta no vinculada -- gonzalo no lo saques
   if (companyId == 144 || companyId == 167 || companyId == 114) {
     const body = await informe(
