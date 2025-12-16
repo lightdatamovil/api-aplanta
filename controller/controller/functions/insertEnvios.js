@@ -1,4 +1,4 @@
-import { axiosInstance, executeQuery } from '../../../db.js';
+import { executeQuery } from '../../../db.js';
 import { senToDataML } from './sendToDataML.js';
 
 export async function insertEnvios(dbConnection, companyId, clientId, accountId, dataQr, flex, externo, driverId, userId) {

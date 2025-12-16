@@ -42,6 +42,7 @@ export async function senToDataML(
         sellerId: sellerId,
         shipmentId: shipmentId
     };
+    console.log('Enviando a DataML:', message);
     try {
         const ch = await getChannel();
         const sent = ch.sendToQueue(
