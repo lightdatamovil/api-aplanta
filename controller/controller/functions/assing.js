@@ -1,4 +1,3 @@
-import { logGreen, logRed } from "../../../src/funciones/logsCustom.js";
 import CustomException from "../../../classes/custom_exception.js";
 import { axiosInstance, urlMicroserviciosAsignaciones } from "../../../db.js";
 
@@ -24,13 +23,7 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
       payload
     );
     console.log(JSON.stringify(result.data));
-    if (result.status == 200) {
-      logGreen("Asignado correctamente");
-    } else {
-      logRed("Error al asignar");
-      console.log(urlMicroserviciosAsignaciones);
-      console.log(payload);
-      console.log(result);
+    if (result.status != 200) {
       throw new CustomException({
         title: "Error al asignar",
         message: `Código de estado: ${result.status}`,
@@ -38,9 +31,6 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
       });
     }
   } catch (error) {
-    logRed(`Error al asignar: ${error.stack}`);
-    console.log(urlMicroserviciosAsignaciones);
-    console.log(payload);
     throw new CustomException({
       title: "Error al asignar",
       message: `Código de estado: ${error.status}`,

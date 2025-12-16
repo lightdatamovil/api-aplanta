@@ -16,7 +16,7 @@ export async function aplanta(company, dataQr, userId) {
     const dbConnection = mysql2.createConnection(dbConfig);
     dbConnection.connect();
     incrActiveLocal(company.did);
-
+    let donde;
     try {
         let response;
         if (typeof dataQr === "string") {
@@ -112,6 +112,7 @@ export async function aplanta(company, dataQr, userId) {
             }
 
             if (account) {
+                donde = 'interno flex';
                 response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
             } else if (company.did == 144 || company.did == 167 || company.did == 114) {
                 // el envio debe estar insertado en la tabla envios, sino no lo inserta al saltar esta verficacion en este if
@@ -128,17 +129,22 @@ export async function aplanta(company, dataQr, userId) {
 
                 if (resultCheck.length > 0) {
                     senderId = dataQr.sender_id;
+                    donde = 'interno flex por empresa especial';
                     response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
                 } else {
+                    donde = 'externo flex por empresa especial';
                     response = await handleExternalFlex(dbConnection, company, dataQr, userId);
                 }
             } else {
+                donde = 'externo flex';
                 response = await handleExternalFlex(dbConnection, company, dataQr, userId);
             }
         } else {
             if (company.did == dataQr.empresa) {
+                donde = 'interno no flex';
                 response = await handleInternalNoFlex(dbConnection, dataQr, company, userId);
             } else {
+                donde = 'externo no flex';
                 response = await handleExternalNoFlex(dbConnection, dataQr, company, userId);
             }
         }
@@ -147,7 +153,7 @@ export async function aplanta(company, dataQr, userId) {
         return response;
     }
     catch (error) {
-        logRed(`Error en aplanta: ${error}`);
+        logRed(`Error en aplanta (${donde}): ${error}`);
         throw error;
     } finally {
         decrActiveLocal(company.did);
