@@ -40,7 +40,7 @@ export async function handleInternalFlex(
     let resultBuscarEnvio = await executeQuery(dbConnection, sql, [
       mlShipmentId,
       senderId,
-    ], true);
+    ]);
     row = resultBuscarEnvio[0];
 
 
