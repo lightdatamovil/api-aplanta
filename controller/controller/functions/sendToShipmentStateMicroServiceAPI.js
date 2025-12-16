@@ -3,7 +3,7 @@ import { logRed } from '../../../src/funciones/logsCustom.js';
 import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
 import { generarTokenFechaHoy } from '../../../src/funciones/generarTokenFechaHoy.js';
 import { axiosInstance, executeQuery, queueEstados, rabbitService, urlMicroserviciosEstado } from '../../../db.js';
-import { microserviciosEstado } from '../../../classes/microservicio_estados.js';
+import { microservicioEstados } from '../../../classes/microservicio_estados.js';
 
 
 dotenv.config({ path: process.env.ENV_FILE || '.env' });
@@ -18,7 +18,7 @@ export async function sendToShipmentStateMicroServiceAPI(
 ) {
 
 
-    if (microserviciosEstado.getEstado()) {
+    if (microservicioEstados.estaCaido()) {
         console.log('Microservicio de estados caído, enviando mensaje a RabbitMQ y actualizando estado localmente.');
         await actualizarEstadoLocal(db, [shipmentId], "aplanta", formatFechaUTC3(), userId, 1);
     } else {
@@ -42,7 +42,7 @@ export async function sendToShipmentStateMicroServiceAPI(
         } catch (httpError) {
             logRed(`Error enviando a Shipment State MicroService API: ${httpError.message}`);
             //setear true microservicioCaido
-            microserviciosEstado.setEstado(true);
+            microservicioEstados.setEstadoCaido();
             console.log('Microservicio de estados caído, enviando mensaje a RabbitMQ y actualizando estado localmente.');
             //enviar a rabbitmq
             await rabbitService.send(queueEstados, message)
