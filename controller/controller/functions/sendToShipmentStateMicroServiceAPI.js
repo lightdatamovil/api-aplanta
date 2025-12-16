@@ -5,7 +5,6 @@ import { generarTokenFechaHoy } from '../../../src/funciones/generarTokenFechaHo
 import { axiosInstance, executeQuery, queueEstados, rabbitService, urlMicroserviciosEstado } from '../../../db.js';
 import { microservicioEstados } from '../../../classes/microservicio_estados.js';
 
-
 dotenv.config({ path: process.env.ENV_FILE || '.env' });
 
 export async function sendToShipmentStateMicroServiceAPI(
@@ -16,8 +15,6 @@ export async function sendToShipmentStateMicroServiceAPI(
     longitud = null,
     db
 ) {
-
-
     if (microservicioEstados.estaCaido()) {
         console.log('Microservicio de estados caído, enviando mensaje a RabbitMQ y actualizando estado localmente.');
         await actualizarEstadoLocal(db, [shipmentId], "aplanta", formatFechaUTC3(), userId, 1);

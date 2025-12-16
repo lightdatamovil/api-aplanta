@@ -35,14 +35,14 @@ export const urlMicroserviciosEstadoCaido = process.env.URL_ESTADOS_MICROSERVICE
 const httpsAgent = new https.Agent({
   keepAlive: true,
   maxSockets: 100,
-  timeout: 10000, // tiempo máximo de socket en ms
+  timeout: 5000, // tiempo máximo de socket en ms
   family: 4, // fuerza IPv4, evita delay IPv6
 });
 
 // 🔹 Axios preconfigurado (usa el agente y timeout)
 export const axiosInstance = axios.create({
   httpsAgent,
-  timeout: 20000, // 5 segundos máximo por request
+  timeout: 5000, // 5 segundos máximo por request
 });
 
 export const redisClient = redis.createClient({
