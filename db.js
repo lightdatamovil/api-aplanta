@@ -22,13 +22,13 @@ const aplantaDBPort = process.env.APLANTA_DB_PORT;
 const aplantaDbUserForLogs = process.env.APLANTA_DB_USER_FOR_LOGS;
 const aplantaDbPasswordForLogs = process.env.APLANTA_DB_PASSWORD_FOR_LOGS;
 const aplantaDbNameForLogs = process.env.APLANTA_DB_NAME_FOR_LOGS;
-
+const local = process.env.LOCAL == "true";
 // Produccion
-const hostProductionDb = process.env.LOCAL == "true" ? process.env.PRODUCTION_DB_HOST : process.env.PRODUCTION_DB_HOST_NODO;
+const hostProductionDb = local ? process.env.PRODUCTION_DB_HOST : process.env.PRODUCTION_DB_HOST_NODO;
 const portProductionDb = process.env.PRODUCTION_DB_PORT;
 
-export const urlMicroserviciosEstado = process.env.LOCAL == "true" ? process.env.URL_MICROSERVICIOS_ESTADO : process.env.URL_MICROSERVICIOS_ESTADO_NODO;
-export const urlMicroserviciosAsignaciones = process.env.LOCAL == "true" ? process.env.URL_ASIGNACION_MICROSERVICE : process.env.URL_ASIGNACION_MICROSERVICE_NODO;
+export const urlMicroserviciosEstado = local ? process.env.URL_MICROSERVICIOS_ESTADO : process.env.URL_MICROSERVICIOS_ESTADO_NODO;
+export const urlMicroserviciosAsignaciones = local ? process.env.URL_ASIGNACION_MICROSERVICE : process.env.URL_ASIGNACION_MICROSERVICE_NODO;
 export const urlMicroserviciosEstadoCaido = process.env.URL_ESTADOS_MICROSERVICE_CAIDO == "true";
 
 // 🔹 Agente HTTPS con keep-alive y hasta 100 conexiones simultáneas
