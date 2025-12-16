@@ -17,6 +17,7 @@ export async function aplanta(company, dataQr, userId) {
     dbConnection.connect();
     incrActiveLocal(company.did);
     let donde;
+    let account = null;
     try {
         let response;
         if (typeof dataQr === "string") {
@@ -75,7 +76,7 @@ export async function aplanta(company, dataQr, userId) {
 
                     shipmentIdExterno = await getShipmentIdFromQr(empresaVinculada, dataQr);
                 } catch (error) {
-                    throw new Error("Error envio no insertado ");
+                    throw new Error(`Error envio no insertado en el sistema vinculado: ${error.message}`);
                 }
 
                 //no encontre shipmentiD : cambiar en el qr la empresa x la externa --- si no esta lo inserta 
@@ -92,8 +93,6 @@ export async function aplanta(company, dataQr, userId) {
         const isFlex = Object.prototype.hasOwnProperty.call(dataQr, "sender_id") || isCollectShipmentML;
 
         if (isFlex) {
-            /// Busco la cuenta del cliente
-            let account = null;
             let senderId = null;
             if (isCollectShipmentML) {
                 //! Esto quiere decir que es un envio de colecta de ML
@@ -153,6 +152,7 @@ export async function aplanta(company, dataQr, userId) {
         return response;
     }
     catch (error) {
+        console.log(account);
         logRed(`Error en aplanta (${donde}): ${error}`);
         throw error;
     } finally {
