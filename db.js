@@ -23,7 +23,7 @@ const aplantaDbPasswordForLogs = process.env.APLANTA_DB_PASSWORD_FOR_LOGS;
 const aplantaDbNameForLogs = process.env.APLANTA_DB_NAME_FOR_LOGS;
 
 // Produccion
-const hostProductionDb = process.env.PRODUCTION_DB_HOST;
+const hostProductionDb = process.env.LOCAL == "true" ? process.env.PRODUCTION_DB_HOST : process.env.PRODUCTION_DB_HOST_NODOS;
 const portProductionDb = process.env.PRODUCTION_DB_PORT;
 
 export const urlMicroserviciosEstado = process.env.LOCAL == "true" ? process.env.URL_MICROSERVICIOS_ESTADO : process.env.URL_MICROSERVICIOS_ESTADO_NODO;
