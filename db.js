@@ -5,6 +5,7 @@ import mysql2 from "mysql2";
 import CustomException from "./classes/custom_exception.js";
 import https from "https";
 import axios from "axios";
+import { RabbitService } from "./classes/rabbit_service.js";
 
 dotenv.config({ path: process.env.ENV_FILE || ".env" });
 
@@ -60,6 +61,10 @@ let companiesList = {};
 export let clientList = {};
 let accountList = {};
 let driverList = {};
+
+export const urlRabbitMQ = process.env.RABBITMQ_URL;
+export const queueEstados = process.env.QUEUE_ESTADOS;
+export const rabbitService = new RabbitService(urlRabbitMQ);
 
 export function getProdDbConfig(company) {
   return {

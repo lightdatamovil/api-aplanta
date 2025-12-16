@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import { logRed } from '../../../src/funciones/logsCustom.js';
 import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
 import { generarTokenFechaHoy } from '../../../src/funciones/generarTokenFechaHoy.js';
-import { axiosInstance, executeQuery, urlMicroserviciosEstado } from '../../../db.js';
+import { axiosInstance, executeQuery, queueEstados, rabbitService, urlMicroserviciosEstado } from '../../../db.js';
 import { microserviciosEstado } from '../../../classes/microservicio_estados.js';
 
 
@@ -21,26 +21,29 @@ export async function sendToShipmentStateMicroServiceAPI(
     if (microserviciosEstado.getEstado()) {
         await actualizarEstadoLocal(db, [shipmentId], "aplanta", formatFechaUTC3(), userId, 1);
     } else {
+        const message = {
+            didempresa: companyId,
+            didenvio: shipmentId,
+            estado: 1,
+            subestado: null,
+            estadoML: null,
+            fecha: formatFechaUTC3(),
+            quien: userId,
+            operacion: 'aplanta',
+            latitud,
+            longitud,
+            desde: "aplanta",
+            tkn: generarTokenFechaHoy(),
+        };
         try {
-            const message = {
-                didempresa: companyId,
-                didenvio: shipmentId,
-                estado: 1,
-                subestado: null,
-                estadoML: null,
-                fecha: formatFechaUTC3(),
-                quien: userId,
-                operacion: 'aplanta',
-                latitud,
-                longitud,
-                desde: "aplanta",
-                tkn: generarTokenFechaHoy(),
-            };
             await axiosInstance.post(urlMicroserviciosEstado, message);
         } catch (httpError) {
             logRed(`Error enviando a Shipment State MicroService API: ${httpError.message}`);
             //setear true microservicioCaido
             microserviciosEstado.setEstado(true);
+
+            rabbitService.send(queueEstados, message)
+
             //actualizar estado localmente
             await actualizarEstadoLocal(db, [shipmentId], "aplanta", formatFechaUTC3(), userId, 1);
         }
