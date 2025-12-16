@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
-import { logGreen, logRed } from '../../../src/funciones/logsCustom.js';
+import { logRed } from '../../../src/funciones/logsCustom.js';
 import { formatFechaUTC3 } from '../../../src/funciones/formatFechaUTC3.js';
 import { generarTokenFechaHoy } from '../../../src/funciones/generarTokenFechaHoy.js';
-import { axiosInstance, executeQuery, urlMicroserviciosEstado, urlMicroserviciosEstadoCaido } from '../../../db.js';
+import { axiosInstance, executeQuery, urlMicroserviciosEstado } from '../../../db.js';
 
 dotenv.config({ path: process.env.ENV_FILE || '.env' });
 
@@ -29,8 +29,9 @@ export async function sendToShipmentStateMicroServiceAPI(
         tkn: generarTokenFechaHoy(),
     };
 
+    const companiesToSend = [211, 54, 164, 55, 12];
     try {
-        if (urlMicroserviciosEstadoCaido) {
+        if (!companiesToSend.includes(companyId)) {
             await actualizarEstadoLocal(db, [shipmentId], "aplanta", message.fecha, userId, message.estado);
             return;
         }
