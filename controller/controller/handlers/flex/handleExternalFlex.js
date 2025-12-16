@@ -56,6 +56,7 @@ export async function handleExternalFlex(
   for (const logistica of logisticasExternas) {
     const externalLogisticId = logistica.did;
     const syncCode = logistica.codigoVinculacionLogE;
+    const nombreFantasia = logistica.nombre_fantasia;
 
     const externalCompany = await getCompanyByCode(syncCode);
     const externalCompanyId = externalCompany.did;
@@ -144,7 +145,7 @@ export async function handleExternalFlex(
           internalShipmentId,
           externalShipmentId,
           1,
-          "ERROR MOMENTANEO",
+          nombreFantasia,
           externalCompanyId
         );
       }
