@@ -19,6 +19,7 @@ export async function sendToShipmentStateMicroServiceAPI(
 
 
     if (microserviciosEstado.getEstado()) {
+        console.log('Microservicio de estados caído, enviando mensaje a RabbitMQ y actualizando estado localmente.');
         await actualizarEstadoLocal(db, [shipmentId], "aplanta", formatFechaUTC3(), userId, 1);
     } else {
         const message = {
@@ -36,13 +37,15 @@ export async function sendToShipmentStateMicroServiceAPI(
             tkn: generarTokenFechaHoy(),
         };
         try {
+            console.log('Enviando estado de envío al Shipment State MicroService API.');
             await axiosInstance.post(urlMicroserviciosEstado, message);
         } catch (httpError) {
             logRed(`Error enviando a Shipment State MicroService API: ${httpError.message}`);
             //setear true microservicioCaido
             microserviciosEstado.setEstado(true);
-
-            rabbitService.send(queueEstados, message)
+            console.log('Microservicio de estados caído, enviando mensaje a RabbitMQ y actualizando estado localmente.');
+            //enviar a rabbitmq
+            await rabbitService.send(queueEstados, message)
 
             //actualizar estado localmente
             await actualizarEstadoLocal(db, [shipmentId], "aplanta", formatFechaUTC3(), userId, 1);
