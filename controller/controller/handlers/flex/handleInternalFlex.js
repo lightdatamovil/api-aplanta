@@ -74,7 +74,8 @@ export async function handleInternalFlex(
       resultBuscarEnvio = await executeQuery(dbConnection, sql, [
         mlShipmentId,
         senderId,
-      ]);
+      ], true);
+      row = resultBuscarEnvio[0];
     }
 
     /// Actualizo el estado del envío y lo envío al microservicio de estados
