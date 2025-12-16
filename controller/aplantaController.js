@@ -152,7 +152,6 @@ export async function aplanta(company, dataQr, userId) {
         return response;
     }
     catch (error) {
-        console.log(account);
         logRed(`Error en aplanta (${donde}): ${error}`);
         throw error;
     } finally {
