@@ -17,12 +17,10 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
   };
 
   try {
-    console.log("urlMicroserviciosAsignaciones");
     const result = await sendToService(
       urlMicroserviciosAsignaciones,
       payload
     );
-    console.log(JSON.stringify(result.data));
     if (result.status != 200) {
       throw new CustomException({
         title: "Error al asignar",
