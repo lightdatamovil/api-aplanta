@@ -70,17 +70,17 @@ export class RabbitService {
             persistent: true,
         });
 
+        /*
         if (!sent) {
             throw new CustomException({
                 title: "Error al enviar a RabbitMQ",
                 message: "El buffer de envío está lleno.",
             });
         }
+            */
     }
 
-    /**
-     * Cierra manualmente la conexión (opcional).
-     */
+
     async close() {
         try {
             await this.#channel?.close();
