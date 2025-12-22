@@ -109,7 +109,6 @@ export async function aplanta(company, dataQr, userId) {
                 flex = Object.prototype.hasOwnProperty.call(dataQr, "id_orden") ? 21 : 1;
                 account = await getAccountBySenderId(dbConnection, company.did, senderId);
 
-                console.log("senderId", senderId, "account", account, "mlShipmentId", mlShipmentId, "flex", flex);
             }
 
             if (account) {
