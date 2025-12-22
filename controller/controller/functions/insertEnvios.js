@@ -39,13 +39,15 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
         if (companiesToSend.includes(companyId)) {
             await senToDataML(companyId, result.insertId, senderid, idshipment);
         }
-        const payload = {
-            idEmpresa: companyId,
-            estado: 1,
-            did: result.insertId,
-            ml_shipment_id: idshipment,
-            ml_vendedor_id: senderid
-        },
+        await axiosInstance.post(
+            'https://altaenvios.lightdata.com.ar/api/enviosMLredis',
+            {
+                idEmpresa: companyId,
+                estado: 1,
+                did: result.insertId,
+                ml_shipment_id: idshipment,
+                ml_vendedor_id: senderid
+            },
             {
                 headers: {
                     'Content-Type': 'application/json'
