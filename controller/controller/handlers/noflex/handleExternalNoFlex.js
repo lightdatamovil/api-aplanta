@@ -20,7 +20,7 @@ Actualizo el estado del envio a colectado y envio el estado del envio en los mic
 
 
 export async function handleExternalNoFlex(dbConnection, dataQr, company, userId) {
-    let insertado = false;
+    let ingresado = false;
     const companyId = company.did;
     const shipmentIdFromDataQr = dataQr.did;
     const clientIdFromDataQr = dataQr.cliente;
@@ -90,7 +90,7 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
             client.nombre || "",
             externalCompany.did,
         );
-        insertado = true;
+        ingresado = true;
     }
 
     const check2 = "SELECT valor FROM envios_logisticainversa WHERE didEnvio = ?";
@@ -118,5 +118,5 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
 
     externalDbConnection.end();
 
-    return { success: true, message: `Paquete ${insertado ? "insertado y" : ""} puesto a planta con éxito`, body: body };
+    return { success: true, message: `Paquete ${ingresado ? "ingresado y" : ""} puesto a planta con éxito`, body: body };
 }

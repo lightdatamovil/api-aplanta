@@ -29,7 +29,7 @@ export async function handleExternalFlex(
   dataQr,
   userId
 ) {
-  let insertado = false;
+  let ingresado = false;
   const senderid = dataQr.sender_id;
   const mlShipmentId = dataQr.id;
   await checkIfFulfillment(dbConnection, mlShipmentId);
@@ -149,7 +149,7 @@ export async function handleExternalFlex(
           nombreFantasia,
           externalCompanyId
         );
-        insertado = true;
+        ingresado = true;
       }
 
       const checkLI = "SELECT valor FROM envios_logisticainversa WHERE didEnvio = ?";
@@ -216,7 +216,7 @@ export async function handleExternalFlex(
 
       return {
         success: true,
-        message: `Paquete ${insertado ? "insertado y" : ""} puesto a planta con éxito`,
+        message: `Paquete ${ingresado ? "ingresado y" : ""} puesto a planta con éxito`,
         body: resultInforme,
       };
 

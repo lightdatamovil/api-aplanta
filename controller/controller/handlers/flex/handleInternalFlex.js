@@ -21,7 +21,7 @@ export async function handleInternalFlex(
   mlShipmentId,
   flex
 ) {
-  let insertado = false;
+  let ingresado = false;
   let row;
 
   const companyId = company.did;
@@ -74,7 +74,7 @@ export async function handleInternalFlex(
       0,
       userId,
     );
-    insertado = true;
+    ingresado = true;
     resultBuscarEnvio = shipmentId
   }
 
@@ -91,7 +91,7 @@ export async function handleInternalFlex(
     );
     return {
       success: true,
-      message: `Paquete ${insertado ? "insertado y" : ""} puesto a planta`,
+      message: `Paquete ${ingresado ? "ingresado y" : ""} puesto a planta`,
       body: body,
     };
 
@@ -105,7 +105,7 @@ export async function handleInternalFlex(
   );
   return {
     success: true,
-    message: `Paquete ${insertado ? "insertado y" : ""} puesto a planta`,
+    message: `Paquete ${ingresado ? "ingresado y" : ""} puesto a planta`,
     body: body,
   };
 
