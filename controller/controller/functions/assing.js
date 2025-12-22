@@ -1,4 +1,3 @@
-import { logGreen, logRed } from "../../../src/funciones/logsCustom.js";
 import CustomException from "../../../classes/custom_exception.js";
 import { axiosInstance, urlMicroserviciosAsignaciones } from "../../../db.js";
 
@@ -14,18 +13,15 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
     deviceId: "null",
     dataQr: dataQr,
     driverId: driverId,
-    deviceFrom: "Autoasignado de colecta",
+    deviceFrom: "Asignacion por empresa externa",
   };
 
   try {
-    const result = await axiosInstance.post(
+    const result = await sendToService(
       urlMicroserviciosAsignaciones,
       payload
     );
-    if (result.status == 200) {
-      logGreen("Asignado correctamente");
-    } else {
-      logRed("Error al asignar");
+    if (result.status != 200) {
       throw new CustomException({
         title: "Error al asignar",
         message: `Código de estado: ${result.status}`,
@@ -33,11 +29,21 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
       });
     }
   } catch (error) {
-    logRed(`Error al asignar: ${error.stack}`);
     throw new CustomException({
       title: "Error al asignar",
       message: `Código de estado: ${error.status}`,
       stack: error.stack || '',
     });
+  }
+}
+export async function sendToService(endpoint, message, retries = 3) {
+  try {
+    return await axiosInstance.post(endpoint, message);
+  } catch (err) {
+    if (retries > 0) {
+      await new Promise(r => setTimeout(r, 300 * (4 - retries)));
+      return sendToService(endpoint, message, retries - 1);
+    }
+    throw err;
   }
 }

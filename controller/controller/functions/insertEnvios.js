@@ -1,5 +1,5 @@
-import { axiosInstance, executeQuery } from '../../../db.js';
-import { senToDataML } from './sendToDataML.js';
+import { axiosInstance, executeQuery, local, rabbitService } from '../../../db.js';
+import { sendToService } from './assing.js';
 
 export async function insertEnvios(dbConnection, companyId, clientId, accountId, dataQr, flex, externo, driverId, userId) {
     const lote = "aplanta";
@@ -34,12 +34,16 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
         // Array de companyIds que deben enviar el mensaje
         const companiesToSend = [12, 79, 167, 365, 364, 363, 362, 361, 360, 359, 358, 357, 356, 355, 354, 353, 352, 351, 350, 204, 334, 211, 227];
 
-
         // Verificamos si el companyId actual está en la lista
-        if (companiesToSend.includes(companyId)) {
-            await senToDataML(companyId, result.insertId, senderid, idshipment);
+        if (companiesToSend.includes(Number(companyId))) {
+            if (!local) await rabbitService.send("dataML", {
+                idEmpresa: companyId,
+                did: result.insertId,
+                sellerId: senderid,
+                shipmentId: idshipment
+            });
         }
-        await axiosInstance.post(
+        await sendToService(
             'https://altaenvios.lightdata.com.ar/api/enviosMLredis',
             {
                 idEmpresa: companyId,
@@ -48,13 +52,7 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
                 ml_shipment_id: idshipment,
                 ml_vendedor_id: senderid
             },
-            {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            },
         );
-
     }
 
     return result.insertId;

@@ -3,9 +3,8 @@ import { executeQuery } from "../../../../db.js";
 import { insertEnvios } from "../../functions/insertEnvios.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
-import { logBlue, logCyan } from "../../../../src/funciones/logsCustom.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
-import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
+import { changeState } from "../../functions/changeState.js";
 
 /// Busco el envio
 /// Si no existe, lo inserto y tomo el did
@@ -22,6 +21,8 @@ export async function handleInternalFlex(
   mlShipmentId,
   flex
 ) {
+  let row;
+
   const companyId = company.did;
 
 
@@ -41,17 +42,15 @@ export async function handleInternalFlex(
     mlShipmentId,
     senderId,
   ]);
-  const row = resultBuscarEnvio[0];
+  row = resultBuscarEnvio[0];
 
 
   /// Si no existe, lo inserto y tomo el did
   if (resultBuscarEnvio.length > 0) {
-    logCyan("Encontre el envio");
     shipmentId = row.did;
     /// Checkea si el envio ya fue puesto a planta, entregado, entregado 2da o cancelado
     const check = await checkearEstadoEnvio(dbConnection, shipmentId, companyId);
     if (check) return check;
-    logCyan("El envio no fue puesto a planta, entregado, entregado 2da o cancelado");
     const queryUpdateEnvios = `
                 UPDATE envios 
                 SET ml_qr_seguridad = ?
@@ -60,7 +59,6 @@ export async function handleInternalFlex(
             `;
 
     await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,]);
-    logCyan("Actualice el ml_qr_seguridad del envio");
   } else {
     console.log("No encontre el envio, lo inserto");
     // para el caso de que no este vincualdo el cliente 167 o 114, el envio ya debe estar insertado 
@@ -76,17 +74,10 @@ export async function handleInternalFlex(
       userId,
     );
     resultBuscarEnvio = shipmentId
-    logCyan("Inserte el envio");
   }
 
-  const startTime = performance.now();
   /// Actualizo el estado del envío y lo envío al microservicio de estados
-  await sendToShipmentStateMicroServiceAPI(companyId, userId, shipmentId);
-  logBlue(`Fin sendToShipmentStateMicroServiceAPI - ${((performance.now() - startTime)).toFixed(2)} ms`);
-  logCyan(
-    "Actualice el estado del envio y lo envie al microservicio de estados"
-  );
-
+  await changeState(companyId, userId, shipmentId, null, null, dbConnection);
   //! jls 167 tambien usa una cuenta no vinculada -- gonzalo no lo saques
   if (companyId == 144 || companyId == 167 || companyId == 114) {
     const body = await informe(
@@ -115,4 +106,5 @@ export async function handleInternalFlex(
     message: "Paquete insertado y puesto a planta  - FLEX",
     body: body,
   };
+
 }

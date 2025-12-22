@@ -11,7 +11,7 @@ export async function getShipmentIdFromQr(companyId, dataQr) {
         brand: "null",
         model: "null",
         androidVersion: "null",
-        deviceFrom: "Autoasignado de colecta",
+        deviceFrom: "Aplanta API",
         appVersion: "null",
         dataQr: dataQr
     };

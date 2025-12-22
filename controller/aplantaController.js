@@ -4,7 +4,6 @@ import { handleExternalFlex } from "./controller/handlers/flex/handleExternalFle
 import { handleExternalNoFlex } from "./controller/handlers/noflex/handleExternalNoFlex.js";
 import { handleInternalNoFlex } from "./controller/handlers/noflex/handleInternalNoFlex.js";
 import mysql2 from "mysql2";
-import { logCyan, logPurple } from "../src/funciones/logsCustom.js";
 import { getShipmentIdFromQr } from "../src/funciones/getShipmentIdFromQr.js";
 import { parseIfJson } from "../src/funciones/isValidJson.js";
 import LogisticaConf from "../classes/logistica_conf.js";
@@ -17,14 +16,13 @@ export async function aplanta(company, dataQr, userId) {
     const dbConnection = mysql2.createConnection(dbConfig);
     dbConnection.connect();
     incrActiveLocal(company.did);
-
+    let donde;
+    let account = null;
     try {
         let response;
         if (typeof dataQr === "string") {
             dataQr = dataQr.replace(/\s+/g, '');
         }
-
-        //  console.log("DATA QR:", dataQr);
 
         dataQr = parseIfJson(dataQr);
 
@@ -78,7 +76,7 @@ export async function aplanta(company, dataQr, userId) {
 
                     shipmentIdExterno = await getShipmentIdFromQr(empresaVinculada, dataQr);
                 } catch (error) {
-                    throw new Error("Error envio no insertado ");
+                    throw new Error(`Error envio no insertado en el sistema vinculado: ${error.message}`);
                 }
 
                 //no encontre shipmentiD : cambiar en el qr la empresa x la externa --- si no esta lo inserta 
@@ -95,9 +93,6 @@ export async function aplanta(company, dataQr, userId) {
         const isFlex = Object.prototype.hasOwnProperty.call(dataQr, "sender_id") || isCollectShipmentML || Object.prototype.hasOwnProperty.call(dataQr, "id_orden");
 
         if (isFlex) {
-            logCyan("Es flex");
-            /// Busco la cuenta del cliente
-            let account = null;
             let senderId = null;
             let flex = null;
             let mlShipmentId;
@@ -118,11 +113,10 @@ export async function aplanta(company, dataQr, userId) {
             }
 
             if (account) {
-                logCyan("Es interno");
+                donde = 'interno flex';
                 response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId, mlShipmentId, flex);
             } else if (company.did == 144 || company.did == 167 || company.did == 114) {
                 // el envio debe estar insertado en la tabla envios, sino no lo inserta al saltar esta verficacion en este if
-                logCyan("Es interno (por verificación extra de empresa 144 o 167)");
                 const queryCheck = `
                   SELECT did
                   FROM envios
@@ -136,23 +130,22 @@ export async function aplanta(company, dataQr, userId) {
 
                 if (resultCheck.length > 0) {
                     senderId = dataQr.sender_id;
+                    donde = 'interno flex por empresa especial';
                     response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
                 } else {
-                    logCyan("Es externo (empresa 144 pero sin coincidencias)");
+                    donde = 'externo flex por empresa especial';
                     response = await handleExternalFlex(dbConnection, company, dataQr, userId);
                 }
             } else {
-                logCyan("Es externo");
+                donde = 'externo flex';
                 response = await handleExternalFlex(dbConnection, company, dataQr, userId);
             }
         } else {
-            logCyan("No es flex");
             if (company.did == dataQr.empresa) {
-                logCyan("Es interno");
+                donde = 'interno no flex';
                 response = await handleInternalNoFlex(dbConnection, dataQr, company, userId);
             } else {
-                logCyan("Es externo");
-                logPurple(JSON.stringify(dataQr));
+                donde = 'externo no flex';
                 response = await handleExternalNoFlex(dbConnection, dataQr, company, userId);
             }
         }
@@ -161,9 +154,8 @@ export async function aplanta(company, dataQr, userId) {
         return response;
     }
     catch (error) {
-        console.log(dbConfig);
+        logRed(`Error en aplanta (${donde}): ${error}`);
         throw error;
-
     } finally {
         decrActiveLocal(company.did);
         dbConnection.end();

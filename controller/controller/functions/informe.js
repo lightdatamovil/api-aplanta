@@ -1,5 +1,4 @@
 import { executeQuery, getClientsByCompany, getDriversByCompany } from "../../../db.js";
-import { logCyan } from "../../../src/funciones/logsCustom.js";
 
 const contadoresIngresados = {};
 
@@ -81,16 +80,8 @@ export async function informe(dbConnection, company, clientId = 0, userId, shipm
     const choferAsignado = envioDetalle.choferAsignado || 0;
     const zonaEntrega = envioDetalle.zona || "Sin información";
     const sucursal = envioDetalle.sucursal || "Sin información";
-
-    // 🔹 Datos del cliente y chofer
     const cliente = companyClients[clientId]?.nombre ?? "Sin información";
     const chofer = companyDrivers[choferAsignado]?.nombre ?? "Sin información";
-
-    if (!companyClients[clientId]) logCyan(`[informe] Cliente no encontrado (ID: ${clientId})`);
-    if (!companyDrivers[choferAsignado])
-        logCyan(`[informe] Chofer no encontrado (ID: ${choferAsignado})`);
-
-    logCyan(`[informe] Informe generado para empresa ${companyId}`);
 
     // 🔹 Resultado final
     return {

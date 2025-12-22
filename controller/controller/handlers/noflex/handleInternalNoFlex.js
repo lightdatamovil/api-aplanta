@@ -1,9 +1,8 @@
 import { executeQuery } from "../../../../db.js";
 import { checkIfFulfillment } from "../../../../src/funciones/checkIfFulfillment.js";
-import { logCyan } from "../../../../src/funciones/logsCustom.js";
+import { changeState } from "../../functions/changeState.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
 import { informe } from "../../functions/informe.js";
-import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
 /// Esta funcion checkea si el envio ya fue colectado, entregado o cancelado
 /// Si el envio no esta asignado y se quiere autoasignar, lo asigna
 /// Actualiza el estado del envio en el micro servicio
@@ -25,11 +24,11 @@ export async function handleInternalNoFlex(dbConnection, dataQr, company, userId
         return { success: false, message: "El paquete no esta cargado" };
     }
 
-    logCyan("El envio no fue colectado, entregado o cancelado");
-
     /// Actualizamos el estado del envio en el micro servicio
-    await sendToShipmentStateMicroServiceAPI(companyId, userId, shipmentId);
-    logCyan("Se actualizo el estado del envio en el micro servicio");
+    await changeState(companyId, userId, shipmentId,
+        null,
+        null, dbConnection);
+
 
     const body = await informe(dbConnection, company, clientId, userId, shipmentId);
 

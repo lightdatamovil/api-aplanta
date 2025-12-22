@@ -5,6 +5,8 @@ import mysql2 from "mysql2";
 import CustomException from "./classes/custom_exception.js";
 import https from "https";
 import axios from "axios";
+import { RabbitService } from "./classes/rabbit_service.js";
+import { MicroservicioEstadosService } from "./classes/microservicio_estados.js";
 
 dotenv.config({ path: process.env.ENV_FILE || ".env" });
 
@@ -21,27 +23,31 @@ const aplantaDBPort = process.env.APLANTA_DB_PORT;
 const aplantaDbUserForLogs = process.env.APLANTA_DB_USER_FOR_LOGS;
 const aplantaDbPasswordForLogs = process.env.APLANTA_DB_PASSWORD_FOR_LOGS;
 const aplantaDbNameForLogs = process.env.APLANTA_DB_NAME_FOR_LOGS;
-
+export const local = process.env.LOCAL == "true";
 // Produccion
-const hostProductionDb = process.env.PRODUCTION_DB_HOST;
+const hostProductionDb = local ? process.env.PRODUCTION_DB_HOST : process.env.PRODUCTION_DB_HOST_NODO;
 const portProductionDb = process.env.PRODUCTION_DB_PORT;
 
-export const urlMicroserviciosEstado = process.env.LOCAL == "true" ? process.env.URL_MICROSERVICIOS_ESTADO : process.env.URL_MICROSERVICIOS_ESTADO_NODO;
-export const urlMicroserviciosAsignaciones = process.env.LOCAL == "true" ? process.env.URL_MICROSERVICIOS_ASIGNACIONES : process.env.URL_MICROSERVICIOS_ASIGNACIONES_NODO;
+export const urlMicroserviciosEstado = local ? process.env.URL_MICROSERVICIOS_ESTADO : process.env.URL_MICROSERVICIOS_ESTADO_NODO;
+export const urlMicroserviciosAsignaciones = local ? process.env.URL_ASIGNACION_MICROSERVICE : process.env.URL_ASIGNACION_MICROSERVICE_NODO;
+export const urlMicroserviciosEstadoCaido = process.env.URL_ESTADOS_MICROSERVICE_CAIDO == "true";
+
 
 // 🔹 Agente HTTPS con keep-alive y hasta 100 conexiones simultáneas
 const httpsAgent = new https.Agent({
   keepAlive: true,
   maxSockets: 100,
-  timeout: 10000, // tiempo máximo de socket en ms
+  timeout: 5000, // tiempo máximo de socket en ms
   family: 4, // fuerza IPv4, evita delay IPv6
 });
 
 // 🔹 Axios preconfigurado (usa el agente y timeout)
 export const axiosInstance = axios.create({
   httpsAgent,
-  timeout: 7000, // 5 segundos máximo por request
+  timeout: 5000, // 5 segundos máximo por request
 });
+
+export const microservicioEstadosService = new MicroservicioEstadosService(60000, axiosInstance, urlMicroserviciosEstado);
 
 export const redisClient = redis.createClient({
   socket: {
@@ -59,6 +65,10 @@ let companiesList = {};
 export let clientList = {};
 let accountList = {};
 let driverList = {};
+
+export const urlRabbitMQ = process.env.RABBITMQ_URL;
+export const queueEstados = process.env.QUEUE_ESTADOS;
+export const rabbitService = new RabbitService(urlRabbitMQ);
 
 export function getProdDbConfig(company) {
   return {
@@ -130,7 +140,7 @@ async function loadAccountList(dbConnection, companyId, senderId) {
   const querySelectClientesCuentas = `
             SELECT did, didCliente, ML_id_vendedor 
             FROM clientes_cuentas 
-            WHERE superado = 0 AND elim = 0 AND tipoCuenta = 1 AND ML_id_vendedor != ''
+            WHERE superado = 0 AND elim = 0 AND tipoCuenta in (1,21) AND ML_id_vendedor != ''
         `;
 
   const result = await executeQuery(dbConnection, querySelectClientesCuentas);

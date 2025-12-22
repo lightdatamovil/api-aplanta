@@ -4,11 +4,10 @@ import { insertEnvios } from "../../functions/insertEnvios.js";
 import { insertEnviosExteriores } from "../../functions/insertEnviosExteriores.js";
 import { checkIfExistLogisticAsDriverInExternalCompany } from "../../functions/checkIfExistLogisticAsDriverInExternalCompany.js";
 import { informe } from "../../functions/informe.js";
-import { logCyan } from "../../../../src/funciones/logsCustom.js";
 import { insertEnviosLogisticaInversa } from "../../functions/insertLogisticaInversa.js";
 import { assign } from "../../functions/assing.js";
-import { sendToShipmentStateMicroServiceAPI } from "../../functions/sendToShipmentStateMicroServiceAPI.js";
 import { checkearEstadoEnvio } from "../../functions/checkarEstadoEnvio.js";
+import { changeState } from "../../functions/changeState.js";
 
 /**  Esta funcion se conecta a la base de datos de la empresa externa
  Checkea si el envio ya fue colectado, entregado o cancelado
@@ -46,7 +45,6 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
 
         return { success: false, message: "No se encontró chofer asignado" };
     }
-    logCyan("Se encontró la logistica como chofer en la logistica externa");
 
     const queryClient = `
             SELECT did 
@@ -60,7 +58,6 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
 
     if (internalShipmentId.length > 0 && internalShipmentId[0]?.didLocal) {
         internalShipmentId = internalShipmentId[0].didLocal;
-        logCyan("Se encontró el didLocal en envios_exteriores");
 
         /// Chequeo si el envio ya fue colectado, entregado o cancelado en losgistica iinterna
         const check = await checkearEstadoEnvio(dbConnection, shipmentIdFromDataQr);
@@ -69,7 +66,6 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
 
             return check;
         }
-        logCyan("El envio no es colectado, entregado o cancelado");
 
     } else {
         internalShipmentId = await insertEnvios(
@@ -83,7 +79,6 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
             0,
             userId
         );
-        logCyan("Inserté en envios");
         /// Inserto en envios exteriores en la empresa interna
         await insertEnviosExteriores(
             dbConnection,
@@ -111,13 +106,10 @@ export async function handleExternalNoFlex(dbConnection, dataQr, company, userId
         );
     }
 
-    await sendToShipmentStateMicroServiceAPI(companyId, userId, internalShipmentId);
-    logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios internos");
+    await changeState(companyId, userId, internalShipmentId, null, null, dbConnection);
 
-    await sendToShipmentStateMicroServiceAPI(dataQr.empresa, driver, shipmentIdFromDataQr);
-    logCyan("Actualicé el estado del envio a colectado y envié el estado del envio en los microservicios externos");
+    await changeState(dataQr.empresa, driver, shipmentIdFromDataQr, null, null, externalDbConnection);
 
-    logCyan(`Voy a asignar el envio en la logistica interna 2 con driver: ${driver}  jj`);
     await assign(externalCompany.did, userId, 3, dataQr, driver);
     const body = await informe(dbConnection, company, externalClient[0].did, userId, internalShipmentId);
 
