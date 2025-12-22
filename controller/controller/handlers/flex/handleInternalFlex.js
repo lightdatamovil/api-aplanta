@@ -60,7 +60,7 @@ export async function handleInternalFlex(
 
     await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,]);
   } else {
-    console.log("No encontre el envio, lo inserto");
+
     // para el caso de que no este vincualdo el cliente 167 o 114, el envio ya debe estar insertado 
     shipmentId = await insertEnvios(
       dbConnection,
