@@ -1,5 +1,5 @@
 export class MicroservicioEstadosService {
-    constructor(timeoutMs = 60000, axiosInstance, url) {
+    constructor(timeoutMs = 420000, axiosInstance, url) {
         this.axiosInstance = axiosInstance;
         this.url = url;
         this.estado = true;
