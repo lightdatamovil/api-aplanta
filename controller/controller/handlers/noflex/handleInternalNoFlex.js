@@ -32,5 +32,5 @@ export async function handleInternalNoFlex(dbConnection, dataQr, company, userId
 
     const body = await informe(dbConnection, company, clientId, userId, shipmentId);
 
-    return { success: true, message: "Paquete puesto a planta  correctamente", body: body };
+    return { success: true, message: "Paquete puesto a planta correctamente", body: body };
 }
