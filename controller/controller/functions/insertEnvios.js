@@ -6,8 +6,8 @@ export async function insertEnvios(dbConnection, companyId, clientId, accountId,
     const fecha_actual = new Date();
     fecha_actual.setHours(fecha_actual.getHours() - 3);
     const fecha_inicio = fecha_actual.toISOString().slice(0, 19).replace('T', ' ');
-    const idshipment = dataQr.id || dataQr.id_orden;
-    const senderid = dataQr.sender_id || dataQr.id_seller;
+    const idshipment = dataQr.id ?? dataQr.id_orden;
+    const senderid = dataQr.sender_id ?? dataQr.id_seller;
     const fechaunix = Math.floor(Date.now() / 1000);
 
     const queryInsertEnvios = `
