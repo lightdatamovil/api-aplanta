@@ -13,7 +13,7 @@ export async function assign(companyId, userId, profile, dataQr, driverId) {
     deviceId: "null",
     dataQr: dataQr,
     driverId: driverId,
-    deviceFrom: "Autoasignado de colecta",
+    deviceFrom: "Asignacion por empresa externa",
   };
 
   try {
