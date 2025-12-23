@@ -130,7 +130,7 @@ export async function aplanta(company, dataQr, userId) {
                 if (resultCheck.length > 0) {
                     senderId = dataQr.sender_id;
                     donde = 'interno flex por empresa especial';
-                    response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId);
+                    response = await handleInternalFlex(dbConnection, company, userId, dataQr, account, senderId, mlShipmentId, flex);
                 } else {
                     donde = 'externo flex por empresa especial';
                     response = await handleExternalFlex(dbConnection, company, dataQr, userId);
