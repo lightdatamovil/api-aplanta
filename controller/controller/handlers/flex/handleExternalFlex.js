@@ -57,7 +57,7 @@ export async function handleExternalFlex(
   for (const logistica of logisticasExternas) {
     const externalLogisticId = logistica.did;
     const syncCode = logistica.codigoVinculacionLogE;
-    const nombreFantasia = logistica.nombre_fantasia;
+
 
     const externalCompany = await getCompanyByCode(syncCode);
     const externalCompanyId = externalCompany.did;
@@ -141,12 +141,28 @@ export async function handleExternalFlex(
         );
 
 
+
+        const queryDidCliente = `SELECT didCliente FROM clientes_cuentas WHERE ML_id_vendedor = ? LIMIT 1`;
+        const didCliente = await executeQuery(
+          externalDbConnection,
+          queryDidCliente,
+          [dataQr.sender_id], true
+        );
+
+        const queryNombreClient = `SELECT nombre_fantasia FROM clientes WHERE did = ? LIMIT 1`;
+
+        const nombreCliente = await executeQuery(
+          externalDbConnection,
+          queryNombreClient,
+          [didCliente[0].didCliente], true
+        );
+
         await insertEnviosExteriores(
           dbConnection,
           internalShipmentId,
           externalShipmentId,
           1,
-          nombreFantasia,
+          nombreCliente[0].nombre_fantasia || "",
           externalCompanyId
         );
         ingresado = true;
