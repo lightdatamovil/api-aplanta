@@ -61,6 +61,12 @@ export async function handleInternalFlex(
 
     await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,]);
   } else {
+    if (!row) {
+      console.log("Entre a insertar flex sin row"
+      )
+
+    }
+
     if (!account) {
       console.log("No se encontró la cuenta para didCliente")
     }
