@@ -101,10 +101,6 @@ export async function handleInternalFlex(
     account?.didCliente ??
     row?.didCliente;
 
-  if (!didCliente) {
-    console.log(JSON.stringify({ account, row }));
-  }
-
   const body = await informe(
     dbConnection,
     company,
