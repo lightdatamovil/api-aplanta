@@ -90,9 +90,7 @@ export async function handleInternalFlex(
   await changeState(companyId, userId, shipmentId, null, null, dbConnection);
   //! jls 167 tambien usa una cuenta no vinculada -- gonzalo no lo saques
   if (companyId == 144 || companyId == 167 || companyId == 114) {
-    if (!row) {
-      console.log("No se encontró el row para didCliente")
-    }
+    console.log(JSON.stringify({ account, row }));
     const body = await informe(
       dbConnection,
       company,
