@@ -61,7 +61,9 @@ export async function handleInternalFlex(
 
     await executeQuery(dbConnection, queryUpdateEnvios, [JSON.stringify(dataQr), shipmentId,]);
   } else {
-
+    if (!account) {
+      console.log("No se encontró la cuenta para didCliente")
+    }
     // para el caso de que no este vincualdo el cliente 167 o 114, el envio ya debe estar insertado 
     shipmentId = await insertEnvios(
       dbConnection,
@@ -82,6 +84,9 @@ export async function handleInternalFlex(
   await changeState(companyId, userId, shipmentId, null, null, dbConnection);
   //! jls 167 tambien usa una cuenta no vinculada -- gonzalo no lo saques
   if (companyId == 144 || companyId == 167 || companyId == 114) {
+    if (!row) {
+      console.log("No se encontró el row para didCliente")
+    }
     const body = await informe(
       dbConnection,
       company,
@@ -96,10 +101,19 @@ export async function handleInternalFlex(
     };
 
   }
+
+  const didCliente =
+    account?.didCliente ??
+    row?.didCliente;
+
+  if (!didCliente) {
+    console.log(JSON.stringify({ account, row }));
+  }
+
   const body = await informe(
     dbConnection,
     company,
-    account.didCliente || row.didCliente,
+    didCliente,
     userId,
     shipmentId
   );
